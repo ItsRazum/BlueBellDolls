@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.1" />
+		<PackageReference Include="Serilog" Version="4.2.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\BlueBellDolls.Common\BlueBellDolls.Common.csproj" />
+	  <ProjectReference Include="..\Common\BlueBellDolls.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Protobuf Include="..\Grpc\BlueBellDollsService.proto" Link="Protos\BlueBellDollsService.proto" GrpcServices="Server" />
+		<Protobuf Include="..\Grpc\BlueBellDollsServiceCore.proto" Link="Protos\BlueBellDollsServiceCore.proto" GrpcServices="Server" />
+	</ItemGroup>
+</Project>

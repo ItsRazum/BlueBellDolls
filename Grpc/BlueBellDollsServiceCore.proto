@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "BlueBellDolls.Grpc";
+package bluebelldolls.grpc;
+
+message GetLittersResponce {
+	// litters
+	repeated Litter litters = 1;
+}
+
+message GetFemaleCatsResponce {
+	//female cats
+	repeated ParentCat female_cats = 1;
+}
+
+message GetMaleCatsResponce {
+	//male cats
+	repeated ParentCat male_cats = 1;
+}
+
+message Litter {
+	// letter
+	google.protobuf.StringValue letter = 1;
+	//birth day
+	google.protobuf.StringValue birth_day = 2;
+	// is active
+	google.protobuf.BoolValue is_active = 3;
+	// mother cat
+	ParentCat mother_cat = 4;
+	// father cat
+	ParentCat father_cat = 5;
+	// kittens
+	repeated Kitten kittens = 6;
+	// description
+	google.protobuf.StringValue description = 7;
+}
+
+message ParentCat {
+	// name
+	google.protobuf.StringValue name = 1;
+	// birth day
+	google.protobuf.StringValue birth_day = 2;
+	// is male
+	google.protobuf.BoolValue is_male = 3;
+	// description
+	google.protobuf.StringValue description = 4;
+	// photos
+	repeated google.protobuf.StringValue photos = 5;
+	// genetic test one
+	google.protobuf.StringValue genetic_test_one = 6;
+	// genetic test two 
+	google.protobuf.StringValue genetic_test_two = 7;
+	// titles
+	repeated google.protobuf.StringValue titles = 8;
+	// old description
+	google.protobuf.StringValue old_description = 9;
+}
+
+message Kitten {
+	// name
+	google.protobuf.StringValue name = 1;
+	// birth day
+	google.protobuf.StringValue birth_day = 2;
+	// is male
+	google.protobuf.BoolValue is_male = 3;
+	// description
+	google.protobuf.StringValue description = 4;
+	// photos
+	repeated google.protobuf.StringValue photos = 5;
+	// class
+	google.protobuf.StringValue class = 6;
+	// status
+	google.protobuf.StringValue status = 7;
+}

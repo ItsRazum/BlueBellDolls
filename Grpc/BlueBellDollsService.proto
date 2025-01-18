@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+import "BlueBellDollsServiceCore.proto";
+
+option csharp_namespace = "BlueBellDolls.Grpc";
+package bluebelldolls.grpc;
+
+service BlueBellDollsService {
+	//
+	rpc GetLitters(google.protobuf.Empty) returns (GetLittersResponce);
+	//
+	rpc GetCatsByGender(google.protobuf.BoolValue) returns (GetFemaleCatsResponce);
+	//
+	rpc AddNewCat(ParentCat) returns (google.protobuf.BoolValue);
+	//
+	rpc AddNewLitter(Litter) returns (google.protobuf.BoolValue);
+}
