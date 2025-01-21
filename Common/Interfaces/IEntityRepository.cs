@@ -1,9 +1,8 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
-namespace BlueBellDolls.Service.Interfaces
+namespace BlueBellDolls.Common.Interfaces
 {
-    internal interface IEntityRepository<TEntity> where TEntity : class, IEntity
+    public interface IEntityRepository<TEntity> where TEntity : class, IEntity
     {
 
         #region Methods

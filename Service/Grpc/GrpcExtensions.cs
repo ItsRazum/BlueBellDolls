@@ -19,6 +19,7 @@ namespace BlueBellDolls.Service.Grpc
         {
             var result = new BlueBellDolls.Grpc.ParentCat
             {
+                Id = parentCat.Id,
                 Name = parentCat.Name,
                 IsMale = parentCat.IsMale,
                 Description = parentCat.Description,
@@ -38,6 +39,7 @@ namespace BlueBellDolls.Service.Grpc
         {
             return new ParentCat
             {
+                Id = parentCat.Id,
                 Name = parentCat.Name,
                 IsMale = parentCat.IsMale!.Value,
                 Description = parentCat.Description,
@@ -57,6 +59,7 @@ namespace BlueBellDolls.Service.Grpc
         {
             var result = new BlueBellDolls.Grpc.Kitten
             {
+                Id = kitten.Id,
                 Name = kitten.Name,
                 IsMale = kitten.IsMale,
                 BirthDay = kitten.BirthDay.ToString(_cultureInfo),
@@ -74,6 +77,7 @@ namespace BlueBellDolls.Service.Grpc
         {
             return new Kitten
             {
+                Id = kitten.Id,
                 Name = kitten.Name,
                 IsMale = kitten.IsMale!.Value,
                 BirthDay = DateOnly.Parse(kitten.BirthDay, _cultureInfo),
@@ -92,6 +96,7 @@ namespace BlueBellDolls.Service.Grpc
         {
             var result = new BlueBellDolls.Grpc.Litter
             {
+                Id = litter.Id,
                 Letter = litter.Letter.ToString(),
                 BirthDay = litter.BirthDay.ToString(_cultureInfo),
                 IsActive = litter.IsActive,
@@ -110,6 +115,7 @@ namespace BlueBellDolls.Service.Grpc
         {
             var result = new Litter
             {
+                Id = litter.Id,
                 Letter = char.Parse(litter.Letter),
                 BirthDay = DateOnly.Parse(litter.BirthDay, _cultureInfo),
                 IsActive = litter.IsActive!.Value,

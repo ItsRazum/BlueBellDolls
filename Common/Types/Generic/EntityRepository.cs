@@ -1,12 +1,11 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Service.Data.Contexts;
-using BlueBellDolls.Service.Interfaces;
+﻿using BlueBellDolls.Common.Data.Contexts;
+using BlueBellDolls.Common.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace BlueBellDolls.Service.Types.Generic
+namespace BlueBellDolls.Common.Types.Generic
 {
-    internal class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntity : class, IEntity
+    public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntity : class, IEntity
     {
         #region Fields
 

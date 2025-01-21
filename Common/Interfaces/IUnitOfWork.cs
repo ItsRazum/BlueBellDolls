@@ -1,14 +1,13 @@
-﻿using BlueBellDolls.Common.Interfaces;
-
-namespace BlueBellDolls.Service.Interfaces
+﻿namespace BlueBellDolls.Common.Interfaces
 {
-    internal interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork : IDisposable
     {
 
         #region Methods
 
         IEntityRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IEntity;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+        IEntityRepository<IEntity> GetRepository(Type entityType);
 
         #endregion
     }

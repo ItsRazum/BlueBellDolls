@@ -1,11 +1,11 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Service.Data.Contexts;
-using BlueBellDolls.Service.Interfaces;
+﻿using BlueBellDolls.Common.Data.Contexts;
+using BlueBellDolls.Common.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 
-namespace BlueBellDolls.Service.Data.Utilities
+namespace BlueBellDolls.Common.Data.Utilities
 {
-    internal class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
         #region Fields
 
@@ -31,20 +31,32 @@ namespace BlueBellDolls.Service.Data.Utilities
 
         public IEntityRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IEntity
         {
-            if (_repositories.TryGetValue(typeof(TEntity), out var repository))
+            if (!_repositories.TryGetValue(typeof(TEntity), out var repository))
             {
-                return (IEntityRepository<TEntity>)repository;
+                var newRepository = _serviceProvider.GetRequiredService<IEntityRepository<TEntity>>();
+                _repositories[typeof(TEntity)] = newRepository;
+
+                return newRepository;
             }
 
-            var newRepository = _serviceProvider.GetRequiredService<IEntityRepository<TEntity>>();
-            _repositories[typeof(TEntity)] = newRepository;
-
-            return newRepository;
+            return (IEntityRepository<TEntity>)repository;
         }
 
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        public IEntityRepository<IEntity> GetRepository(Type entityType)
+        {
+            if (!_repositories.TryGetValue(entityType, out var repository))
+            {
+                var repositoryType = typeof(IEntityRepository<>).MakeGenericType(entityType);
+                repository = _serviceProvider.GetRequiredService(repositoryType);
+                _repositories[entityType] = repository;
+            }
+
+            return (IEntityRepository<IEntity>)repository;
         }
 
         #endregion

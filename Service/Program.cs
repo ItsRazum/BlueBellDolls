@@ -1,13 +1,14 @@
-using BlueBellDolls.Service.Data.Contexts;
-using BlueBellDolls.Service.Data.Utilities;
 using BlueBellDolls.Service.Interfaces;
 using BlueBellDolls.Service.Services;
 using BlueBellDolls.Service.Settings;
-using BlueBellDolls.Service.Types.Generic;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Net;
+using BlueBellDolls.Common.Data.Contexts;
+using BlueBellDolls.Common.Data.Utilities;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Types.Generic;
 
 namespace BlueBellDolls.Service;
 
@@ -56,22 +57,20 @@ class Program
             options.UseSqlite(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
         });
 
-        // Репозитории
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         builder.Services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
 
-        // Настройки сервера gRPC
-        builder.Services.Configure<GrpcServerSettings>(
-            builder.Configuration.GetSection(nameof(GrpcServerSettings))
-        );
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ gRPC
+        builder.Services.Configure<GrpcServerSettings>(builder.Configuration.GetSection(nameof(GrpcServerSettings)));
 
-        // Юниты
+        // пїЅпїЅпїЅпїЅпїЅ
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // Остальные сервисы
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         builder.Services.AddScoped<ICatService, CatService>();
 
 
-        // Доп. настройки
+        // пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         builder.Host.UseDefaultServiceProvider(options =>
         {
             options.ValidateScopes = true;
@@ -97,7 +96,7 @@ class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
-        app.MapGrpcService<Services.BlueBellDollsService>();
+        app.MapGrpcService<BlueBellDollsService>();
     }
 
     private static void InitializeDatabase(WebApplication app)

@@ -1,10 +1,11 @@
 ﻿using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Static;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BlueBellDolls.Service.Data.Configurations
+namespace BlueBellDolls.Common.Data.Configurations
 {
-    internal class KittenEntityTypeConfiguration : IEntityTypeConfiguration<Kitten>
+    public class KittenEntityTypeConfiguration : IEntityTypeConfiguration<Kitten>
     {
         public void Configure(EntityTypeBuilder<Kitten> builder)
         {
@@ -15,6 +16,12 @@ namespace BlueBellDolls.Service.Data.Configurations
             builder
                 .Property(k => k.Status)
                 .HasConversion<string>();
+
+            builder
+                .Property(k => k.Photos)
+                .HasConversion(ValueConverters.ListStringConverter)
+                .Metadata
+                .SetValueComparer(ValueComparers.ListStringComparer);
         }
     }
 }

@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/timestamp.proto";
 
 option csharp_namespace = "BlueBellDolls.Grpc";
 package bluebelldolls.grpc;
@@ -22,56 +21,62 @@ message GetMaleCatsResponce {
 }
 
 message Litter {
+	// id
+	int32 id = 1;
 	// letter
-	google.protobuf.StringValue letter = 1;
+	google.protobuf.StringValue letter = 2;
 	//birth day
-	google.protobuf.StringValue birth_day = 2;
+	google.protobuf.StringValue birth_day = 3;
 	// is active
-	google.protobuf.BoolValue is_active = 3;
+	google.protobuf.BoolValue is_active = 4;
 	// mother cat
-	ParentCat mother_cat = 4;
+	ParentCat mother_cat = 5;
 	// father cat
-	ParentCat father_cat = 5;
+	ParentCat father_cat = 6;
 	// kittens
-	repeated Kitten kittens = 6;
+	repeated Kitten kittens = 7;
 	// description
-	google.protobuf.StringValue description = 7;
+	google.protobuf.StringValue description = 8;
 }
 
 message ParentCat {
+	// id
+	int32 id = 1;
 	// name
-	google.protobuf.StringValue name = 1;
+	google.protobuf.StringValue name = 2;
 	// birth day
-	google.protobuf.StringValue birth_day = 2;
+	google.protobuf.StringValue birth_day = 3;
 	// is male
-	google.protobuf.BoolValue is_male = 3;
+	google.protobuf.BoolValue is_male = 4;
 	// description
-	google.protobuf.StringValue description = 4;
+	google.protobuf.StringValue description = 5;
 	// photos
-	repeated google.protobuf.StringValue photos = 5;
+	repeated google.protobuf.StringValue photos = 6;
 	// genetic test one
-	google.protobuf.StringValue genetic_test_one = 6;
+	google.protobuf.StringValue genetic_test_one = 7;
 	// genetic test two 
-	google.protobuf.StringValue genetic_test_two = 7;
+	google.protobuf.StringValue genetic_test_two = 8;
 	// titles
-	repeated google.protobuf.StringValue titles = 8;
+	repeated google.protobuf.StringValue titles = 9;
 	// old description
-	google.protobuf.StringValue old_description = 9;
+	google.protobuf.StringValue old_description = 10;
 }
 
 message Kitten {
+	// id
+	int32 id = 1;
 	// name
-	google.protobuf.StringValue name = 1;
+	google.protobuf.StringValue name = 2;
 	// birth day
-	google.protobuf.StringValue birth_day = 2;
+	google.protobuf.StringValue birth_day = 3;
 	// is male
-	google.protobuf.BoolValue is_male = 3;
+	google.protobuf.BoolValue is_male = 4;
 	// description
-	google.protobuf.StringValue description = 4;
+	google.protobuf.StringValue description = 5;
 	// photos
-	repeated google.protobuf.StringValue photos = 5;
+	repeated google.protobuf.StringValue photos = 6;
 	// class
-	google.protobuf.StringValue class = 6;
+	google.protobuf.StringValue class = 7;
 	// status
-	google.protobuf.StringValue status = 7;
+	google.protobuf.StringValue status = 8;
 }

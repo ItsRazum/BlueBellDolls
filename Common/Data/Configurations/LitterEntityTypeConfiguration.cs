@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BlueBellDolls.Service.Data.Configurations
+namespace BlueBellDolls.Common.Data.Configurations
 {
-    internal class LitterEntityTypeConfiguration : IEntityTypeConfiguration<Litter>
+    public class LitterEntityTypeConfiguration : IEntityTypeConfiguration<Litter>
     {
         public void Configure(EntityTypeBuilder<Litter> builder)
         {

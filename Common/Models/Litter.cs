@@ -10,6 +10,7 @@ namespace BlueBellDolls.Common.Models
         #region Properties
 
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public char Letter { get; set; }
         public DateOnly BirthDay { get; set; }

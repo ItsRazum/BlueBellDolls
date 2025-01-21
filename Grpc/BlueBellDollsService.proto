@@ -16,4 +16,10 @@ service BlueBellDollsService {
 	rpc AddNewCat(ParentCat) returns (google.protobuf.BoolValue);
 	//
 	rpc AddNewLitter(Litter) returns (google.protobuf.BoolValue);
+	//
+	rpc UpdateCat(ParentCat) returns (google.protobuf.BoolValue);
+	//
+	rpc UpdateLitter(Litter) returns (google.protobuf.BoolValue);
+	//
+	rpc UpdateKitten(Kitten) returns (google.protobuf.BoolValue);
 }
