@@ -5,9 +5,8 @@
 
         #region Methods
 
-        IEntityRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IEntity;
+        IEntityRepository<TEntity> GetRepository<TEntity>() where TEntity : IEntity;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
-        IEntityRepository<IEntity> GetRepository(Type entityType);
 
         #endregion
     }

@@ -12,12 +12,14 @@ namespace BlueBellDolls.Common.Data.Configurations
                 .HasOne(l => l.FatherCat)
                 .WithMany()
                 .HasForeignKey(l => l.FatherCatId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder
                 .HasOne(l => l.MotherCat)
                 .WithMany()
                 .HasForeignKey(l => l.MotherCatId)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder

@@ -51,30 +51,31 @@ namespace BlueBellDolls.Bot.Services
             _entityProperties[entityType] = propertyActions;
         }
 
-        public void UpdateProperty<TEntity>(TEntity entity, string displayName, string value) where TEntity : IEntity
+        public bool UpdateProperty<TEntity>(TEntity entity, string displayName, string value) where TEntity : IEntity
         {
             ArgumentNullException.ThrowIfNull(entity);
-            UpdateEntity(entity, displayName, value);
+            return UpdateEntity(entity, displayName, value);
         }
 
-        public void UpdateProperty(IEntity entity, string displayName, string value)
+        public bool UpdateProperty(IEntity entity, string displayName, string value)
         {
-            UpdateEntity(entity, displayName, value);
+            return UpdateEntity(entity, displayName, value);
         }
 
-        private void UpdateEntity(IEntity entity, string displayName, string value) 
+        private bool UpdateEntity(IEntity entity, string displayName, string value)
         {
             if (string.IsNullOrWhiteSpace(displayName))
                 throw new ArgumentException("Отображаемое имя свойства не может быть пустым.", nameof(displayName));
 
             var entityType = entity.GetType();
             if (!_entityProperties.TryGetValue(entityType, out var propertyActions))
-                throw new InvalidOperationException($"Настройки для типа '{entityType.Name}' не найдены.");
+                return false;
 
             if (!propertyActions.TryGetValue(displayName, out var updateAction))
-                throw new InvalidOperationException($"Отображаемое имя '{displayName}' не сопоставлено ни с одним свойством в типе '{entityType.Name}'.");
+                return false;
 
             updateAction(entity!, value);
+            return true;
         }
     }
 }

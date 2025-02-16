@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Types
 {
-    public abstract class Cat : IEntity
+    public abstract class Cat : IDisplayableEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -14,5 +14,7 @@ namespace BlueBellDolls.Common.Types
         public bool IsMale { get; set; }
         public string Description { get; set; }
         public List<string> Photos { get; set; }
+
+        public abstract string DisplayName { get; }
     }
 }

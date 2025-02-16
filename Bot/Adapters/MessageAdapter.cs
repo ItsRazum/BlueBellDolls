@@ -3,7 +3,7 @@ using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Adapters
 {
-    public class MessageAdapter : ICommandContext
+    public class MessageAdapter : ICommandAdapter
     {
         private readonly Message _message;
 
@@ -12,10 +12,16 @@ namespace BlueBellDolls.Bot.Adapters
             _message = message;
         }
 
+        public string Text => _message.Text ?? string.Empty;
+
+        public int MessageId => _message.MessageId;
+
         public Chat Chat => _message.Chat;
 
         public User? From => _message.From;
 
         public Message? ReplyToMessage => _message.ReplyToMessage;
+
+        public object Photos => _message.Photo ?? [];
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BlueBellDolls.Bot.Extensions
 {
@@ -10,9 +11,18 @@ namespace BlueBellDolls.Bot.Extensions
             return new MessageAdapter(message);
         }
 
-        public static CallbackQueryAdapter ToAdaper(this CallbackQuery message) 
-        { 
-            return new CallbackQueryAdapter(message); 
+        public static CallbackQueryAdapter ToAdaper(this CallbackQuery callback, string? callbackData = null)
+        {
+            if (callbackData != null)
+                callback.Data = callbackData;
+
+            return new CallbackQueryAdapter(callback);
+        }
+
+        public static IEnumerable<InlineKeyboardButton[]> ToEnumerable(this InlineKeyboardMarkup inlineKeyboardMarkup)
+        {
+            foreach (var inlineKeyboardButtonRow in inlineKeyboardMarkup.InlineKeyboard.Select(r => r.ToArray()))
+                yield return inlineKeyboardButtonRow;
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace BlueBellDolls.Common.Data.Utilities
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork, IDisposable
     {
         #region Fields
 
@@ -29,7 +29,7 @@ namespace BlueBellDolls.Common.Data.Utilities
 
         #region IUnitOfWork implementation
 
-        public IEntityRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IEntity
+        public IEntityRepository<TEntity> GetRepository<TEntity>() where TEntity : IEntity
         {
             if (!_repositories.TryGetValue(typeof(TEntity), out var repository))
             {
@@ -45,18 +45,6 @@ namespace BlueBellDolls.Common.Data.Utilities
         public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
             return await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-
-        public IEntityRepository<IEntity> GetRepository(Type entityType)
-        {
-            if (!_repositories.TryGetValue(entityType, out var repository))
-            {
-                var repositoryType = typeof(IEntityRepository<>).MakeGenericType(entityType);
-                repository = _serviceProvider.GetRequiredService(repositoryType);
-                _repositories[entityType] = repository;
-            }
-
-            return (IEntityRepository<IEntity>)repository;
         }
 
         #endregion

@@ -1,8 +1,10 @@
-using BlueBellDolls.Bot.Factories;
+using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Providers;
 using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.ValueConverters;
+using BlueBellDolls.Common.Data.CommandInterceptors;
 using BlueBellDolls.Common.Data.Contexts;
 using BlueBellDolls.Common.Data.Utilities;
 using BlueBellDolls.Common.Interfaces;
@@ -45,23 +47,32 @@ internal class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
             options.UseSqlite(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
+            options.AddInterceptors(new SqliteForeignKeyEnforcer());
         });
 
         // Репозитории
         builder.Services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
 
         // Фабрики
-        builder.Services.AddSingleton<IMessagesFactory, MessagesFactory>();
+        builder.Services.AddSingleton<IMessagesProvider, MessagesProvider>();
+        builder.Services.AddSingleton<IKeyboardsProvider, KeyboardsProvider>();
+        builder.Services.AddSingleton<IMessageParametersProvider, MessageParametersProvider>();
+        builder.Services.AddSingleton<ICallbackDataProvider, CallbackDataProvider>();
 
         // Юниты
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        // Команды
+        builder.Services.AddCommandHandlers();
+
         // Остальные сервисы
         builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
         builder.Services.AddSingleton<IBotService, BotService>();
-        builder.Services.AddSingleton<IRootLocation, RootLocation>();
+        builder.Services.AddSingleton<IUpdateHandlerService, UpdateHandlerService>();
         builder.Services.AddSingleton<IEntityFormService, EntityFormService>();
         builder.Services.AddSingleton<IValueConverter, EntityValueConverter>();
+        builder.Services.AddSingleton<IEntityHelperService, EntityHelperService>();
+        builder.Services.AddSingleton<IEntityUpdateService, EntityUpdateService>();
 
         // Бот
         builder.Services.AddHostedService<BotService>();

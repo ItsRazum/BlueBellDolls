@@ -10,7 +10,7 @@ namespace BlueBellDolls.Bot.Services
 
         public DatabaseService(
             IServiceProvider serviceProvider,
-            ILogger<DatabaseService> logger) 
+            ILogger<DatabaseService> logger)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -31,7 +31,7 @@ namespace BlueBellDolls.Bot.Services
             }
         }
 
-        public async Task<TResult> GetDataAsync<TResult>(Func<IUnitOfWork, CancellationToken, Task<TResult>> operation, CancellationToken token) where TResult : class, new()
+        public async Task<TResult> ExecuteDbOperationAsync<TResult>(Func<IUnitOfWork, CancellationToken, Task<TResult>> operation, CancellationToken token)
         {
             using var scope = _serviceProvider.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -43,7 +43,7 @@ namespace BlueBellDolls.Bot.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception thrown in DatabaseService.GetDataAsync<TResult>()");
-                return new TResult();
+                throw;
             }
         }
     }

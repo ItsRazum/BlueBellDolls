@@ -29,6 +29,7 @@ namespace BlueBellDolls.Common.Types.Generic
         public async Task AddAsync(TEntity entity, CancellationToken token)
         {
             await _dbSet.AddAsync(entity, token);
+            await _dbContext.SaveChangesAsync(token);
         }
 
         public async Task<int> CountAsync(CancellationToken token)
@@ -36,30 +37,72 @@ namespace BlueBellDolls.Common.Types.Generic
             return await _dbSet.CountAsync(token);
         }
 
+        public async Task<int> PagesCountAsync(int pageSize, CancellationToken token)
+        {
+            var count = await _dbSet.CountAsync(token);
+            return (count + pageSize - 1) / pageSize;
+        }
+
         public async Task<int> CountAsync(Expression<Func<TEntity, bool>> expression, CancellationToken token)
         {
             return await _dbSet.CountAsync(expression, token);
         }
 
-        public async Task DeleteAsync(TEntity entity, CancellationToken token)
+        public async Task<bool> DeleteByIdAsync(int id, CancellationToken token)
         {
-            _dbSet.Remove(entity);
-            await _dbContext.SaveChangesAsync(token);
+            var entity = await GetByIdAsync(id, token);
+            
+            if (entity != null)
+                _dbSet.Remove(entity);
+
+            return entity != null;
         }
 
-        public async Task<TEntity?> GetByIdAsync(int id, CancellationToken token)
+        public async Task<TEntity?> GetByIdAsync(int id, CancellationToken token, params Expression<Func<TEntity, object?>>[] includes)
         {
-            return await _dbSet.FindAsync([id], token);
+            IQueryable<TEntity> query = _dbSet;
+
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            return await query.FirstOrDefaultAsync(e => e.Id == id, token);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken token)
+        public async Task<IEnumerable<TEntity>> GetByPageAsync(int page, int pageSize, CancellationToken token)
         {
-            return await _dbSet.ToListAsync(token);
+            return await _dbSet
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(token);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression, CancellationToken token)
+        public async Task<IEnumerable<TEntity>> GetByPageAsync(Expression<Func<TEntity, bool>> expression, int page, int pageSize, CancellationToken token)
         {
-            return await _dbSet.Where(expression).ToListAsync(token);
+            return await _dbSet
+                .Where(expression)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(token);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken token, params Expression<Func<TEntity, object?>>[] includes)
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+            foreach(var include in includes)
+                query = query.Include(include);
+
+            return await query.ToListAsync(token);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> expression, CancellationToken token, params Expression<Func<TEntity, object?>>[] includes)
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+            foreach (var include in includes)
+                query = query.Include(include);
+
+            return await query.Where(expression).ToListAsync(token);
         }
 
         public async Task UpdateAsync(TEntity entity, CancellationToken token)

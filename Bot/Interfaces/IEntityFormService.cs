@@ -4,8 +4,8 @@ namespace BlueBellDolls.Bot.Interfaces
 {
     public interface IEntityFormService
     {
-        void UpdateProperty<TEntity>(TEntity entity, string displayName, string value) where TEntity : IEntity;
+        bool UpdateProperty<TEntity>(TEntity entity, string displayName, string value) where TEntity : IEntity;
 
-        public void UpdateProperty(IEntity entity, string displayName, string value);
+        public bool UpdateProperty(IEntity entity, string displayName, string value);
     }
 }

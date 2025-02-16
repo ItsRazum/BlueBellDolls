@@ -1,10 +1,11 @@
 ﻿using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Types;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
-    public class Kitten : Cat
+    public class Kitten : Cat, IDisplayableEntity
     {
 
         #region Properties
@@ -15,6 +16,28 @@ namespace BlueBellDolls.Common.Models
         [ForeignKey(nameof(Litter))]
         public int LitterId { get; set; }
         public Litter Litter { get; set; }
+
+        #endregion
+
+        #region Constructor
+
+        public Kitten()
+        {
+            Name = "Новый котёнок";
+            BirthDay = DateOnly.FromDateTime(DateTime.Now);
+            IsMale = true;
+            Description = "Добавьте описание!";
+            Photos = [];
+            Class = KittenClass.Pet;
+            Status = KittenStatus.Available;
+        }
+
+        #endregion
+
+        #region IDisplayableEntity
+
+        [NotMapped]
+        public override string DisplayName => Name;
 
         #endregion
 
