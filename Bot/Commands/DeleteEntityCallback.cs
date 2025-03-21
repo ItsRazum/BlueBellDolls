@@ -49,7 +49,7 @@ namespace BlueBellDolls.Bot.Commands
             await BotService.EditMessageAsync(
                 c.Chat, 
                 c.MessageId,
-                _messageParametersProvider.GetDeleteConfirmationParameters(c.CallbackData, entity, onDeletionCanceledCallback, rootPageCallback), token);
+                _messageParametersProvider.GetDeleteEntityConfirmationParameters(entity, c.CallbackData, onDeletionCanceledCallback, rootPageCallback), token);
         }
     }
 }

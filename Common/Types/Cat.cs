@@ -13,7 +13,7 @@ namespace BlueBellDolls.Common.Types
         public DateOnly BirthDay { get; set; }
         public bool IsMale { get; set; }
         public string Description { get; set; }
-        public List<string> Photos { get; set; }
+        public Dictionary<string, string> Photos { get; set; }
 
         public abstract string DisplayName { get; }
     }

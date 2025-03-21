@@ -19,9 +19,9 @@ namespace BlueBellDolls.Common.Data.Configurations
 
             builder
                 .Property(k => k.Photos)
-                .HasConversion(ValueConverters.ListStringConverter)
+                .HasConversion(ValueConverters.DictionaryStringConverter)
                 .Metadata
-                .SetValueComparer(ValueComparers.ListStringComparer);
+                .SetValueComparer(ValueComparers.DictionaryStringComparer);
         }
     }
 }

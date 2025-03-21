@@ -1,29 +1,21 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types.Generic;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
-using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
     public class ConfirmDeleteEntityCallback : CommandHandler<CallbackQueryAdapter>
     {
-        private readonly BotSettings _botSettings;
         private readonly IDatabaseService _databaseService;
-        private readonly IMessageParametersProvider _messageParametersProvider;
 
         public ConfirmDeleteEntityCallback(
             IBotService botService,
-            IOptions<BotSettings> botSettings,
-            IDatabaseService databaseService,
-            IMessageParametersProvider messageParametersProvider)
+            IDatabaseService databaseService)
             : base(botService)
         {
-            _botSettings = botSettings.Value;
             _databaseService = databaseService;
-            _messageParametersProvider = messageParametersProvider;
 
             Handlers.Add("confirm_deleteParentCat", HandleDeleteParentCatCallbackAsync);
             Handlers.Add("confirm_deleteLitter", HandleCallbackAsync<Litter>);

@@ -50,7 +50,7 @@ namespace BlueBellDolls.Bot.Commands
                 return;
             }
 
-            await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityMessageParameters(kitten), token);
+            await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(kitten), token);
         }
     }
 }

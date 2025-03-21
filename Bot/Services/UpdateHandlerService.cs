@@ -12,19 +12,34 @@ using Telegram.Bot.Types.Enums;
 
 namespace BlueBellDolls.Bot.Services
 {
-    internal class UpdateHandlerService : IUpdateHandlerService, IUpdateHandler
+    internal class UpdateHandlerService : IUpdateHandlerService, IHostedService
     {
+
+        #region Fields
+
         private readonly ILogger<UpdateHandlerService> _logger;
-        private readonly ConcurrentDictionary<long, string> _photoUploaders;
+        private readonly IBotService _botService;
+        private readonly ConcurrentDictionary<string, List<PhotoAdapter>> _photoUploaders;
+
+        #endregion
+
+        #region Properties
 
         private Dictionary<string, Func<MessageAdapter, CancellationToken, Task>> TextCommands { get; set; }
         private Dictionary<string, Func<CallbackQueryAdapter, CancellationToken, Task>> CallbackCommands { get; set; }
 
+        #endregion
+
+        #region Constructor
+
         public UpdateHandlerService(
             ILogger<UpdateHandlerService> logger,
+            IBotService botService,
             IServiceProvider serviceProvider)
         {
             _logger = logger;
+            _botService = botService;
+
             _photoUploaders = [];
 
             TextCommands = [];
@@ -42,18 +57,25 @@ namespace BlueBellDolls.Bot.Services
                     CallbackCommands.Add(callbackHandler.Key, callbackHandler.Value);
         }
 
+        #endregion
+
+        #region IUpdateHandlerService implementation
+
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            _logger.LogInformation(JsonConvert.SerializeObject(update));
+            _logger.LogDebug(JsonConvert.SerializeObject(update.Message));
             switch (update.Type)
             {
                 case UpdateType.Message:
                     if (update.Message is not null)
                     {
-                        if (update.Message.ReplyToMessage is not null && update.Message.ReplyToMessage.Text != null)
+                        var message = update.Message;
+
+                        if (message.ReplyToMessage is not null && message.ReplyToMessage.Text != null)
                             await HandleReplyToMessageAsync(update.Message, cancellationToken);
+
                         else
-                            await HandleCommandAsync(update.Message, update.Message.Text != null && update.Message.Text.Contains(' '), cancellationToken);
+                            await HandleCommandAsync(message, message.Text != null && message.Text.Contains(' '), cancellationToken);
                     }
                     break;
 
@@ -107,7 +129,7 @@ namespace BlueBellDolls.Bot.Services
                         $"\nId чата: {c.Message?.Chat.Id}" +
                         $"\n", "Входящий Callback");
 
-            foreach(var callback in c.Data!.Split('\n'))
+            foreach (var callback in c.Data!.Split('\n'))
             {
                 var commandData = containsArgs ? callback.Split('-').First() : callback;
 
@@ -129,14 +151,87 @@ namespace BlueBellDolls.Bot.Services
                 $"\nId чата: {m.Chat.Id}" +
                 $"\n", "Входящее сообщение");
 
-            if (TextCommands.TryGetValue($"updateEntityByReply-{m.ReplyToMessage!.Text!.Split(' ').First()}", out var commandHandler)
-                || TextCommands.TryGetValue(m.Text ?? string.Empty, out commandHandler))
-                await commandHandler(m.ToAdaper(), token);
+            if (m.Photo != null)
+            {
+                var mediaGroupId = m.MediaGroupId;
+
+                if (mediaGroupId != null)
+                {
+                    if (!_photoUploaders.TryGetValue(mediaGroupId, out var value))
+                    {
+                        _photoUploaders.TryAdd(mediaGroupId, []);
+                        value = _photoUploaders[mediaGroupId];
+
+                        var timer = new System.Timers.Timer(100);
+                        timer.Elapsed += async (s, e) =>
+                        {
+                            timer.Stop();
+                            timer.Dispose();
+
+                            if (m.Caption == null)
+                            {
+                                _photoUploaders.Remove(mediaGroupId, out _);
+                                return;
+                            }
+
+                            m.Text = m.Caption;
+                            
+                            await tryHandleCommand(m, value, token);
+                            _photoUploaders.Remove(mediaGroupId, out _);
+                        };
+                        timer.Start();
+                    }
+
+                    value.Add(m.GetPhotoAdapter()!);
+                    return;
+                }
+
+                await tryHandleCommand(m, [m.GetPhotoAdapter()!], token);
+            }
+            
+
+            await tryHandleCommand(m, token: token);
+
+            async Task tryHandleCommand(Message m, IEnumerable<PhotoAdapter>? photos = null, CancellationToken token = default)
+            {
+                if (TextCommands.TryGetValue(m.Text ?? string.Empty, out var commandHandler) 
+                    || TextCommands.TryGetValue(
+                    $"updateEntityByReply-{m.ReplyToMessage!.Text!.Split(' ').First()}",
+                    out commandHandler))
+                    await commandHandler(m.ToAdaper(photos), token);
+            }
         }
 
         public async Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, HandleErrorSource source, CancellationToken cancellationToken)
         {
             await Task.CompletedTask;
         }
+
+        #endregion
+
+        #region IHostedService implementation
+
+        public async Task StartAsync(CancellationToken cancellationToken)
+        {
+            _botService.StartReceiving(this, new ReceiverOptions
+            {
+                AllowedUpdates =
+                    [
+                        UpdateType.Message,
+                        UpdateType.CallbackQuery
+                    ]
+            }, 
+            cancellationToken);
+            await Task.CompletedTask;
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _logger.LogInformation("Бот остановлен.");
+            await Task.CompletedTask;
+        }
+
+        #endregion
+
     }
 }

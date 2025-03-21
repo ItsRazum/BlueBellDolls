@@ -57,20 +57,20 @@ class Program
             options.UseSqlite(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
         });
 
-        // �����������
+        // Репозитории
         builder.Services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
 
-        // ��������� ������� gRPC
+        // Настройки gRPC
         builder.Services.Configure<GrpcServerSettings>(builder.Configuration.GetSection(nameof(GrpcServerSettings)));
 
-        // �����
+        // Юниты
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-        // ��������� �������
+        // Сервисы
         builder.Services.AddScoped<ICatService, CatService>();
 
 
-        // ���. ���������
+        // Доп. настройки
         builder.Host.UseDefaultServiceProvider(options =>
         {
             options.ValidateScopes = true;

@@ -45,7 +45,7 @@ namespace BlueBellDolls.Bot.Providers
                 result.AddNewRow(CreateBackToLitterButton(unitOwner.Id));
 
             foreach (var entity in entities)
-                result.AddNewRow(CreateEntityReferenceButton(entity, actionMode, unitOwner));
+                result.AddNewRow(CreateListEntityReferenceButton(entity, actionMode, unitOwner));
 
             if (pageParameters != null)
                 result.AddNewRow(CreatePageControlsButtons<TEntity>(pageParameters.Value));
@@ -61,19 +61,36 @@ namespace BlueBellDolls.Bot.Providers
             var result = new InlineKeyboardMarkup(CreateBackToEntityListButton(entity));
 
             foreach (var row in _entityOptionsKeyboards[entity.GetType()](entity).InlineKeyboard)
-                result.AddNewRow(row.ToArray());
+                result.AddNewRow([.. row]);
 
             return result;
         }
 
-        public InlineKeyboardMarkup CreateConfirmEntityDeletionKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion)
+        public InlineKeyboardMarkup CreateEntityPhotosKeyboard(IDisplayableEntity entity, int[] photoMessageIds, int[]? selectedPhotosIndexes = null)
+        {
+            var result = new InlineKeyboardMarkup(CreateBackToFormButton(entity, _callbackDataProvider.CreateDeleteMessagesCallback(photoMessageIds)));
+            for (int i = 0; i < 5; i++)
+                result.AddNewRow(CreatePhotoReferenceButton(entity, i, !selectedPhotosIndexes?.Contains(i) ?? true));
+
+            if (selectedPhotosIndexes?.Length > 0)
+            {
+                if (selectedPhotosIndexes.Length == 1)
+                    result.AddNewRow(CreateSelectPhotoAsDefaultButton(entity, selectedPhotosIndexes.First()));
+
+                result.AddNewRow(CreateDeletePhotosButton(entity));
+            }
+
+            return result;
+        }
+
+        public InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion)
         {
             return new InlineKeyboardMarkup(
             [
                 [
-                CreateDeleteYesButton(callback, callbacksAfterDeletion),
-                CreateDeleteNoButton(onDeletionCanceledCallback)
-            ]
+                    CreateDeleteYesButton(callback, callbacksAfterDeletion),
+                    CreateDeleteNoButton(onDeletionCanceledCallback)
+                ]
             ]);
         }
 
@@ -140,6 +157,12 @@ namespace BlueBellDolls.Bot.Providers
             var result = new InlineKeyboardMarkup();
             result.AddNewRow(CreateDeleteButton(parentCat, _callbackDataProvider.CreateDeleteEntityCallback(parentCat)));
 
+            if (parentCat.Photos.Count > 0)
+                result.AddNewRow(CreateManagePhotosButton(parentCat));
+
+            if (parentCat.Titles.Count > 0)
+                result.AddNewRow(CreateManageTitlesButton(parentCat));
+
             return result;
         }
 
@@ -194,7 +217,7 @@ namespace BlueBellDolls.Bot.Providers
                 );
         }
 
-        private InlineKeyboardButton CreateEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
+        private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
         {
             return InlineKeyboardButton.WithCallbackData(
                 entity.DisplayName,
@@ -211,14 +234,40 @@ namespace BlueBellDolls.Bot.Providers
         private InlineKeyboardButton CreateDeleteYesButton(string callback, params string[] callbacksAfterDeletion)
             => InlineKeyboardButton.WithCallbackData("Да", $"{_callbackDataProvider.CreateConfirmCallback(callback)}\n{string.Join('\n', callbacksAfterDeletion)}");
 
-        private InlineKeyboardButton CreateDeleteNoButton(params string[] callbacksAfterDeletion)
-            => InlineKeyboardButton.WithCallbackData("Нет", string.Join('\n', callbacksAfterDeletion));
+        private InlineKeyboardButton CreateDeleteNoButton(string callback)
+            => InlineKeyboardButton.WithCallbackData("Нет", callback);
 
-        private InlineKeyboardButton CreateAddPhotosButton(IDisplayableEntity entity)
-            => InlineKeyboardButton.WithCallbackData("Добавить фото", _callbackDataProvider.CreateAddPhotosCallback(entity));
+        private InlineKeyboardButton CreateManagePhotosButton(IDisplayableEntity entity)
+            => InlineKeyboardButton.WithCallbackData("Редактировать фото", _callbackDataProvider.CreateAddPhotosCallback(entity));
 
-        private InlineKeyboardButton CreateAddTitlesButton(IDisplayableEntity entity)
-            => InlineKeyboardButton.WithCallbackData("Добавить титулы", _callbackDataProvider.CreateAddTitlesCallback(entity));
+        private InlineKeyboardButton CreateManageTitlesButton(IDisplayableEntity entity)
+            => InlineKeyboardButton.WithCallbackData("Редактировать титулы", _callbackDataProvider.CreateAddTitlesCallback(entity));
+
+        private InlineKeyboardButton CreatePhotoReferenceButton(IDisplayableEntity entity, int number, bool select)
+        {
+            var selectionChar = select ? "⚫️" : "🟢";
+
+            return InlineKeyboardButton.WithCallbackData(
+                $"{selectionChar}Фото {number + 1}",
+                _callbackDataProvider.CreateTogglePhotoSelectionCallback(entity, number, select));
+        }
+
+        private InlineKeyboardButton CreateSelectPhotoAsDefaultButton(IDisplayableEntity entity, int photoIndex)
+            => InlineKeyboardButton.WithCallbackData(
+                "Сделать основным", 
+                _callbackDataProvider.CreateMakeDefaultPhotoForEntityCallback(entity, photoIndex));
+
+        private InlineKeyboardButton CreateDeletePhotosButton(IDisplayableEntity entity)
+            => InlineKeyboardButton.WithCallbackData(
+                "Удалить выбранное", 
+                _callbackDataProvider.CreateDeletePhotosForEntityCallback(entity));
+
+        private InlineKeyboardButton CreateBackToFormButton(IDisplayableEntity entity, string? callbackBeforeRedirect = null)
+            => InlineKeyboardButton.WithCallbackData(
+                "Назад",
+                string
+                .Join('\n', callbackBeforeRedirect, _callbackDataProvider.CreateEditEntityCallback(entity))
+                .TrimStart('\n'));
 
         #endregion
     }

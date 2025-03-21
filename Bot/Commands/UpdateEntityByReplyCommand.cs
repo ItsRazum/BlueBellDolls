@@ -48,9 +48,9 @@ namespace BlueBellDolls.Bot.Commands
 
                     if (success)
                     {
-                        if (!await BotService.DeleteMessageAsync(m.Chat, m.ReplyToMessage!.Id, token))
+                        if (!await BotService.DeleteMessageAsync(m.Chat, m.ReplyToMessage!.MessageId, token))
                         {
-                            await BotService.EditMessageAsync(m.Chat, m.ReplyToMessage!.Id,
+                            await BotService.EditMessageAsync(m.Chat, m.ReplyToMessage!.MessageId,
                                 "Модель успешно обновлена!", token: token);
                         }
 
@@ -58,7 +58,7 @@ namespace BlueBellDolls.Bot.Commands
                         var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(result.modelId, token);
 
                         await BotService.SendMessageAsync(m.Chat,
-                            _messageParametersProvider.GetEntityMessageParameters(entity!), token);
+                            _messageParametersProvider.GetEntityFormParameters(entity!), token);
                     }
                     else
                         await BotService.SendMessageAsync(m.Chat, "Не удалось обновить модель! Возможно, была допущена ошибка при вводе значений.", token: token);

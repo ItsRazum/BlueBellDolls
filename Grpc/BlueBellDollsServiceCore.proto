@@ -24,11 +24,11 @@ message Litter {
 	// id
 	int32 id = 1;
 	// letter
-	google.protobuf.StringValue letter = 2;
+	string letter = 2;
 	//birth day
-	google.protobuf.StringValue birth_day = 3;
+	string birth_day = 3;
 	// is active
-	google.protobuf.BoolValue is_active = 4;
+	bool is_active = 4;
 	// mother cat
 	ParentCat mother_cat = 5;
 	// father cat
@@ -36,28 +36,30 @@ message Litter {
 	// kittens
 	repeated Kitten kittens = 7;
 	// description
-	google.protobuf.StringValue description = 8;
+	string description = 8;
+	// photos
+	map<string, string> photos = 9;
 }
 
 message ParentCat {
 	// id
 	int32 id = 1;
 	// name
-	google.protobuf.StringValue name = 2;
+	string name = 2;
 	// birth day
-	google.protobuf.StringValue birth_day = 3;
+	string birth_day = 3;
 	// is male
-	google.protobuf.BoolValue is_male = 4;
+	bool is_male = 4;
 	// description
-	google.protobuf.StringValue description = 5;
+	string description = 5;
 	// photos
-	repeated google.protobuf.StringValue photos = 6;
+	map<string, string> photos = 6;
 	// genetic test one
-	google.protobuf.StringValue genetic_test_one = 7;
+	string genetic_test_one = 7;
 	// genetic test two 
-	google.protobuf.StringValue genetic_test_two = 8;
+	string genetic_test_two = 8;
 	// titles
-	repeated google.protobuf.StringValue titles = 9;
+	map<string, string> titles = 9;
 	// old description
 	google.protobuf.StringValue old_description = 10;
 }
@@ -66,17 +68,17 @@ message Kitten {
 	// id
 	int32 id = 1;
 	// name
-	google.protobuf.StringValue name = 2;
+	string name = 2;
 	// birth day
-	google.protobuf.StringValue birth_day = 3;
+	string birth_day = 3;
 	// is male
-	google.protobuf.BoolValue is_male = 4;
+	bool is_male = 4;
 	// description
-	google.protobuf.StringValue description = 5;
+	string description = 5;
 	// photos
-	repeated google.protobuf.StringValue photos = 6;
+	map<string, string> photos = 6;
 	// class
-	google.protobuf.StringValue class = 7;
+	string class = 7;
 	// status
-	google.protobuf.StringValue status = 8;
+	string status = 8;
 }

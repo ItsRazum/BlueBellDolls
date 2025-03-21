@@ -7,6 +7,6 @@ namespace BlueBellDolls.Bot.Types
     {
         public string Text { get; } = text;
         public InlineKeyboardMarkup? InlineKeyboard { get; } = inlineKeyboard;
-        public IEnumerable<InputMediaPhoto>? InputFiles { get; } = inputFiles;
+        public InputMediaPhoto[]? InputFiles { get; } = inputFiles?.ToArray();
     }
 }

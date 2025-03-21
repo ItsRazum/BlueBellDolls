@@ -70,7 +70,7 @@ namespace BlueBellDolls.Bot.Commands
             await BotService.EditMessageAsync(
                 c.Chat,
                 c.MessageId,
-                _messageParametersProvider.GetEntityMessageParameters(result.litter),
+                _messageParametersProvider.GetEntityFormParameters(result.litter),
                 token
             );
         }

@@ -13,7 +13,8 @@ namespace BlueBellDolls.Bot.Commands
         public SelectParentCatCallback(
             IBotService botService,
             IEntityHelperService entityHelperService,
-            IMessageParametersProvider messageParametersProvider) : base(botService)
+            IMessageParametersProvider messageParametersProvider) 
+            : base(botService)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;

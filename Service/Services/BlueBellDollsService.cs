@@ -1,6 +1,7 @@
 ﻿using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Grpc;
 using BlueBellDolls.Service.Grpc;
+using BlueBellDolls.Service.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
@@ -12,7 +13,7 @@ namespace BlueBellDolls.Service.Services
         #region Fields
 
         private readonly ILogger<BlueBellDollsService> _logger;
-        private readonly CatService _catService;
+        private readonly ICatService _catService;
 
         #endregion
 
@@ -20,7 +21,7 @@ namespace BlueBellDolls.Service.Services
 
         public BlueBellDollsService(
             ILogger<BlueBellDollsService> logger,
-            CatService catService)
+            ICatService catService)
         {
             _logger = logger;
             _catService = catService;

@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Extensions;
+using BlueBellDolls.Bot.Interfaces;
 using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Adapters
@@ -7,9 +8,12 @@ namespace BlueBellDolls.Bot.Adapters
     {
         private readonly Message _message;
 
-        public MessageAdapter(Message message)
+        public MessageAdapter(Message message, IEnumerable<PhotoAdapter>? photos = null)
         {
             _message = message;
+            Photos = photos?.ToArray();
+            if (_message.ReplyToMessage != null)
+                ReplyToMessage = _message.ReplyToMessage.ToAdaper();
         }
 
         public string Text => _message.Text ?? string.Empty;
@@ -20,8 +24,9 @@ namespace BlueBellDolls.Bot.Adapters
 
         public User? From => _message.From;
 
-        public Message? ReplyToMessage => _message.ReplyToMessage;
+        public MessageAdapter? ReplyToMessage { get; }
 
-        public object Photos => _message.Photo ?? [];
+        public PhotoAdapter[]? Photos { get; }
+
     }
 }

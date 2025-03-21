@@ -21,13 +21,17 @@ namespace BlueBellDolls.Bot.Services
             using var scope = _serviceProvider.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
+            _logger.LogInformation("{DatabaseService}.{ExecuteDbOperationAsync}(): Открыто подключение к БД",
+                nameof(DatabaseService),
+                nameof(ExecuteDbOperationAsync));
+
             try
             {
                 await operation(unitOfWork, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception thrown in DatabaseService.ExecuteDbOperationAsync()");
+                _logger.LogError(ex, "{DatabaseService}.{ExecuteDbOperationAsync}(): Возникло исключение", nameof(DatabaseService), nameof(ExecuteDbOperationAsync));
             }
         }
 
@@ -36,13 +40,21 @@ namespace BlueBellDolls.Bot.Services
             using var scope = _serviceProvider.CreateScope();
             var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
+            _logger.LogInformation("{DatabaseService}.{ExecuteDbOperationAsync}<{TResult}>(): Открыто подключение к БД",
+                nameof(DatabaseService),
+                nameof(ExecuteDbOperationAsync),
+                typeof(TResult).Name);
+
             try
             {
                 return await operation(unitOfWork, token);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Exception thrown in DatabaseService.GetDataAsync<TResult>()");
+                _logger.LogError(ex, "{DatabaseService}.{ExecuteDbOperationAsync}<{TResult}>(): Возникло исключение", 
+                    nameof(DatabaseService), 
+                    nameof(ExecuteDbOperationAsync), 
+                    typeof(TResult).Name);
                 throw;
             }
         }

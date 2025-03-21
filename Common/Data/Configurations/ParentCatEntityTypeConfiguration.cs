@@ -11,15 +11,15 @@ namespace BlueBellDolls.Common.Data.Configurations
         {
             builder
                 .Property(c => c.Titles)
-                .HasConversion(ValueConverters.ListStringConverter)
+                .HasConversion(ValueConverters.DictionaryStringConverter)
                 .Metadata
-                .SetValueComparer(ValueComparers.ListStringComparer);
+                .SetValueComparer(ValueComparers.DictionaryStringComparer);
 
             builder
                 .Property(c => c.Photos)
-                .HasConversion(ValueConverters.ListStringConverter)
+                .HasConversion(ValueConverters.DictionaryStringConverter)
                 .Metadata
-                .SetValueComparer(ValueComparers.ListStringComparer);
+                .SetValueComparer(ValueComparers.DictionaryStringComparer);
         }
     }
 }

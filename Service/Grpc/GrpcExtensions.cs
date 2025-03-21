@@ -29,8 +29,8 @@ namespace BlueBellDolls.Service.Grpc
                 BirthDay = parentCat.BirthDay.ToString(_cultureInfo),
             };
 
-            result.Photos.AddRange(parentCat.Photos);
-            result.Titles.AddRange(parentCat.Titles);
+            result.Photos.Add(parentCat.Photos);
+            result.Titles.Add(parentCat.Titles);
 
             return result;
         }
@@ -41,13 +41,13 @@ namespace BlueBellDolls.Service.Grpc
             {
                 Id = parentCat.Id,
                 Name = parentCat.Name,
-                IsMale = parentCat.IsMale!.Value,
+                IsMale = parentCat.IsMale,
                 Description = parentCat.Description,
                 OldDescription = parentCat.OldDescription,
                 GeneticTestOne = parentCat.GeneticTestOne,
                 GeneticTestTwo = parentCat.GeneticTestTwo,
-                Photos = new List<string>(parentCat.Photos),
-                Titles = new List<string>(parentCat.Titles)
+                Photos = new(parentCat.Photos),
+                Titles = new(parentCat.Titles)
             };
         }
 
@@ -68,23 +68,26 @@ namespace BlueBellDolls.Service.Grpc
                 Description = kitten.Description
             };
 
-            result.Photos.AddRange(kitten.Photos);
-
+            result.Photos.Add(kitten.Photos);
             return result;
         }
 
         public static Kitten Decompress(this BlueBellDolls.Grpc.Kitten kitten)
         {
+            var photos = new Dictionary<string, string>();
+            foreach (var photo in kitten.Photos)
+                photos.Add(photo.Key, photo.Value);
+
             return new Kitten
             {
                 Id = kitten.Id,
                 Name = kitten.Name,
-                IsMale = kitten.IsMale!.Value,
+                IsMale = kitten.IsMale,
                 BirthDay = DateOnly.Parse(kitten.BirthDay, _cultureInfo),
                 Class = Enum.Parse<KittenClass>(kitten.Class),
                 Status = Enum.Parse<KittenStatus>(kitten.Status),
                 Description = kitten.Description,
-                Photos = new List<string>(kitten.Photos)
+                Photos = new(kitten.Photos)
             };
         }
 
@@ -101,9 +104,11 @@ namespace BlueBellDolls.Service.Grpc
                 BirthDay = litter.BirthDay.ToString(_cultureInfo),
                 IsActive = litter.IsActive,
                 Description = litter.Description,
-                MotherCat = litter.MotherCat.Compress(),
-                FatherCat = litter.FatherCat.Compress()
+                MotherCat = litter.MotherCat?.Compress(),
+                FatherCat = litter.FatherCat?.Compress()
             };
+
+            result.Photos.Add(litter.Photos);
 
             foreach (var kitten in litter.Kittens)
                 result.Kittens.Add(kitten.Compress());
@@ -118,7 +123,7 @@ namespace BlueBellDolls.Service.Grpc
                 Id = litter.Id,
                 Letter = char.Parse(litter.Letter),
                 BirthDay = DateOnly.Parse(litter.BirthDay, _cultureInfo),
-                IsActive = litter.IsActive!.Value,
+                IsActive = litter.IsActive,
                 Description = litter.Description,
                 MotherCat = litter.MotherCat.Decompress(),
                 FatherCat = litter.FatherCat.Decompress()

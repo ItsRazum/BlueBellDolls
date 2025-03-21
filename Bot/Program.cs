@@ -4,7 +4,6 @@ using BlueBellDolls.Bot.Providers;
 using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.ValueConverters;
-using BlueBellDolls.Common.Data.CommandInterceptors;
 using BlueBellDolls.Common.Data.Contexts;
 using BlueBellDolls.Common.Data.Utilities;
 using BlueBellDolls.Common.Interfaces;
@@ -40,24 +39,28 @@ internal class Program
         builder.Services.AddGrpc();
 
         // Конфигурация
-        builder.Services.Configure<BotSettings>(builder.Configuration.GetSection(nameof(BotSettings)));
-        builder.Services.Configure<EntityFormSettings>(builder.Configuration.GetSection(nameof(EntityFormSettings)));
+        builder.Services
+            .Configure<BotSettings>(builder.Configuration.GetSection(nameof(BotSettings)))
+            .Configure<EntityFormSettings>(builder.Configuration.GetSection(nameof(EntityFormSettings)))
+            .Configure<TelegramFilesHttpClientSettings>(builder.Configuration.GetSection(nameof(TelegramFilesHttpClientSettings)));
 
         // Entity Framework
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlite(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
-            options.AddInterceptors(new SqliteForeignKeyEnforcer());
+            options.UseSqlite(
+                builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)), 
+                b => b.MigrationsAssembly("BlueBellDolls.Common"));
         });
 
         // Репозитории
         builder.Services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
 
-        // Фабрики
-        builder.Services.AddSingleton<IMessagesProvider, MessagesProvider>();
-        builder.Services.AddSingleton<IKeyboardsProvider, KeyboardsProvider>();
-        builder.Services.AddSingleton<IMessageParametersProvider, MessageParametersProvider>();
-        builder.Services.AddSingleton<ICallbackDataProvider, CallbackDataProvider>();
+        // Провайдеры
+        builder.Services
+            .AddSingleton<IMessagesProvider, MessagesProvider>()
+            .AddSingleton<IKeyboardsProvider, KeyboardsProvider>()
+            .AddSingleton<IMessageParametersProvider, MessageParametersProvider>()
+            .AddSingleton<ICallbackDataProvider, CallbackDataProvider>();
 
         // Юниты
         builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -65,17 +68,34 @@ internal class Program
         // Команды
         builder.Services.AddCommandHandlers();
 
-        // Остальные сервисы
-        builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
-        builder.Services.AddSingleton<IBotService, BotService>();
-        builder.Services.AddSingleton<IUpdateHandlerService, UpdateHandlerService>();
-        builder.Services.AddSingleton<IEntityFormService, EntityFormService>();
-        builder.Services.AddSingleton<IValueConverter, EntityValueConverter>();
-        builder.Services.AddSingleton<IEntityHelperService, EntityHelperService>();
-        builder.Services.AddSingleton<IEntityUpdateService, EntityUpdateService>();
+        // HTTP клиенты
+        builder.Services
+            .AddHttpClient(builder.Configuration
+                .GetSection(
+                    nameof(TelegramFilesHttpClientSettings))[nameof(TelegramFilesHttpClientSettings.ClientName)] 
+                    ?? throw new NullReferenceException(nameof(TelegramFilesHttpClientSettings.ClientName)))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                MaxConnectionsPerServer = int.Parse(builder.Configuration
+                .GetSection(
+                    nameof(TelegramFilesHttpClientSettings))
+                    [nameof(TelegramFilesHttpClientSettings.MaxConnectionsPerServer)] 
+                    ?? "50")
+            });
 
-        // Бот
-        builder.Services.AddHostedService<BotService>();
+        // Hosted сервисы
+        builder.Services.AddHostedService<UpdateHandlerService>();
+
+        // Остальные сервисы
+        builder.Services
+            .AddSingleton<IDatabaseService, DatabaseService>()
+            .AddSingleton<IBotService, BotService>()
+            .AddSingleton<IEntityFormService, EntityFormService>()
+            .AddSingleton<IValueConverter, EntityValueConverter>()
+            .AddSingleton<IEntityHelperService, EntityHelperService>()
+            .AddSingleton<IEntityUpdateService, EntityUpdateService>()
+            .AddSingleton<IArgumentParseHelperService, ArgumentParseHelperService>()
+            .AddSingleton<IMessagesHelperService, MessagesHelperService>();
 
         // Доп. настройки
         builder.Host.UseDefaultServiceProvider(options =>

@@ -16,7 +16,9 @@ namespace BlueBellDolls.Bot.Interfaces
 
         InlineKeyboardMarkup CreateEntityOptionsKeyboard(IDisplayableEntity entity);
 
-        InlineKeyboardMarkup CreateConfirmEntityDeletionKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion);
+        InlineKeyboardMarkup CreateEntityPhotosKeyboard(IDisplayableEntity entity, int[] photoMessageIds, int[]? selectedPhotosIndexes = null);
+
+        InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion);
 
         InlineKeyboardMarkup CreateEntityFromLitterKeyboard(IDisplayableEntity entity, int litterId);
     }

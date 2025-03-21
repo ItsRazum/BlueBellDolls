@@ -1,4 +1,5 @@
 ﻿using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Static;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -27,6 +28,12 @@ namespace BlueBellDolls.Common.Data.Configurations
                 .WithOne(k => k.Litter)
                 .HasForeignKey(k => k.LitterId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder
+                .Property(l => l.Photos)
+                .HasConversion(ValueConverters.DictionaryStringConverter)
+                .Metadata
+                .SetValueComparer(ValueComparers.DictionaryStringComparer);
         }
     }
 }

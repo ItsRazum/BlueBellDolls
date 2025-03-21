@@ -39,6 +39,7 @@ namespace BlueBellDolls.Common.Models
             IsActive = true;
             Description = "Добавьте описание!";
             Kittens = [];
+            Photos = [];
         }
 
         #endregion
@@ -48,6 +49,8 @@ namespace BlueBellDolls.Common.Models
 
         [NotMapped]
         public string DisplayName => "Помёт " + Letter;
+
+        public Dictionary<string, string> Photos { get; set; }
 
         #endregion
 

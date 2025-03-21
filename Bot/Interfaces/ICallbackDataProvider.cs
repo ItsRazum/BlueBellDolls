@@ -18,5 +18,9 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreateAddEntityCallback(string entityName);
         string CreateAddPhotosCallback(IDisplayableEntity entity);
         string CreateAddTitlesCallback(IDisplayableEntity entity);
+        string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int number, bool select);
+        string CreateMakeDefaultPhotoForEntityCallback(IDisplayableEntity entity, int photoIndex);
+        string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity);
+        string CreateDeleteMessagesCallback(int[] messagesId);
     }
 }

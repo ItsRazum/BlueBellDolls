@@ -55,10 +55,41 @@ namespace BlueBellDolls.Bot.Providers
                 "- /start - вызов данного меню";
         }
 
+        public string CreateMessagesDeletingError()
+        {
+            return
+                "Боту не удалось удалить сообщение с фотографиями выше. " +
+                "Это случилось из-за ограничений Telegram, согласно которым бот может удалить отправленное собой сообщение в течение 48 часов. " +
+                "Ради вашего удобства рекомендуется удалить фотографии выше вручную.";
+        }
         public string CreateEntityFormMessage(IEntity entity)
         {
             return _entityFormMessages[entity.GetType()](entity);
         }
+
+        public string CreateEntityPhotosGuideMessage(IDisplayableEntity entity)
+        {
+            return 
+                $"{entity.GetType().Name} {entity.Id}\n" +
+                $"\n" +
+                $"Количество фотографий: {entity.Photos.Count}/5\n" +
+                $"\n" +
+                $"Нумерация фотографий соответствует порядку, отправленному выше. Можно выбрать одно фото и установить его в качестве заглавного для сущности, оно может быть только одно. Также можно выбрать одно или несколько фотографий и удалить их";
+        }
+
+        public string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds)
+        {
+            var key = (selectedPhotoIndexes.Length > 0
+                ? string.Join(", ", selectedPhotoIndexes)
+                : "-") + " : " + string.Join(", ", photoMessageIds);
+
+            return
+                $"{entity.GetType().Name} {entity.Id}\n" +
+                $"Выберите фотографии\n" +
+                $"\n" +
+                $"{key}";
+        }
+
 
         public string CreateDeleteConfirmationMessage(IDisplayableEntity entity)
         {
@@ -80,7 +111,6 @@ namespace BlueBellDolls.Bot.Providers
                 $"Количество: {totalEntitiesCount}\n" +
                 $"Хранится локально: {totalEntitiesCount}\n";
         }
-
 
         #endregion
 

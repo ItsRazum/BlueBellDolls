@@ -13,5 +13,13 @@ namespace BlueBellDolls.Common.Static
                 v => JsonConvert.SerializeObject(v),
                 v => JsonConvert.DeserializeObject<List<string>>(v)!
                 );
+
+        /// <summary>
+        /// ValueConverter для сериализации и десериализации Dictionary<string, string> в JSON.
+        /// </summary>
+        public static ValueConverter<Dictionary<string, string>, string> DictionaryStringConverter { get; } =
+            new ValueConverter<Dictionary<string, string>, string>(
+                v => JsonConvert.SerializeObject(v),
+                v => JsonConvert.DeserializeObject<Dictionary<string, string>>(v)!);
     }
 }

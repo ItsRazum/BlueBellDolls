@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Newtonsoft.Json;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -50,9 +51,21 @@ namespace BlueBellDolls.Bot.Providers
             => $"add{entityName}";
 
         public string CreateAddPhotosCallback(IDisplayableEntity entity)
-            => $"addPhotosTo{entity.GetType().Name}-{entity.Id}";
+            => $"managePhotosTo{entity.GetType().Name}-{entity.Id}";
 
         public string CreateAddTitlesCallback(IDisplayableEntity entity)
-        => $"addTitlesTo{entity.GetType().Name}-{entity.Id}";
+            => $"manageTitlesTo{entity.GetType().Name}-{entity.Id}";
+
+        public string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int number, bool select) 
+            => $"togglePhotoFor{entity.GetType().Name}-{number}-{select}-{entity.Id}";
+
+        public string CreateMakeDefaultPhotoForEntityCallback(IDisplayableEntity entity, int photoIndex)
+            => $"setDefaultPhotoFor{entity.GetType().Name}-{photoIndex}-{entity.Id}";
+
+        public string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity)
+            => $"deletePhotosFor{entity.GetType().Name}-{entity.Id}";
+
+        public string CreateDeleteMessagesCallback(int[] messagesId)
+            => $"dm-[{string.Join(", ", messagesId)}]";
     }
 }

@@ -27,7 +27,7 @@ namespace BlueBellDolls.Bot.Commands
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity, new()
         {
             var newEntity = await _entityHelperService.AddNewEntityAsync<TEntity>(token);
-            await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityMessageParameters(newEntity), token);
+            await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(newEntity), token);
         }
     }
 }
