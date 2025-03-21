@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Bot/BlueBellDollsManagement.db
+/Bot/BlueBellDollsManagement.db-shm
+/Bot/BlueBellDollsManagement.db-wal
