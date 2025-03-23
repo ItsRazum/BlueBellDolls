@@ -13,7 +13,7 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
-
+        private readonly IMessagesProvider _messagesProvider;
         private readonly BotSettings _botSettings;
         private readonly TelegramFilesHttpClientSettings _telegramFilesHttpClientSettings;
         private readonly IHttpClientFactory _httpClientFactory;
@@ -22,6 +22,7 @@ namespace BlueBellDolls.Bot.Commands
             IBotService botService,
             IDatabaseService databaseService,
             IMessageParametersProvider messageParametersProvider,
+            IMessagesProvider messagesProvider,
             IOptions<TelegramFilesHttpClientSettings> telegramFilesHttpClientSettings,
             IOptions<BotSettings> botSettings,
             IHttpClientFactory httpClientFactory)
@@ -29,6 +30,7 @@ namespace BlueBellDolls.Bot.Commands
         {
             _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
+            _messagesProvider = messagesProvider;
             _telegramFilesHttpClientSettings = telegramFilesHttpClientSettings.Value;
             _botSettings = botSettings.Value;
             _httpClientFactory = httpClientFactory;
@@ -42,7 +44,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (m.Photos.Length > 5)
             {
-                await BotService.SendMessageAsync(m.Chat, "Количество фотографий не может быть больше 5!", token: token);
+                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitationErrorMessage(), token: token);
                 return;
             }
 
@@ -61,7 +63,7 @@ namespace BlueBellDolls.Bot.Commands
                 _ => throw new InvalidDataException(entityType)
             };
 
-            var loadingMessage = await BotService.SendMessageAsync(m.Chat, "Загрузка...", token: token);
+            var loadingMessage = await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLoadingMessage(), token: token);
 
             var entity = await addPhotosTask(m.Photos, entityId, token);
 

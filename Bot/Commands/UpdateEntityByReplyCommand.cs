@@ -11,17 +11,20 @@ namespace BlueBellDolls.Bot.Commands
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IEntityUpdateService _entityUpdateService;
+        private readonly IMessagesProvider _messagesProvider;
 
         public UpdateEntityByReplyCommand(
             IBotService botService,
             IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
-            IEntityUpdateService entityUpdateService)
+            IEntityUpdateService entityUpdateService,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
             _entityUpdateService = entityUpdateService;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("updateEntityByReply-ParentCat", HandleCommandAsync<ParentCat>);
             Handlers.Add("updateEntityByReply-Litter", HandleCommandAsync<Litter>);
@@ -51,7 +54,7 @@ namespace BlueBellDolls.Bot.Commands
                         if (!await BotService.DeleteMessageAsync(m.Chat, m.ReplyToMessage!.MessageId, token))
                         {
                             await BotService.EditMessageAsync(m.Chat, m.ReplyToMessage!.MessageId,
-                                "Модель успешно обновлена!", token: token);
+                                _messagesProvider.CreateEntityUpdateSuccessMessage(), token: token);
                         }
 
                         await BotService.DeleteMessageAsync(m.Chat, m.MessageId, token);
@@ -61,7 +64,7 @@ namespace BlueBellDolls.Bot.Commands
                             _messageParametersProvider.GetEntityFormParameters(entity!), token);
                     }
                     else
-                        await BotService.SendMessageAsync(m.Chat, "Не удалось обновить модель! Возможно, была допущена ошибка при вводе значений.", token: token);
+                        await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateEntityUpdateFailureMessage(), token: token);
                 }
 
                 static bool IsValidMessageFormat(string message, out (string modelName, int modelId) values)

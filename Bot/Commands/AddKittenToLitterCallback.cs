@@ -9,15 +9,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly IMessagesProvider _messagesProvider;
 
         public AddKittenToLitterCallback(
             IBotService botService,
             IDatabaseService databaseService,
-            IMessageParametersProvider messageParametersProvider)
+            IMessageParametersProvider messageParametersProvider,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("addKittenToLitter", HandleCallbackAsync);
         }
@@ -46,7 +49,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (kitten == null)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Помёт не найден!", token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(typeof(Litter), litterId), token: token);
                 return;
             }
 

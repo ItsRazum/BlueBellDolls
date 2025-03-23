@@ -9,13 +9,16 @@ namespace BlueBellDolls.Bot.Commands
     public class ConfirmDeleteEntityCallback : CommandHandler<CallbackQueryAdapter>
     {
         private readonly IDatabaseService _databaseService;
+        private readonly IMessagesProvider _messagesProvider;
 
         public ConfirmDeleteEntityCallback(
             IBotService botService,
-            IDatabaseService databaseService)
+            IDatabaseService databaseService,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _databaseService = databaseService;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("confirm_deleteParentCat", HandleDeleteParentCatCallbackAsync);
             Handlers.Add("confirm_deleteLitter", HandleCallbackAsync<Litter>);
@@ -34,7 +37,7 @@ namespace BlueBellDolls.Bot.Commands
                     await unit.SaveChangesAsync(ct);
             }, token);
 
-            await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Модель успешно удалена!", token: token);
+            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityDeletionSuccess(), token: token);
         }
 
         private async Task HandleDeleteParentCatCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
@@ -60,7 +63,7 @@ namespace BlueBellDolls.Bot.Commands
 
             }, token);
 
-            await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Модель успешно удалена!", token: token);
+            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityDeletionSuccess(), token: token);
         }
     }
 }

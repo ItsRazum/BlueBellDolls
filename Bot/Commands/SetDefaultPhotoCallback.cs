@@ -11,17 +11,20 @@ namespace BlueBellDolls.Bot.Commands
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessagesHelperService _messagesHelperService;
         private readonly IArgumentParseHelperService _argumentParseHelperService;
+        private readonly IMessagesProvider _messagesProvider;
 
         public SetDefaultPhotoCallback(
             IBotService botService,
             IEntityHelperService entityHelperService,
             IMessagesHelperService messagesHelperService,
-            IArgumentParseHelperService argumentParseHelperService) 
+            IArgumentParseHelperService argumentParseHelperService,
+            IMessagesProvider messagesProvider) 
             : base(botService)
         {
             _entityHelperService = entityHelperService;
             _messagesHelperService = messagesHelperService;
             _argumentParseHelperService = argumentParseHelperService;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("setDefaultPhotoForParentCat", HandleCallbackAsync<ParentCat>);
             Handlers.Add("setDefaultPhotoForLitter", HandleCallbackAsync<Litter>);
@@ -39,7 +42,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (entity == null)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Запрашиваемая сущность не найдена!", token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
             }
 
@@ -58,7 +61,7 @@ namespace BlueBellDolls.Bot.Commands
 
             await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, entity, token);
 
-            await BotService.AnswerCallbackQueryAsync(c.CallbackData, $"Фотография №{photoIndex + 1} успешно установлена как основная!", token: token);
+            await BotService.AnswerCallbackQueryAsync(c.CallbackData, _messagesProvider.CreateDefaultPhotoSetForEntityMessage(entity, photoIndex), token: token);
         }
     }
 }

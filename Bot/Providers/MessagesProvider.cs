@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Bot.Enums;
+﻿using BlueBellDolls.Bot.Adapters;
+using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Common.Interfaces;
@@ -20,7 +21,8 @@ namespace BlueBellDolls.Bot.Providers
 
         #region Constructor
 
-        public MessagesProvider(IOptions<EntityFormSettings> entityFormSettings)
+        public MessagesProvider(
+            IOptions<EntityFormSettings> entityFormSettings)
         {
             _entityFormSettings = entityFormSettings.Value;
             _entityFormMessages = new()
@@ -62,6 +64,27 @@ namespace BlueBellDolls.Bot.Providers
                 "Это случилось из-за ограничений Telegram, согласно которым бот может удалить отправленное собой сообщение в течение 48 часов. " +
                 "Ради вашего удобства рекомендуется удалить фотографии выше вручную.";
         }
+
+        public string CreateEntityUpdateSuccessMessage()
+        {
+            return "Сущность успешно обновлена!";
+        }
+
+        public string CreateEntityUpdateFailureMessage()
+        {
+            return "Не удалось обновить сущность! Возможно, была допущена ошибка при вводе значений.";
+        }
+
+        public string CreateEntityNotFoundMessage()
+        {
+            return "Запрашиваемая сущность не найдена!";
+        }
+
+        public string CreateEntityNotFoundMessage(Type entityType, int entityId)
+        {
+            return $"Сущность {entityType.Name} {entityId} не найдена!";
+        }
+
         public string CreateEntityFormMessage(IEntity entity)
         {
             return _entityFormMessages[entity.GetType()](entity);
@@ -75,6 +98,16 @@ namespace BlueBellDolls.Bot.Providers
                 $"Количество фотографий: {entity.Photos.Count}/5\n" +
                 $"\n" +
                 $"Нумерация фотографий соответствует порядку, отправленному выше. Можно выбрать одно фото и установить его в качестве заглавного для сущности, оно может быть только одно. Также можно выбрать одно или несколько фотографий и удалить их";
+        }
+
+        public string CreatePhotosLoadingMessage()
+        {
+            return "Загрузка...";
+        }
+
+        public string CreatePhotosLimitationErrorMessage()
+        {
+            return "Количество фотографий не может быть больше 5!";
         }
 
         public string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds)
@@ -96,6 +129,11 @@ namespace BlueBellDolls.Bot.Providers
             return $"Вы уверены, что хотите удалить {entity.DisplayName} ({entity.GetType().Name} {entity.Id})?";
         }
 
+        public string CreateEntityDeletionSuccess()
+        {
+            return "Сущность успешно удалена!";
+        }
+
         public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotos)
         {
             return $"Вы уверены, что хотите удалить фотографии ({selectedPhotos.Length} шт.) у сущности {entity.DisplayName}?";
@@ -115,6 +153,22 @@ namespace BlueBellDolls.Bot.Providers
                 $"\n" +
                 $"Количество: {totalEntitiesCount}\n" +
                 $"Хранится локально: {totalEntitiesCount}\n";
+        }
+
+        public string CreateCouldNotExtractMessagesFromCallbackMessage(CallbackQueryAdapter c)
+        {
+            return $"Не удалось извлечь сообщения из Callback:{c.CallbackData}";
+        }
+
+        public string CreateParentCatSetForLitter(ParentCat parentCat, Litter litter)
+        {
+            var parentGender = parentCat.IsMale ? "папа" : "мама";
+            return $"Установлен родитель ({parentGender}) для помёта {litter.Letter} (от {litter.BirthDay.ToString("d", new CultureInfo("ru-RU"))})";
+        }
+
+        public string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoIndex)
+        {
+            return $"Фотография №{photoIndex + 1} успешно установлена как основная у сущности {entity.GetType().Name} {entity.Id}!";
         }
 
         #endregion

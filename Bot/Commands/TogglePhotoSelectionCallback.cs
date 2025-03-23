@@ -12,17 +12,20 @@ namespace BlueBellDolls.Bot.Commands
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IArgumentParseHelperService _argumentParseHelperService;
+        private readonly IMessagesProvider _messagesProvider;
 
         public TogglePhotoSelectionCallback(
             IBotService botService,
             IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
-            IArgumentParseHelperService argumentParseHelperService) 
+            IArgumentParseHelperService argumentParseHelperService,
+            IMessagesProvider messagesProvider) 
             : base(botService)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
             _argumentParseHelperService = argumentParseHelperService;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("togglePhotoForParentCat", HandleCallbackAsync<ParentCat>);
             Handlers.Add("togglePhotoForKitten", HandleCallbackAsync<Kitten>);
@@ -38,7 +41,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (entity == null)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Не удалось найти целевую сущность!", token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
             }
 

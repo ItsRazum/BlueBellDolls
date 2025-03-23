@@ -11,15 +11,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly IMessagesProvider _messagesProvider;
 
         public EditEntityCallback(
             IBotService botService,
             IEntityHelperService entityHelperService,
-            IMessageParametersProvider messageParametersProvider)
+            IMessageParametersProvider messageParametersProvider,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("editParentCat", HandleCommandAsync<ParentCat>);
             Handlers.Add("editLitter", HandleCommandAsync<Litter>);
@@ -45,7 +48,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (entity == null)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Запрашиваемая сущность не найдена!", token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
             }
 

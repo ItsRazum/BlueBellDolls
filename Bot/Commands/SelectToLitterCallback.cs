@@ -10,14 +10,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly IMessagesProvider _messagesProvider;
 
         public SelectToLitterCallback(
             IBotService botService,
             IDatabaseService databaseService,
-            IMessageParametersProvider messageParametersProvider) : base(botService)
+            IMessageParametersProvider messageParametersProvider,
+            IMessagesProvider messagesProvider) 
+            : base(botService)
         {
             _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("selectToLitter", HandleCommandAsync);
         }
@@ -55,15 +59,14 @@ namespace BlueBellDolls.Bot.Commands
 
             if (result.parentCat == null || result.litter == null)
             {
-                var missingEntity = result.parentCat == null ? $"ParentCat {parentCatId}" : $"Litter {litterId}";
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, $"Ошибка: {missingEntity} не найден!", token: token);
+                (var entityType, var entityId) = result.parentCat == null ? (typeof(ParentCat), parentCatId) : (typeof(Litter), litterId);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(entityType, entityId), token: token);
                 return;
             }
 
-            var parentGender = result.parentCat.IsMale ? "папа" : "мама";
             await BotService.AnswerCallbackQueryAsync(
                 c.CallbackId,
-                $"Установлен родитель ({parentGender}) для помёта {result.litter.Letter} (от {result.litter.BirthDay.ToString("d", new CultureInfo("ru-RU"))})",
+                _messagesProvider.CreateParentCatSetForLitter(result.parentCat, result.litter),
                 token: token
             );
 

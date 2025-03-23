@@ -27,8 +27,8 @@ namespace BlueBellDolls.Bot.Commands
             if (messageIds == null)
             {
                 await BotService.AnswerCallbackQueryAsync(
-                    c.CallbackId, 
-                    $"Не удалось извлечь сообщения из Callback:{c.CallbackData}", 
+                    c.CallbackId,
+                    _messagesProvider.CreateCouldNotExtractMessagesFromCallbackMessage(c), 
                     token: token);
 
                 return;

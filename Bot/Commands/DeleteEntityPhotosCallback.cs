@@ -12,19 +12,22 @@ namespace BlueBellDolls.Bot.Commands
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly ICallbackDataProvider _callbackDataProvider;
+        private readonly IMessagesProvider _messagesProvider;
 
         public DeleteEntityPhotosCallback(
             IBotService botService,
             IEntityHelperService entityHelperService,
             IArgumentParseHelperService argumentParseHelperService,
             IMessageParametersProvider messageParametersProvider,
-            ICallbackDataProvider callbackDataProvider)
+            ICallbackDataProvider callbackDataProvider,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _entityHelperService = entityHelperService;
             _argumentParseHelperService = argumentParseHelperService;
             _messageParametersProvider = messageParametersProvider;
             _callbackDataProvider = callbackDataProvider;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("deletePhotosForParentCat", HandleCallbackAsync<ParentCat>);
             Handlers.Add("deletePhotosForLitter", HandleCallbackAsync<Litter>);
@@ -43,7 +46,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (entity == null)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Запрашиваемая сущность не найдена!", token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
             }
 

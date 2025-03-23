@@ -10,15 +10,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IDatabaseService _databaseService;
+        private readonly IMessagesProvider _messagesProvider;
 
         public OpenEntityInLitterCallback(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IDatabaseService databaseService) 
+            IDatabaseService databaseService,
+            IMessagesProvider messagesProvider) 
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
             _databaseService = databaseService;
+            _messagesProvider = messagesProvider;
 
             Handlers.Add("openParentCat", HandleCommandAsync<ParentCat>);
             Handlers.Add("openKitten", HandleCommandAsync<Kitten>);
@@ -37,7 +40,7 @@ namespace BlueBellDolls.Bot.Commands
 
             if (entity == null)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, "Не удалось найти сущность!", token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
             }
 
