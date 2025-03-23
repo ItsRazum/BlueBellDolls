@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /Bot/BlueBellDollsManagement.db
 /Bot/BlueBellDollsManagement.db-shm
 /Bot/BlueBellDollsManagement.db-wal
+/Service/BlueBellDolls.db-shm
+/Service/BlueBellDolls.db-wal
