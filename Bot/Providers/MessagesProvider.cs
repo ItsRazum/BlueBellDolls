@@ -96,6 +96,11 @@ namespace BlueBellDolls.Bot.Providers
             return $"Вы уверены, что хотите удалить {entity.DisplayName} ({entity.GetType().Name} {entity.Id})?";
         }
 
+        public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotos)
+        {
+            return $"Вы уверены, что хотите удалить фотографии ({selectedPhotos.Length} шт.) у сущности {entity.DisplayName}?";
+        }
+
         public string CreateEntityListMessage<TEntity>(
             ListUnitActionMode actionMode, 
             int totalEntitiesCount, 

@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types.Generic;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
 
 namespace BlueBellDolls.Bot.Commands
 {
@@ -10,24 +11,31 @@ namespace BlueBellDolls.Bot.Commands
         private readonly IEntityHelperService _entityHelperService;
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly ICallbackDataProvider _callbackDataProvider;
 
         public DeleteEntityPhotosCallback(
             IBotService botService,
             IEntityHelperService entityHelperService,
             IArgumentParseHelperService argumentParseHelperService,
-            IMessageParametersProvider messageParametersProvider)
+            IMessageParametersProvider messageParametersProvider,
+            ICallbackDataProvider callbackDataProvider)
             : base(botService)
         {
             _entityHelperService = entityHelperService;
             _argumentParseHelperService = argumentParseHelperService;
             _messageParametersProvider = messageParametersProvider;
+            _callbackDataProvider = callbackDataProvider;
+
+            Handlers.Add("deletePhotosForParentCat", HandleCallbackAsync<ParentCat>);
+            Handlers.Add("deletePhotosForLitter", HandleCallbackAsync<Litter>);
+            Handlers.Add("deletePhotosForKitten", HandleCallbackAsync<Kitten>);
         }
 
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token)
             where TEntity : IDisplayableEntity
         {
 
-            var args = c.CallbackData.Split('-'); //[0]Command, [1]int[] SelectedPhotos, [2]Entity Id
+            var args = c.CallbackData.Split('-'); //[0]Command, [2]Entity Id
 
             var entityId = int.Parse(args.Last());
 
@@ -41,9 +49,24 @@ namespace BlueBellDolls.Bot.Commands
 
             var key = c.MessageText.Split('\n').Last();
 
-            var (_, photoMessageIds) = _argumentParseHelperService.ParsePhotosArgs(key);
+            var (photoIndexes, photoMessageIds) = _argumentParseHelperService.ParsePhotosArgs(key);
 
-            await BotService.DeleteMessagesAsync(c.Chat, [.. photoMessageIds, c.MessageId], token);
+            //await BotService.DeleteMessagesAsync(c.Chat, [.. photoMessageIds, c.MessageId], token);
+
+            var photoIds = new List<string>();
+            foreach (var index in photoIndexes)
+                photoIds.Add(entity.PhotoIds[index]);
+
+            var managePhotosCallback = _callbackDataProvider.CreateAddPhotosCallback(entity);
+
+            await BotService.SendMessageAsync(c.Chat, 
+                _messageParametersProvider.GetDeleteEntityPhotosConfirmationParameters(
+                    entity,
+                    c.CallbackData, 
+                    ([..photoIndexes], [..photoIds]),
+                    managePhotosCallback, 
+                    managePhotosCallback), 
+                token);
 
         }
     }

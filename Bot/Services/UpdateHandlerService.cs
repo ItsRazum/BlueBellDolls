@@ -35,7 +35,8 @@ namespace BlueBellDolls.Bot.Services
         public UpdateHandlerService(
             ILogger<UpdateHandlerService> logger,
             IBotService botService,
-            IServiceProvider serviceProvider)
+            IEnumerable<CommandHandler<MessageAdapter>> messageHandlers,
+            IEnumerable<CommandHandler<CallbackQueryAdapter>> callbackHandlers)
         {
             _logger = logger;
             _botService = botService;
@@ -44,9 +45,6 @@ namespace BlueBellDolls.Bot.Services
 
             TextCommands = [];
             CallbackCommands = [];
-
-            var messageHandlers = serviceProvider.GetServices<CommandHandler<MessageAdapter>>();
-            var callbackHandlers = serviceProvider.GetServices<CommandHandler<CallbackQueryAdapter>>();
 
             foreach (var command in messageHandlers)
                 foreach (var commandHandler in command.Handlers)
