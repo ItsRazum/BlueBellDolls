@@ -1,6 +1,7 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
@@ -11,9 +12,8 @@ namespace BlueBellDolls.Bot.Commands
 
         public StartCommand(
             IBotService botService,
-            IOptions<BotSettings> botSettings,
             IMessagesProvider messagesProvider)
-            : base(botService, botSettings)
+            : base(botService)
         {
             _messagesProvider = messagesProvider;
 
