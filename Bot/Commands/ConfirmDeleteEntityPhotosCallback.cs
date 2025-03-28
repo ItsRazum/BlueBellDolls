@@ -28,8 +28,8 @@ namespace BlueBellDolls.Bot.Commands
             _messagesProvider = messagesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<ParentCat>);
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Litter>);
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Litter>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Kitten>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Kitten>);
         }
 
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : IDisplayableEntity

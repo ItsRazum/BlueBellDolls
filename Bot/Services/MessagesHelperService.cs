@@ -1,8 +1,10 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Services
@@ -14,19 +16,22 @@ namespace BlueBellDolls.Bot.Services
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly ICallbackDataProvider _callbackDataProvider;
         private readonly IArgumentParseHelperService _argumentParseHelperService;
+        private readonly CallbackDataSettings _callbackDataSettings;
 
         public MessagesHelperService(
             IBotService botService,
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
             ICallbackDataProvider callbackDataProvider,
-            IArgumentParseHelperService argumentParseHelperService)
+            IArgumentParseHelperService argumentParseHelperService,
+            IOptions<BotSettings> options)
         {
             _botService = botService;
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
             _callbackDataProvider = callbackDataProvider;
             _argumentParseHelperService = argumentParseHelperService;
+            _callbackDataSettings = options.Value.CallbackDataSettings;
         }
 
         #region Photo Management
@@ -77,7 +82,7 @@ namespace BlueBellDolls.Bot.Services
         private async Task SendDeleteConfirmation(CallbackQueryAdapter c, IDisplayableEntity entity, PhotosManagementMode photosManagementMode, Dictionary<string, string> photos, CancellationToken token)
         {
 
-            var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
+            var args = c.CallbackData.Split(_callbackDataSettings.ArgsSeparator); //[0]Command, [1]Entity Id
 
             var key = c.MessageText.Split('\n').Last();
 

@@ -27,10 +27,10 @@ namespace BlueBellDolls.Bot.Providers
             => $"{_settings.AddEntity}{typeof(T).Name}";
 
         public string GetConfirmDeleteEntityCallback<T>() where T : IDisplayableEntity
-            => $"{_settings.ConfirmSuffix}{_settings.DeleteEntity}{typeof(T).Name}";
+            => $"{_settings.ConfirmationSuffix}{_settings.DeleteEntity}{typeof(T).Name}";
 
         public string GetConfirmDeletePhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity
-            => $"{_settings.ConfirmSuffix}{_settings.DeletePhoto}{mode}For{typeof(T).Name}";
+            => $"{_settings.ConfirmationSuffix}{_settings.DeletePhoto}{mode}For{typeof(T).Name}";
 
         public string GetDeleteEntityCallback<T>() where T : IDisplayableEntity
             => $"{_settings.DeleteEntity}{typeof(T).Name}";
@@ -69,7 +69,7 @@ namespace BlueBellDolls.Bot.Providers
         #region Create methods
 
         public string CreateConfirmCallback(string baseCallback)
-            => $"{_settings.ConfirmSuffix}{baseCallback}";
+            => $"{_settings.ConfirmationSuffix}{baseCallback}";
 
         public string CreateEditEntityCallback(IDisplayableEntity entity)
             => $"{_settings.EditEntity}{entity.GetType().Name}{Separator}{entity.Id}";

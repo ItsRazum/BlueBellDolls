@@ -16,6 +16,6 @@
         public string SetDefaultPhoto { get; set; }
         public string DeletePhoto { get; set; }
         public string DeleteMessages { get; set; }
-        public string ConfirmSuffix { get; set; }
+        public string ConfirmationSuffix { get; set; }
     }
 }
