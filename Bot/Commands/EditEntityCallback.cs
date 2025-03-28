@@ -1,13 +1,15 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class EditEntityCallback : CommandHandler<CallbackQueryAdapter>
+    public class EditEntityCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
@@ -15,18 +17,20 @@ namespace BlueBellDolls.Bot.Commands
 
         public EditEntityCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider)
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("editParentCat", HandleCommandAsync<ParentCat>);
-            Handlers.Add("editLitter", HandleCommandAsync<Litter>);
-            Handlers.Add("editKitten", HandleCommandAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
+            AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<Litter>(), HandleCommandAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<Kitten>(), HandleCommandAsync<Kitten>);
         }
 
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
@@ -43,7 +47,7 @@ namespace BlueBellDolls.Bot.Commands
             };
 
 
-            var entityId = int.Parse(c.CallbackData.Split('-').Last());
+            var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
             var entity = await _entityHelperService.GetDisplayableEntityByIdAsync(entityId, token, includes);
 
             if (entity == null)

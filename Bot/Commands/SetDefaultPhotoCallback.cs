@@ -1,12 +1,14 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class SetDefaultPhotoCallback : CommandHandler<CallbackQueryAdapter>
+    public class SetDefaultPhotoCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessagesHelperService _messagesHelperService;
@@ -15,26 +17,28 @@ namespace BlueBellDolls.Bot.Commands
 
         public SetDefaultPhotoCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IEntityHelperService entityHelperService,
             IMessagesHelperService messagesHelperService,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider) 
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _entityHelperService = entityHelperService;
             _messagesHelperService = messagesHelperService;
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("setDefaultPhotoForParentCat", HandleCallbackAsync<ParentCat>);
-            Handlers.Add("setDefaultPhotoForLitter", HandleCallbackAsync<Litter>);
-            Handlers.Add("setDefaultPhotoForKitten", HandleCallbackAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetSetDefaultPhotoCallback<ParentCat>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<ParentCat>);
+            AddCommandHandler(CallbackDataProvider.GetSetDefaultPhotoCallback<Litter>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetSetDefaultPhotoCallback<Kitten>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Kitten>);
         }
 
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) 
             where TEntity : IDisplayableEntity
         {
-            var args = c.CallbackData.Split('-'); //[0]Command, [1]PhotoIndex, [2]Entity Id
+            var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]PhotoIndex, [2]Entity Id
 
             var entityId = int.Parse(args.Last());
 
@@ -61,7 +65,7 @@ namespace BlueBellDolls.Bot.Commands
 
             await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, entity, token);
 
-            await BotService.AnswerCallbackQueryAsync(c.CallbackData, _messagesProvider.CreateDefaultPhotoSetForEntityMessage(entity, photoIndex), token: token);
+            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateDefaultPhotoSetForEntityMessage(entity, photoIndex), token: token);
         }
     }
 }

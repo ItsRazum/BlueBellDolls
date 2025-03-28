@@ -20,6 +20,12 @@ namespace BlueBellDolls.Common.Data.Configurations
                 .HasConversion(ValueConverters.DictionaryStringConverter)
                 .Metadata
                 .SetValueComparer(ValueComparers.DictionaryStringComparer);
+
+            builder
+                .Property(c => c.GeneticTests)
+                .HasConversion(ValueConverters.DictionaryStringConverter)
+                .Metadata
+                .SetValueComparer(ValueComparers.DictionaryStringComparer);
         }
     }
 }

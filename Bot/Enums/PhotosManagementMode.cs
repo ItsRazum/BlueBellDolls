@@ -1,6 +1,6 @@
 ﻿namespace BlueBellDolls.Bot.Enums
 {
-    public enum PhotosUploadMode
+    public enum PhotosManagementMode
     {
         Photos,
         Titles,

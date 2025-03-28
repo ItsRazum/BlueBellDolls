@@ -15,6 +15,7 @@ namespace BlueBellDolls.Bot.Providers
         #region Fields
 
         private readonly EntityFormSettings _entityFormSettings;
+        private readonly EntitySettings _entitySettings;
         private readonly Dictionary<Type, Func<IEntity, string>> _entityFormMessages;
 
         #endregion
@@ -22,9 +23,11 @@ namespace BlueBellDolls.Bot.Providers
         #region Constructor
 
         public MessagesProvider(
-            IOptions<EntityFormSettings> entityFormSettings)
+            IOptions<EntityFormSettings> entityFormSettings, 
+            IOptions<EntitySettings> entityOptions)
         {
             _entityFormSettings = entityFormSettings.Value;
+            _entitySettings = entityOptions.Value;
             _entityFormMessages = new()
             {
                 { typeof(ParentCat), (entity) => CreateParentCatFormMessage((ParentCat)entity) },
@@ -93,9 +96,9 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateEntityPhotosGuideMessage(IDisplayableEntity entity)
         {
             return 
-                $"{entity.GetType().Name} {entity.Id}\n" +
+                $"{entity.DisplayName}\n" +
                 $"\n" +
-                $"Количество фотографий: {entity.Photos.Count}/5\n" +
+                $"Количество фотографий: {entity.Photos.Count}/{_entitySettings.MaxPhotosCount}\n" +
                 $"\n" +
                 $"Нумерация фотографий соответствует порядку, отправленному выше. Можно выбрать одно фото и установить его в качестве заглавного для сущности, оно может быть только одно. Также можно выбрать одно или несколько фотографий и удалить их";
         }
@@ -105,9 +108,19 @@ namespace BlueBellDolls.Bot.Providers
             return "Загрузка...";
         }
 
-        public string CreatePhotosLimitationErrorMessage()
+        public string CreatePhotosLimitReachedMessage()
         {
-            return "Количество фотографий не может быть больше 5!";
+            return $"Количество фотографий не может быть больше {_entitySettings.MaxPhotosCount}!";
+        }
+
+        public string CreateTitlesLimitReachedMessage()
+        {
+            return $"Количество титулов не может быть больше {_entitySettings.MaxParentCatTitlesCount}!";
+        }
+
+        public string CreateGeneticTestsLimitReachedMessage()
+        {
+            return $"Количество генетических тестов не может быть больше {_entitySettings.MaxParentCatGeneticTestsCount}!";
         }
 
         public string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds)
@@ -117,7 +130,7 @@ namespace BlueBellDolls.Bot.Providers
                 : "-") + " : " + string.Join(", ", photoMessageIds);
 
             return
-                $"{entity.GetType().Name} {entity.Id}\n" +
+                $"{entity.DisplayName}\n" +
                 $"Выберите фотографии\n" +
                 $"\n" +
                 $"{key}";
@@ -134,9 +147,21 @@ namespace BlueBellDolls.Bot.Providers
             return "Сущность успешно удалена!";
         }
 
-        public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotos)
+        public string CreateSelectedPhotosOverviewMessage(IDisplayableEntity entity, int photosCount)
         {
-            return $"Вы уверены, что хотите удалить фотографии ({selectedPhotos.Length} шт.) у сущности {entity.DisplayName}?";
+            var entityData = $"{entity.GetType().Name} {entity.Id}";
+            if (photosCount == 1)
+                return $"Данная фотография будет удалена у сущности {entityData}, подтвердите действие";
+
+            else
+                return $"Следующие фотографии ({photosCount} шт.) будут удалены у сущности {entityData}. Подтвердите действие";
+        }
+
+        public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] sendedPhotoMessageIds)
+        {
+            return $"Вы уверены, что хотите удалить фотографии ({selectedPhotoIndexes.Length} шт.) у сущности {entity.DisplayName}?" +
+                $"\n" +
+                $"\n{string.Join(", ", selectedPhotoIndexes)} : {string.Join(", ", sendedPhotoMessageIds)}";
         }
 
         public string CreateEntityListMessage<TEntity>(
@@ -171,6 +196,16 @@ namespace BlueBellDolls.Bot.Providers
             return $"Фотография №{photoIndex + 1} успешно установлена как основная у сущности {entity.GetType().Name} {entity.Id}!";
         }
 
+        public string CreatePhotosDeletionSuccessMessage()
+        {
+            return "Фотографии успешно удалены!";
+        }
+
+        public string CreatePhotosDeletionFailureMessage()
+        {
+            return CreateEntityNotFoundMessage();
+        }
+
         #endregion
 
         #region Methods
@@ -184,10 +219,10 @@ namespace BlueBellDolls.Bot.Providers
                 $"{_entityFormSettings.ParentCatProperties[nameof(parentCat.BirthDay)]}: {parentCat.BirthDay.ToString(new CultureInfo("ru-RU"))}\n" +
                 $"{_entityFormSettings.ParentCatProperties[nameof(parentCat.IsMale)]}: {(parentCat.IsMale ? "мужской" : "женский")}\n" +
                 $"{_entityFormSettings.ParentCatProperties[nameof(parentCat.Description)]}: {parentCat.Description}\n" +
-                $"Фотографии: {parentCat.Photos.Count}/5\n" +
+                $"Фотографии: {parentCat.Photos.Count}/{_entitySettings.MaxPhotosCount} \n" +
                 $"Титулы: {parentCat.Titles.Count}/6\n" +
-                $"Генетический тест 1: {(!string.IsNullOrWhiteSpace(parentCat.GeneticTestOne) ? "получен" : "нужно отправить")}\n" +
-                $"Генетический тест 2: {(!string.IsNullOrWhiteSpace(parentCat.GeneticTestTwo) ? "получен" : "нужно отправить")}";
+                $"Генетический тест 1: {(parentCat.GeneticTests.Count >= 1 ? "получен" : "нужно отправить")}\n" +
+                $"Генетический тест 2: {(parentCat.GeneticTests.Count >= 2 ? "получен" : "нужно отправить")}";
         }
 
         private string CreateLitterFormMessage(Litter litter)
@@ -216,7 +251,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"{_entityFormSettings.KittenProperties[nameof(kitten.Description)]}: {kitten.Description}\n" +
                 $"{_entityFormSettings.KittenProperties[nameof(kitten.Class)]}: {kitten.Class}\n" +
                 $"{_entityFormSettings.KittenProperties[nameof(kitten.Status)]}: {kitten.Status}\n" +
-                $"Фотографии: {kitten.Photos.Count}/5";
+                $"Фотографии: {kitten.Photos.Count}/{_entitySettings.MaxPhotosCount}";
         }
 
         #endregion

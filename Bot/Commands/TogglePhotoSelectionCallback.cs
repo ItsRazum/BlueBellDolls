@@ -1,13 +1,15 @@
 ﻿using BlueBellDolls.Bot.Adapters;
+using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
-using Microsoft.AspNetCore.Components.Web;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class TogglePhotoSelectionCallback : CommandHandler<CallbackQueryAdapter>
+    public class TogglePhotoSelectionCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
@@ -16,25 +18,27 @@ namespace BlueBellDolls.Bot.Commands
 
         public TogglePhotoSelectionCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider) 
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("togglePhotoForParentCat", HandleCallbackAsync<ParentCat>);
-            Handlers.Add("togglePhotoForKitten", HandleCallbackAsync<Kitten>);
-            Handlers.Add("togglePhotoForLitter", HandleCallbackAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetTogglePhotoSelectionCallback<ParentCat>(), HandleCallbackAsync<ParentCat>);
+            AddCommandHandler(CallbackDataProvider.GetTogglePhotoSelectionCallback<Kitten>(), HandleCallbackAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetTogglePhotoSelectionCallback<Litter>(), HandleCallbackAsync<Litter>);
         }
 
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : IDisplayableEntity
         {
-            var args = c.CallbackData.Split('-'); //[0]Command, [1] PhotoIndex, [2]bool Select [3]EntityId
+            var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1] PhotoIndex, [2]bool Select, [3] PhotosManagementMode, [4]EntityId
             var entityId = int.Parse(args.Last());
 
             var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
@@ -54,11 +58,14 @@ namespace BlueBellDolls.Bot.Commands
                 ? photoIndexes.Append(selectedPhotoIndex)
                 : photoIndexes.Where(x => x != selectedPhotoIndex);
 
+            var photoManagementMode = Enum.Parse<PhotosManagementMode>(args[3]);
+
             await BotService.EditMessageAsync(
                 c.Chat, 
                 c.MessageId, 
                 _messageParametersProvider.GetEntityPhotosParameters(
                     entity, 
+                    photoManagementMode,
                     [..photoIndexes.Order()], 
                     [..photoMessageIds]),
                 token);

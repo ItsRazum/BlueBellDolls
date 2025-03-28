@@ -7,7 +7,11 @@ namespace BlueBellDolls.Bot.Interfaces
     public interface IMessageParametersProvider
     {
         MessageParameters GetEntityFormParameters(IDisplayableEntity entity);
-        MessageParameters GetEntityPhotosParameters(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds);
+        MessageParameters GetEntityPhotosParameters(
+            IDisplayableEntity entity, 
+            PhotosManagementMode photosManagementMode, 
+            int[] selectedPhotoIndexes, 
+            int[] photoMessageIds);
         MessageParameters GetDeleteEntityConfirmationParameters(
             IDisplayableEntity entity, 
             string callback, 
@@ -16,9 +20,10 @@ namespace BlueBellDolls.Bot.Interfaces
 
         MessageParameters GetDeleteEntityPhotosConfirmationParameters(
             IDisplayableEntity entity, 
-            string callback,
-            (int[] selectedPhotoIndexes, string[] selectedPhotoFileIds) photoParameters,
-            string onDeletionCanceledCallback, 
+            string callback, 
+            int[] selectedPhotoIndexes, 
+            int[] sendedPhotoMessageIds,
+            string onDeletionCanceledCallback,
             params string[] callbacksAfterDeletion);
 
         MessageParameters GetEntityListParameters<TEntity>(

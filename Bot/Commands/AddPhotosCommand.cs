@@ -1,50 +1,49 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class AddPhotosCommand : CommandHandler<MessageAdapter>
+    public class AddPhotosCommand : CommandHandler
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly BotSettings _botSettings;
-        private readonly TelegramFilesHttpClientSettings _telegramFilesHttpClientSettings;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IEntityHelperService _entityHelperService;
+        private readonly IPhotosDownloaderService _photosDownloaderService;
+        private readonly EntitySettings _entitySettings;
 
         public AddPhotosCommand(
             IBotService botService,
             IDatabaseService databaseService,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider,
-            IOptions<TelegramFilesHttpClientSettings> telegramFilesHttpClientSettings,
-            IOptions<BotSettings> botSettings,
-            IHttpClientFactory httpClientFactory)
+            IEntityHelperService entityHelperService,
+            IPhotosDownloaderService photosDownloaderService,
+            IOptions<EntitySettings> entitySettings)
             : base(botService)
         {
             _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
-            _telegramFilesHttpClientSettings = telegramFilesHttpClientSettings.Value;
-            _botSettings = botSettings.Value;
-            _httpClientFactory = httpClientFactory;
+            _entityHelperService = entityHelperService;
+            _photosDownloaderService = photosDownloaderService;
+            _entitySettings = entitySettings.Value;
 
-            Handlers.Add("Фото", HandleCommandAsync);
+            AddCommandHandler("Фото", HandleCommandAsync);
         }
 
         private async Task HandleCommandAsync(MessageAdapter m, CancellationToken token)
         {
             if (m.Photos == null) return;
 
-            if (m.Photos.Length > 5)
+            if (m.Photos.Length > _entitySettings.MaxPhotosCount)
             {
-                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitationErrorMessage(), token: token);
+                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitReachedMessage(), token: token);
                 return;
             }
 
@@ -55,7 +54,7 @@ namespace BlueBellDolls.Bot.Commands
             var entityId = int.Parse(messageArgs[1]);
             var entityType = messageArgs.First();
 
-            Func<PhotoAdapter[], int, CancellationToken, Task<IDisplayableEntity?>> addPhotosTask = entityType switch
+            Func<PhotoAdapter[], int, CancellationToken, Task<(IDisplayableEntity? entity, bool photosLimitIsReached)>> addPhotosTask = entityType switch
             {
                 "ParentCat" => AddPhotosToEntity<ParentCat>,
                 "Kitten" => AddPhotosToEntity<Kitten>,
@@ -65,61 +64,56 @@ namespace BlueBellDolls.Bot.Commands
 
             var loadingMessage = await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLoadingMessage(), token: token);
 
-            var entity = await addPhotosTask(m.Photos, entityId, token);
+            var (entity, photosLimitIsReached) = await addPhotosTask(m.Photos, entityId, token);
 
             await BotService.DeleteMessageAsync(m.Chat, loadingMessage.Single().MessageId, token);
             if (entity != null)
             {
-                await BotService.DeleteMessagesAsync(m.Chat, [ ..m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
-                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
+                if (photosLimitIsReached)
+                    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitReachedMessage(), token: token);
+                else
+                {
+                    await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
+                    await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
+                }
             }
         }
 
-        private async Task<IDisplayableEntity?> AddPhotosToEntity<TEntity>(PhotoAdapter[] photos, int entityId, CancellationToken token) where TEntity : IDisplayableEntity
+        private async Task<(IDisplayableEntity? entity, bool photosLimitIsReached)> AddPhotosToEntity<TEntity>(
+            PhotoAdapter[] photos, int entityId, CancellationToken token) where TEntity : IDisplayableEntity
         {
             try
             {
-                var base64Photos = new Dictionary<string, string>();
+                var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId);
+                if (entity == null) 
+                    return (null, false);
 
-                using (var httpClient = _httpClientFactory.CreateClient(_telegramFilesHttpClientSettings.ClientName))
+                if (entity.Photos.Count + photos.Length > _entitySettings.MaxPhotosCount)
+                    return (entity, true);
+
+                var base64Photos = await _photosDownloaderService.DownloadAndConvertPhotosToBase64(photos, token);
+                if (base64Photos.Count == 0) 
+                    return (entity, false);
+
+                return await _databaseService.ExecuteDbOperationAsync<(IDisplayableEntity?, bool)>(async (unit, ct) =>
                 {
-                    foreach (var photoAdapter in photos)
-                    {
-                        var file = await BotService.GetFileAsync(photoAdapter.FileId, token);
+                    var entityFromDb = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
+                    if (entityFromDb == null) return (null, false);
 
-                        var response = await httpClient.GetAsync(
-                            $"https://api.telegram.org/file/bot{_botSettings.Token}/{file.FilePath}",
-                            HttpCompletionOption.ResponseHeadersRead,
-                            token);
+                    if (entityFromDb.Photos.Count + base64Photos.Count > _entitySettings.MaxPhotosCount)
+                        return (entityFromDb, true);
 
-                        response.EnsureSuccessStatusCode();
+                    foreach (var photo in base64Photos)
+                        entityFromDb.Photos.Add(photo.Key, photo.Value);
 
-                        await using var stream = await response.Content.ReadAsStreamAsync(token);
-                        using var memoryStream = new MemoryStream();
-                        await stream.CopyToAsync(memoryStream, token);
+                    await unit.SaveChangesAsync(ct);
+                    return (entityFromDb, false);
 
-                        base64Photos.Add(photoAdapter.FileId, Convert.ToBase64String(memoryStream.ToArray()));
-                    }
-                }
-
-                return await _databaseService.ExecuteDbOperationAsync<IDisplayableEntity?>(async (unit, ct) =>
-                {
-                    var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
-                    if (entity != null)
-                    {
-                        foreach (var photo in base64Photos)
-                            entity.Photos.Add(photo.Key, photo.Value);
-
-                        await unit.SaveChangesAsync(ct);
-                        return entity;
-                    }
-
-                    return null;
                 }, token);
             }
             catch
             {
-                return null;
+                return (null, false);
             }
         }
     }

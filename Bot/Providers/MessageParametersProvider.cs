@@ -27,22 +27,35 @@ namespace BlueBellDolls.Bot.Providers
                 );
         }
 
-        public MessageParameters GetEntityPhotosParameters(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds)
+        public MessageParameters GetEntityPhotosParameters(
+            IDisplayableEntity entity, 
+            PhotosManagementMode photosManagementMode, 
+            int[] selectedPhotoIndexes,
+            int[] photoMessageIds)
         {
             return new MessageParameters(
                 _messagesProvider.CreateEntityPhotosMessage(entity, selectedPhotoIndexes, photoMessageIds),
-                _keyboardsProvider.CreateEntityPhotosKeyboard(entity, photoMessageIds, selectedPhotoIndexes));
+                _keyboardsProvider.CreateEntityPhotosKeyboard(entity, photosManagementMode, photoMessageIds, selectedPhotoIndexes));
         }
 
-        public MessageParameters GetDeleteEntityPhotosConfirmationParameters(IDisplayableEntity entity, string callback, (int[] selectedPhotoIndexes, string[] selectedPhotoFileIds) photoParameters, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion)
+        public MessageParameters GetDeleteEntityPhotosConfirmationParameters(
+            IDisplayableEntity entity,
+            string callback,
+            int[] selectedPhotoIndexes,
+            int[] sendedPhotoMessageIds,
+            string onDeletionCanceledCallback,
+            params string[] callbacksAfterDeletion)
         {
-            var inputFiles = photoParameters.selectedPhotoFileIds.Select(p => new InputMediaPhoto(new InputFileId(p)));
             return new MessageParameters(
-                _messagesProvider.CreateDeletePhotosConfirmationMessage(entity, photoParameters.selectedPhotoIndexes),
+                _messagesProvider.CreateDeletePhotosConfirmationMessage(entity, selectedPhotoIndexes, sendedPhotoMessageIds),
                 _keyboardsProvider.CreateYesNoKeyboard(callback, entity, onDeletionCanceledCallback, callbacksAfterDeletion));
         }
 
-        public MessageParameters GetDeleteEntityConfirmationParameters(IDisplayableEntity entity, string callback, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion)
+        public MessageParameters GetDeleteEntityConfirmationParameters(
+            IDisplayableEntity entity,
+            string callback,
+            string onDeletionCanceledCallback,
+            params string[] callbacksAfterDeletion)
         {
             return new MessageParameters(
                 _messagesProvider.CreateDeleteConfirmationMessage(entity),

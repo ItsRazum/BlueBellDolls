@@ -1,7 +1,7 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Types;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
@@ -35,8 +35,8 @@ namespace BlueBellDolls.Bot.Services
         public UpdateHandlerService(
             ILogger<UpdateHandlerService> logger,
             IBotService botService,
-            IEnumerable<CommandHandler<MessageAdapter>> messageHandlers,
-            IEnumerable<CommandHandler<CallbackQueryAdapter>> callbackHandlers)
+            IEnumerable<CommandHandler> messageHandlers,
+            IEnumerable<CallbackHandler> callbackHandlers)
         {
             _logger = logger;
             _botService = botService;

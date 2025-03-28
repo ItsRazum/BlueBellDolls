@@ -17,8 +17,7 @@ namespace BlueBellDolls.Common.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    GeneticTestOne = table.Column<string>(type: "TEXT", nullable: false),
-                    GeneticTestTwo = table.Column<string>(type: "TEXT", nullable: false),
+                    GeneticTests = table.Column<string>(type: "TEXT", nullable: false),
                     Titles = table.Column<string>(type: "TEXT", nullable: false),
                     OldDescription = table.Column<string>(type: "TEXT", nullable: true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),

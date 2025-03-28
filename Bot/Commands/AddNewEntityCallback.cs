@@ -1,27 +1,31 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class AddNewEntityCallback : CommandHandler<CallbackQueryAdapter>
+    public class AddNewEntityCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
 
         public AddNewEntityCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider)
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
 
-            Handlers.Add("addParentCat", HandleCommandAsync<ParentCat>);
-            Handlers.Add("addLitter", HandleCommandAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetAddEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
+            AddCommandHandler(CallbackDataProvider.GetAddEntityCallback<Litter>(), HandleCommandAsync<Litter>);
         }
 
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity, new()

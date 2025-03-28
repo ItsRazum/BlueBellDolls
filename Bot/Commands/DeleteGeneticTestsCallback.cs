@@ -2,19 +2,18 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class DeleteEntityPhotosCallback : CallbackHandler
+    public class DeleteGeneticTestsCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
-        public DeleteEntityPhotosCallback(
+        public DeleteGeneticTestsCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
@@ -27,18 +26,15 @@ namespace BlueBellDolls.Bot.Commands
             _messagesProvider = messagesProvider;
             _messagesHelperService = messagesHelperService;
 
-            AddCommandHandler(CallbackDataProvider.GetDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<ParentCat>);
-            AddCommandHandler(CallbackDataProvider.GetDeletePhotoCallback<Litter>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Litter>);
-            AddCommandHandler(CallbackDataProvider.GetDeletePhotoCallback<Kitten>(Enums.PhotosManagementMode.Photos), HandleCallbackAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.GeneticTests), HandleCallbackAsync);
         }
 
-        private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token)
-            where TEntity : IDisplayableEntity
+        private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
         {
 
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
 
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(int.Parse(args.Last()), token);
+            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<ParentCat>(int.Parse(args.Last()), token);
 
             if (entity == null)
             {
@@ -46,7 +42,7 @@ namespace BlueBellDolls.Bot.Commands
                 return;
             }
 
-            await _messagesHelperService.SendDeletePhotosConfirmationAsync(c, entity, token);
+            await _messagesHelperService.SendDeleteGeneticTestsConfirmationAsync(c, entity, token);
         }
     }
 }

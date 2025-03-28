@@ -1,33 +1,37 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class ConfirmDeleteEntityCallback : CommandHandler<CallbackQueryAdapter>
+    public class ConfirmDeleteEntityCallback : CallbackHandler
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessagesProvider _messagesProvider;
 
         public ConfirmDeleteEntityCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IDatabaseService databaseService,
             IMessagesProvider messagesProvider)
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _databaseService = databaseService;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("confirm_deleteParentCat", HandleDeleteParentCatCallbackAsync);
-            Handlers.Add("confirm_deleteLitter", HandleCallbackAsync<Litter>);
-            Handlers.Add("confirm_deleteKitten", HandleCallbackAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<ParentCat>(), HandleDeleteParentCatCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<Litter>(), HandleCallbackAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<Kitten>(), HandleCallbackAsync<Kitten>);
         }
 
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            var entityId = int.Parse(c.CallbackData.Split('-').Last());
+            var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
             await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
             {
@@ -42,7 +46,7 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleDeleteParentCatCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var entityId = int.Parse(c.CallbackData.Split('-').Last());
+            var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
             await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
             {

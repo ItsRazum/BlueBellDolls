@@ -1,5 +1,8 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Adapters;
+using BlueBellDolls.Bot.Enums;
+using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
 using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Services
@@ -9,24 +12,40 @@ namespace BlueBellDolls.Bot.Services
         private readonly IBotService _botService;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly ICallbackDataProvider _callbackDataProvider;
+        private readonly IArgumentParseHelperService _argumentParseHelperService;
 
         public MessagesHelperService(
             IBotService botService,
             IMessagesProvider messagesProvider,
-            IMessageParametersProvider messageParametersProvider)
+            IMessageParametersProvider messageParametersProvider,
+            ICallbackDataProvider callbackDataProvider,
+            IArgumentParseHelperService argumentParseHelperService)
         {
             _botService = botService;
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
+            _callbackDataProvider = callbackDataProvider;
+            _argumentParseHelperService = argumentParseHelperService;
         }
 
-        public async Task SendPhotoManagementMessageAsync(Chat chat, IDisplayableEntity entity, CancellationToken token = default)
+        #region Photo Management
+
+        public Task SendPhotoManagementMessageAsync(Chat chat, IDisplayableEntity entity, CancellationToken token = default)
+            => SendManagementMessageAsync(chat, entity, PhotosManagementMode.Photos, entity.Photos, token);
+
+        public Task SendTitlesManagementMessageAsync(Chat chat, ParentCat entity, CancellationToken token = default)
+            => SendManagementMessageAsync(chat, entity, PhotosManagementMode.Titles, entity.Titles, token);
+
+        public Task SendGeneticTestsManagementMessageAsync(Chat chat, ParentCat entity, CancellationToken token = default)
+            => SendManagementMessageAsync(chat, entity, PhotosManagementMode.GeneticTests, entity.GeneticTests, token);
+
+        private async Task SendManagementMessageAsync(Chat chat, IDisplayableEntity entity, PhotosManagementMode mode, IEnumerable<KeyValuePair<string, string>> photos, CancellationToken token = default)
         {
             var message = _messagesProvider.CreateEntityPhotosGuideMessage(entity);
-            var inputFiles = entity.Photos
-                    .Select(p => new InputMediaPhoto(new InputFileId(p.Key))).ToArray();
+            var inputFiles = photos.Select(p => new InputMediaPhoto(new InputFileId(p.Key))).ToArray();
 
-            var sendedPhotos = await _botService.SendMessageAsync(
+            var sentPhotos = await _botService.SendMessageAsync(
                 chat,
                 message,
                 inputFiles: inputFiles,
@@ -36,9 +55,65 @@ namespace BlueBellDolls.Bot.Services
                 chat,
                 _messageParametersProvider.GetEntityPhotosParameters(
                     entity,
+                    mode,
                     [],
-                    [.. sendedPhotos.Select(m => m.MessageId)]),
+                    [.. sentPhotos.Select(m => m.MessageId)]),
                 token);
         }
+
+        #endregion
+
+        #region Delete photos confirmation
+
+        public async Task SendDeletePhotosConfirmationAsync(CallbackQueryAdapter c, IDisplayableEntity entity, CancellationToken token = default)
+            => await SendDeleteConfirmation(c, entity, PhotosManagementMode.Photos, entity.Photos, token);
+
+        public async Task SendDeleteTitlesConfirmationAsync(CallbackQueryAdapter c, ParentCat entity, CancellationToken token = default)
+            => await SendDeleteConfirmation(c, entity, PhotosManagementMode.Titles, entity.Titles, token);
+
+        public async Task SendDeleteGeneticTestsConfirmationAsync(CallbackQueryAdapter c, ParentCat entity, CancellationToken token = default)
+            => await SendDeleteConfirmation(c, entity, PhotosManagementMode.GeneticTests, entity.GeneticTests, token);
+
+        private async Task SendDeleteConfirmation(CallbackQueryAdapter c, IDisplayableEntity entity, PhotosManagementMode photosManagementMode, Dictionary<string, string> photos, CancellationToken token)
+        {
+
+            var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
+
+            var key = c.MessageText.Split('\n').Last();
+
+            var (photoIndexes, photoMessageIds) = _argumentParseHelperService.ParsePhotosArgs(key);
+
+            await _botService.DeleteMessagesAsync(c.Chat, [.. photoMessageIds, c.MessageId], token);
+
+            var photoIds = new List<string>();
+            foreach (var index in photoIndexes)
+                photoIds.Add(photos.Keys.ToArray()[index]);
+
+            var sendedMessages = await _botService.SendMessageAsync(
+                c.Chat,
+                _messagesProvider.CreateSelectedPhotosOverviewMessage(entity, photoIndexes.Count()),
+                inputFiles: [.. photoIds.Select(p => new InputMediaPhoto(p))],
+                token: token);
+
+            int[] sendedMessageIds = [.. sendedMessages.Select(m => m.Id)];
+
+            string redirectToCallback = photoIndexes.Count() == photos.Count
+            ? _callbackDataProvider.CreateEditEntityCallback(entity)
+            : _callbackDataProvider.CreateManagePhotosCallback(entity, photosManagementMode);
+
+            var managePhotosCallback = _callbackDataProvider.CreateDeleteMessagesCallback() + '\n' + redirectToCallback;
+
+            await _botService.SendMessageAsync(c.Chat,
+                _messageParametersProvider.GetDeleteEntityPhotosConfirmationParameters(
+                    entity,
+                    c.CallbackData,
+                    [.. photoIndexes],
+                    [.. sendedMessages.Select(p => p.MessageId)],
+                    managePhotosCallback,
+                    managePhotosCallback),
+                token);
+        }
+
+        #endregion
     }
 }

@@ -54,14 +54,12 @@ message ParentCat {
 	string description = 5;
 	// photos
 	map<string, string> photos = 6;
-	// genetic test one
-	string genetic_test_one = 7;
-	// genetic test two 
-	string genetic_test_two = 8;
+	// genetic tests
+	map<string, string> genetic_tests = 7;
 	// titles
-	map<string, string> titles = 9;
+	map<string, string> titles = 8;
 	// old description
-	google.protobuf.StringValue old_description = 10;
+	google.protobuf.StringValue old_description = 9;
 }
 
 message Kitten {

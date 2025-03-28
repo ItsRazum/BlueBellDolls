@@ -24,13 +24,12 @@ namespace BlueBellDolls.Service.Grpc
                 IsMale = parentCat.IsMale,
                 Description = parentCat.Description,
                 OldDescription = parentCat.OldDescription,
-                GeneticTestOne = parentCat.GeneticTestOne,
-                GeneticTestTwo = parentCat.GeneticTestTwo,
                 BirthDay = parentCat.BirthDay.ToString(_cultureInfo),
             };
 
             result.Photos.Add(parentCat.Photos);
             result.Titles.Add(parentCat.Titles);
+            result.GeneticTests.Add(parentCat.GeneticTests);
 
             return result;
         }
@@ -44,8 +43,7 @@ namespace BlueBellDolls.Service.Grpc
                 IsMale = parentCat.IsMale,
                 Description = parentCat.Description,
                 OldDescription = parentCat.OldDescription,
-                GeneticTestOne = parentCat.GeneticTestOne,
-                GeneticTestTwo = parentCat.GeneticTestTwo,
+                GeneticTests = new(parentCat.GeneticTests),
                 Photos = new(parentCat.Photos),
                 Titles = new(parentCat.Titles)
             };

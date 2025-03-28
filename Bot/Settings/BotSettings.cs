@@ -8,5 +8,7 @@
         public Dictionary<string, string> CommandsSettings { get; set; }
 
         public InlineKeyboardsSettings InlineKeyboardsSettings { get; set; }
+
+        public CallbackDataSettings CallbackDataSettings { get; set; }
     }
 }

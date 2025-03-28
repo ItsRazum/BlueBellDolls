@@ -25,7 +25,11 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreatePhotosLoadingMessage();
 
-        string CreatePhotosLimitationErrorMessage();
+        string CreatePhotosLimitReachedMessage();
+
+        string CreateTitlesLimitReachedMessage();
+
+        string CreateGeneticTestsLimitReachedMessage();
 
         string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds);
 
@@ -33,7 +37,9 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateEntityDeletionSuccess();
 
-        string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes);
+        string CreateSelectedPhotosOverviewMessage(IDisplayableEntity entity, int photosCount);
+
+        string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] sendedPhotoMessageIds);
 
         string CreateEntityListMessage<TEntity>(ListUnitActionMode actionMode, int totalEntitiesCount, IEntity? unitOwner = null) where TEntity : class, IDisplayableEntity;
 
@@ -42,5 +48,9 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreateParentCatSetForLitter(ParentCat parentCat, Litter litter);
 
         string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoIndex);
+
+        string CreatePhotosDeletionSuccessMessage();
+
+        string CreatePhotosDeletionFailureMessage();
     }
 }

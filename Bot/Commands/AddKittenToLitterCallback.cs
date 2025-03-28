@@ -1,11 +1,13 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class AddKittenToLitterCallback : CommandHandler<CallbackQueryAdapter>
+    public class AddKittenToLitterCallback : CallbackHandler
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
@@ -13,21 +15,23 @@ namespace BlueBellDolls.Bot.Commands
 
         public AddKittenToLitterCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IDatabaseService databaseService,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider)
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("addKittenToLitter", HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetAddKittenToLitterCallback(), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var litterId = int.Parse(c.CallbackData.Split('-').Last());
+            var litterId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
             var kitten = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
             {

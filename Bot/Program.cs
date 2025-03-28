@@ -42,7 +42,8 @@ internal class Program
         builder.Services
             .Configure<BotSettings>(builder.Configuration.GetSection(nameof(BotSettings)))
             .Configure<EntityFormSettings>(builder.Configuration.GetSection(nameof(EntityFormSettings)))
-            .Configure<TelegramFilesHttpClientSettings>(builder.Configuration.GetSection(nameof(TelegramFilesHttpClientSettings)));
+            .Configure<TelegramFilesHttpClientSettings>(builder.Configuration.GetSection(nameof(TelegramFilesHttpClientSettings)))
+            .Configure<EntitySettings>(builder.Configuration.GetSection(nameof(EntitySettings)));
 
         // Entity Framework
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -95,7 +96,8 @@ internal class Program
             .AddSingleton<IEntityHelperService, EntityHelperService>()
             .AddSingleton<IEntityUpdateService, EntityUpdateService>()
             .AddSingleton<IArgumentParseHelperService, ArgumentParseHelperService>()
-            .AddSingleton<IMessagesHelperService, MessagesHelperService>();
+            .AddSingleton<IMessagesHelperService, MessagesHelperService>()
+            .AddSingleton<IPhotosDownloaderService, PhotosDownloaderService>();
 
         // Доп. настройки
         builder.Host.UseDefaultServiceProvider(options =>

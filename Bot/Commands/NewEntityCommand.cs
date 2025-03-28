@@ -1,12 +1,14 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class NewEntityCommand : CommandHandler<MessageAdapter>
+    public class NewEntityCommand : CommandHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
@@ -20,8 +22,8 @@ namespace BlueBellDolls.Bot.Commands
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
 
-            Handlers.Add("/newcat", HandleCommandAsync<ParentCat>);
-            Handlers.Add("/newlitter", HandleCommandAsync<Litter>);
+            AddCommandHandler("/newcat", HandleCommandAsync<ParentCat>);
+            AddCommandHandler("/newlitter", HandleCommandAsync<Litter>);
         }
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity, new()

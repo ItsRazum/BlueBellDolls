@@ -1,11 +1,13 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class SelectParentCatCallback : CommandHandler<CallbackQueryAdapter>
+    public class SelectParentCatCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
@@ -13,21 +15,23 @@ namespace BlueBellDolls.Bot.Commands
 
         public SelectParentCatCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider) 
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("selectParentCat", HandleCommandAsync);
+            AddCommandHandler(CallbackDataProvider.GetSelectEntityCallback<ParentCat>(), HandleCommandAsync);
         }
 
         private async Task HandleCommandAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var args = c.CallbackData.Split('-'); // [0]Command, [1]IsMale, [2]LitterId
+            var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]IsMale, [2]LitterId
 
             var isMale = bool.Parse(args[1]);
             var litterId = int.Parse(args[2]);

@@ -1,5 +1,4 @@
-﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Types.Generic;
+﻿using BlueBellDolls.Bot.Types;
 
 namespace BlueBellDolls.Bot.Extensions
 {
@@ -8,15 +7,15 @@ namespace BlueBellDolls.Bot.Extensions
         public static IServiceCollection AddCommandHandlers(this IServiceCollection services)
         {
             services.Scan(scan => scan
-                .FromAssemblyOf<CommandHandler<MessageAdapter>>()
-                .AddClasses(classes => classes.AssignableTo<CommandHandler<MessageAdapter>>())
-                .As<CommandHandler<MessageAdapter>>()
+                .FromAssemblyOf<CommandHandler>()
+                .AddClasses(classes => classes.AssignableTo<CommandHandler>())
+                .As<CommandHandler>()
                 .WithTransientLifetime());
 
             services.Scan(scan => scan
-                .FromAssemblyOf<CommandHandler<CallbackQueryAdapter>>()
-                .AddClasses(classes => classes.AssignableTo<CommandHandler<CallbackQueryAdapter>>())
-                .As<CommandHandler<CallbackQueryAdapter>>()
+                .FromAssemblyOf<CallbackHandler>()
+                .AddClasses(classes => classes.AssignableTo<CallbackHandler>())
+                .As<CallbackHandler>()
                 .WithTransientLifetime());
 
             return services;

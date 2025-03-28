@@ -9,8 +9,7 @@ namespace BlueBellDolls.Common.Models
 
         #region Properties
 
-        public string GeneticTestOne { get; set; }
-        public string GeneticTestTwo { get; set; }
+        public Dictionary<string, string> GeneticTests { get; set; }
         public Dictionary<string, string> Titles { get; set; }
         public string? OldDescription { get; set; }
 
@@ -28,8 +27,7 @@ namespace BlueBellDolls.Common.Models
             Description = "Добавьте описание!";
             Photos = [];
             Titles = [];
-            GeneticTestOne = string.Empty;
-            GeneticTestTwo = string.Empty;
+            GeneticTests = [];
         }
 
         #endregion

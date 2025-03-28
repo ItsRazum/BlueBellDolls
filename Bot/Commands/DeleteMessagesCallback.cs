@@ -1,28 +1,45 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class DeleteMessagesCallback : CommandHandler<CallbackQueryAdapter>
+    public class DeleteMessagesCallback : CallbackHandler
     {
         private readonly IMessagesProvider _messagesProvider;
+        private readonly IArgumentParseHelperService _argumentParseHelperService;
 
         public DeleteMessagesCallback(
             IBotService botService,
-            IMessagesProvider messagesProvider) 
-            : base(botService)
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
+            IMessagesProvider messagesProvider,
+            IArgumentParseHelperService argumentParseHelperService) 
+            : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
+            _argumentParseHelperService = argumentParseHelperService;
 
-            Handlers.Add("dm", HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetDeleteMessagesCallback(), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var args = c.CallbackData.Split('-');
-            var messageIds = JsonConvert.DeserializeObject<int[]>(args.Last());
+            IEnumerable<int>? messageIds;
+            if (c.CallbackData.Contains('-'))
+            {
+                var args = c.CallbackData.Split(CallbackArgsSeparator);
+                messageIds = JsonConvert.DeserializeObject <int[]>(args.Last());
+            }
+
+            else
+            {
+                (_, messageIds) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText);
+            }
+
 
             if (messageIds == null)
             {

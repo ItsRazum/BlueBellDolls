@@ -5,6 +5,22 @@ namespace BlueBellDolls.Bot.Interfaces
 {
     public interface ICallbackDataProvider
     {
+        string GetAddKittenToLitterCallback();
+        string GetAddEntityCallback<T>() where T : IDisplayableEntity;
+        string GetConfirmDeleteEntityCallback<T>() where T : IDisplayableEntity;
+        string GetConfirmDeletePhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity;
+        string GetDeleteEntityCallback<T>() where T : IDisplayableEntity;
+        string GetDeletePhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity;
+        string GetDeleteMessagesCallback();
+        string GetEditEntityCallback<T>() where T : IDisplayableEntity;
+        string GetListEntityCallback<T>() where T : IDisplayableEntity;
+        string GetManagePhotosCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity;
+        string GetOpenEntityCallback<T>() where T : IDisplayableEntity;
+        string GetSelectEntityCallback<T>() where T : IDisplayableEntity;
+        string GetSelectToLitterCallback();
+        string GetSetDefaultPhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity;
+        string GetTogglePhotoSelectionCallback<T>() where T : IDisplayableEntity;
+
         string CreateConfirmCallback(string baseCallback);
         string CreateEditEntityCallback(IDisplayableEntity entity);
         string CreateSelectParentCatCallback(bool isMale, int litterId);
@@ -13,14 +29,13 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreateBackToLitterCallback(int litterId);
         string CreateListEntityCallback(string entityName, int page);
         string CreateDeleteEntityCallback(IDisplayableEntity entity, int fromLitterId = 0);
-        string CreateDeleteParentCatFromLitterCallback(int parentCatId, int litterId);
         string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null);
         string CreateAddEntityCallback(string entityName);
-        string CreateAddPhotosCallback(IDisplayableEntity entity);
-        string CreateAddTitlesCallback(IDisplayableEntity entity);
-        string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int number, bool select);
-        string CreateMakeDefaultPhotoForEntityCallback(IDisplayableEntity entity, int photoIndex);
-        string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity);
+        string CreateManagePhotosCallback(IDisplayableEntity entity, PhotosManagementMode photosManagementMode);
+        string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int number, bool select, PhotosManagementMode photosManagementMode);
+        string CreateMakeDefaultPhotoForEntityCallback(IDisplayableEntity entity, int photoIndex, PhotosManagementMode photosManagementMode);
+        string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity, PhotosManagementMode photosManagementMode);
         string CreateDeleteMessagesCallback(int[] messagesId);
+        string CreateDeleteMessagesCallback();
     }
 }

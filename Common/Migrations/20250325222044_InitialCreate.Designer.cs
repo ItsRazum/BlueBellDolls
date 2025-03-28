@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlueBellDolls.Common.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250304212603_InitialCreate")]
+    [Migration("20250325222044_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -118,11 +118,7 @@ namespace BlueBellDolls.Common.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("GeneticTestOne")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GeneticTestTwo")
+                    b.Property<string>("GeneticTests")
                         .IsRequired()
                         .HasColumnType("TEXT");
 

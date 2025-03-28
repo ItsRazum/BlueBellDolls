@@ -1,12 +1,14 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types.Generic;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 
 namespace BlueBellDolls.Bot.Commands
 {
-    public class SelectToLitterCallback : CommandHandler<CallbackQueryAdapter>
+    public class SelectToLitterCallback : CallbackHandler
     {
         private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
@@ -14,21 +16,23 @@ namespace BlueBellDolls.Bot.Commands
 
         public SelectToLitterCallback(
             IBotService botService,
+            IOptions<BotSettings> botSettings,
+            ICallbackDataProvider callbackDataProvider,
             IDatabaseService databaseService,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider) 
-            : base(botService)
+            : base(botService, botSettings, callbackDataProvider)
         {
             _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
-            Handlers.Add("selectToLitter", HandleCommandAsync);
+            AddCommandHandler(CallbackDataProvider.GetSelectToLitterCallback(), HandleCommandAsync);
         }
 
         private async Task HandleCommandAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var args = c.CallbackData.Split('-'); // [0]Command, [1]LitterId, [2]EntityType, [3]EntityId
+            var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]LitterId, [2]EntityType, [3]EntityId
 
             var litterId = int.Parse(args[1]);
             var parentCatId = int.Parse(args[3]);
