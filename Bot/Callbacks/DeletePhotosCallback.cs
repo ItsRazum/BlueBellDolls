@@ -6,15 +6,15 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
-    public class DeleteEntityPhotosCallback : CallbackHandler
+    public class DeletePhotosCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
-        public DeleteEntityPhotosCallback(
+        public DeletePhotosCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,

@@ -4,6 +4,6 @@
     {
         Photos,
         Titles,
-        GeneticTests
+        GenTests
     }
 }

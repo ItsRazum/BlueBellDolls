@@ -7,7 +7,7 @@ using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class EditEntityCallback : CallbackHandler
     {

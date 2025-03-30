@@ -43,11 +43,11 @@ namespace BlueBellDolls.Bot.Services
             => SendManagementMessageAsync(chat, entity, PhotosManagementMode.Titles, entity.Titles, token);
 
         public Task SendGeneticTestsManagementMessageAsync(Chat chat, ParentCat entity, CancellationToken token = default)
-            => SendManagementMessageAsync(chat, entity, PhotosManagementMode.GeneticTests, entity.GeneticTests, token);
+            => SendManagementMessageAsync(chat, entity, PhotosManagementMode.GenTests, entity.GeneticTests, token);
 
-        private async Task SendManagementMessageAsync(Chat chat, IDisplayableEntity entity, PhotosManagementMode mode, IEnumerable<KeyValuePair<string, string>> photos, CancellationToken token = default)
+        private async Task SendManagementMessageAsync(Chat chat, IDisplayableEntity entity, PhotosManagementMode photosManagementMode, IEnumerable<KeyValuePair<string, string>> photos, CancellationToken token = default)
         {
-            var message = _messagesProvider.CreateEntityPhotosGuideMessage(entity);
+            var message = _messagesProvider.CreateEntityPhotosGuideMessage(entity, photosManagementMode);
             var inputFiles = photos.Select(p => new InputMediaPhoto(new InputFileId(p.Key))).ToArray();
 
             var sentPhotos = await _botService.SendMessageAsync(
@@ -60,7 +60,7 @@ namespace BlueBellDolls.Bot.Services
                 chat,
                 _messageParametersProvider.GetEntityPhotosParameters(
                     entity,
-                    mode,
+                    photosManagementMode,
                     [],
                     [.. sentPhotos.Select(m => m.MessageId)]),
                 token);
@@ -77,7 +77,7 @@ namespace BlueBellDolls.Bot.Services
             => await SendDeleteConfirmation(c, entity, PhotosManagementMode.Titles, entity.Titles, token);
 
         public async Task SendDeleteGeneticTestsConfirmationAsync(CallbackQueryAdapter c, ParentCat entity, CancellationToken token = default)
-            => await SendDeleteConfirmation(c, entity, PhotosManagementMode.GeneticTests, entity.GeneticTests, token);
+            => await SendDeleteConfirmation(c, entity, PhotosManagementMode.GenTests, entity.GeneticTests, token);
 
         private async Task SendDeleteConfirmation(CallbackQueryAdapter c, IDisplayableEntity entity, PhotosManagementMode photosManagementMode, Dictionary<string, string> photos, CancellationToken token)
         {
@@ -106,7 +106,7 @@ namespace BlueBellDolls.Bot.Services
             ? _callbackDataProvider.CreateEditEntityCallback(entity)
             : _callbackDataProvider.CreateManagePhotosCallback(entity, photosManagementMode);
 
-            var managePhotosCallback = _callbackDataProvider.CreateDeleteMessagesCallback() + '\n' + redirectToCallback;
+            var managePhotosCallback = _callbackDataProvider.CreateDeleteMessagesCallback() + _callbackDataSettings.MultipleCallbackSeparator + redirectToCallback;
 
             await _botService.SendMessageAsync(c.Chat,
                 _messageParametersProvider.GetDeleteEntityPhotosConfirmationParameters(

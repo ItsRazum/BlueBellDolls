@@ -63,7 +63,7 @@ namespace BlueBellDolls.Bot.Commands
 
             var downloadedPhotos = await _photosDownloaderService.DownloadAndConvertPhotosToBase64(m.Photos, token);
 
-            await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+            entity = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) => //Присваивание нужно для обновления сущности
             {
                 var entity = await unit.GetRepository<ParentCat>().GetByIdAsync(entityId, ct);
                 ArgumentNullException.ThrowIfNull(entity);
@@ -72,10 +72,10 @@ namespace BlueBellDolls.Bot.Commands
                     entity.Titles.Add(photo.Key, photo.Value);
 
                 await unit.SaveChangesAsync(ct);
+                return entity;
             }, token);
 
             await BotService.DeleteMessagesAsync(m.Chat, [m.ReplyToMessage.MessageId, .. loadingMessage.Select(m => m.MessageId), .. m.Photos.Select(p => p.MessageId)], token);
-
             await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
         }
     }

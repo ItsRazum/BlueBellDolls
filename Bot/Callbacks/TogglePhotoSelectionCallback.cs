@@ -7,7 +7,7 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class TogglePhotoSelectionCallback : CallbackHandler
     {
@@ -64,7 +64,7 @@ namespace BlueBellDolls.Bot.Commands
                 c.Chat, 
                 c.MessageId, 
                 _messageParametersProvider.GetEntityPhotosParameters(
-                    entity, 
+                    entity,
                     photoManagementMode,
                     [..photoIndexes.Order()], 
                     [..photoMessageIds]),

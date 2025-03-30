@@ -27,6 +27,7 @@ namespace BlueBellDolls.Common.Models
             BirthDay = DateOnly.FromDateTime(DateTime.Now);
             IsMale = true;
             Description = "Добавьте описание!";
+            Color = "Не указан";
             Photos = [];
             Class = KittenClass.Pet;
             Status = KittenStatus.Available;

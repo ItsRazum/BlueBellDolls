@@ -6,15 +6,15 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
-    public class ConfirmDeleteEntityPhotosCallback : CallbackHandler
+    public class ConfirmDeletePhotosCallback : CallbackHandler
     {
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IDatabaseService _databaseService;
         private readonly IMessagesProvider _messagesProvider;
 
-        public ConfirmDeleteEntityPhotosCallback(
+        public ConfirmDeletePhotosCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,

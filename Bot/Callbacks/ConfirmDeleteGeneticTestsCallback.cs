@@ -5,7 +5,7 @@ using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class ConfirmDeleteGeneticTestsCallback : CallbackHandler
     {
@@ -26,7 +26,7 @@ namespace BlueBellDolls.Bot.Commands
             _databaseService = databaseService;
             _messagesProvider = messagesProvider;
 
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.GeneticTests), HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.GenTests), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)

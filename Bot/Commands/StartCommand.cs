@@ -1,28 +1,35 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BlueBellDolls.Bot.Commands
 {
     public class StartCommand : CommandHandler
     {
-        private readonly IMessagesProvider _messagesProvider;
+        private readonly IMessageParametersProvider _messageParametersProvider;
 
         public StartCommand(
             IBotService botService,
-            IMessagesProvider messagesProvider)
+            IMessageParametersProvider messageParametersProvider)
             : base(botService)
         {
-            _messagesProvider = messagesProvider;
+            _messageParametersProvider = messageParametersProvider;
 
             AddCommandHandler("/start", HandleCommandAsync);
+            AddCommandHandler("/hide", HideCommandAsync);
+        }
+
+        private async Task HideCommandAsync(MessageAdapter m, CancellationToken token)
+        {
+            await BotService.SendMessageAsync(m.Chat, new MessageParameters(":)", new ReplyKeyboardRemove()), token);
         }
 
         public Func<MessageAdapter, CancellationToken, Task> Handler => HandleCommandAsync;
 
         private async Task HandleCommandAsync(MessageAdapter m, CancellationToken token)
         {
-            await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateStartMessage(), token: token);
+            await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetStartParameters(), token: token);
         }
     }
 }

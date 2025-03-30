@@ -6,7 +6,7 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class SetDefaultPhotoCallback : CallbackHandler
     {

@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Interfaces
 {
@@ -21,7 +22,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateEntityFormMessage(IEntity entity);
 
-        string CreateEntityPhotosGuideMessage(IDisplayableEntity entity);
+        string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosManagementMode photosManagementMode);
 
         string CreatePhotosLoadingMessage();
 
@@ -52,5 +53,7 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreatePhotosDeletionSuccessMessage();
 
         string CreatePhotosDeletionFailureMessage();
+        string CreateColorSetSuccessfullyMessage(string color);
+        string CreateColorPickerMessage(Cat cat, string buildedColor);
     }
 }

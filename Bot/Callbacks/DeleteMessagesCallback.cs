@@ -5,7 +5,7 @@ using BlueBellDolls.Bot.Types;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class DeleteMessagesCallback : CallbackHandler
     {

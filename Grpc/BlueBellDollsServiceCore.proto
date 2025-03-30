@@ -52,14 +52,16 @@ message ParentCat {
 	bool is_male = 4;
 	// description
 	string description = 5;
+	// color
+	string color = 6;
 	// photos
-	map<string, string> photos = 6;
+	map<string, string> photos = 7;
 	// genetic tests
-	map<string, string> genetic_tests = 7;
+	map<string, string> genetic_tests = 8;
 	// titles
-	map<string, string> titles = 8;
+	map<string, string> titles = 9;
 	// old description
-	google.protobuf.StringValue old_description = 9;
+	google.protobuf.StringValue old_description = 10;
 }
 
 message Kitten {
@@ -73,10 +75,12 @@ message Kitten {
 	bool is_male = 4;
 	// description
 	string description = 5;
+	// color
+	string color = 6;
 	// photos
-	map<string, string> photos = 6;
+	map<string, string> photos = 7;
 	// class
-	string class = 7;
+	string class = 8;
 	// status
-	string status = 8;
+	string status = 9;
 }

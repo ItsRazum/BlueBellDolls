@@ -3,19 +3,23 @@ using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Providers
 {
     public class CallbackDataProvider : ICallbackDataProvider
     {
-        private readonly CallbackDataSettings _settings;
-        private string Separator => _settings.ArgsSeparator;
+        private readonly CallbackCommandIdentifiers _settings;
+        private string Separator { get; }
 
         public CallbackDataProvider(
             IOptions<BotSettings> botSettings) 
         {
-            _settings = botSettings.Value.CallbackDataSettings;
+            var callbackDataSettings = botSettings.Value.CallbackDataSettings;
+
+            _settings = callbackDataSettings.CallbackCommandIdentifiers;
+            Separator = callbackDataSettings.ArgsSeparator;
         }
 
         #region Get Methods
@@ -64,9 +68,12 @@ namespace BlueBellDolls.Bot.Providers
         public string GetTogglePhotoSelectionCallback<T>() where T : IDisplayableEntity
             => $"{_settings.TogglePhotoSelection}{typeof(T).Name}";
 
+        public string GetFindColorCallback<T>() where T : Cat
+            => $"{_settings.FindColor}{typeof(T).Name}";
+
         #endregion
 
-        #region Create methods
+            #region Create methods
 
         public string CreateConfirmCallback(string baseCallback)
             => $"{_settings.ConfirmationSuffix}{baseCallback}";
@@ -124,6 +131,14 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateDeleteMessagesCallback()
             => _settings.DeleteMessages;
+
+        public string CreateFindColorCallback(Cat entity, string buildedColor, string colorPart)
+        {
+            return $"{_settings.FindColor}{entity.GetType().Name}{Separator}{(buildedColor + "_" + colorPart).TrimStart('_')}{Separator}{entity.Id}";
+        }
+
+        public string CreateStartFindColorCallback(Cat entity)
+            => $"{_settings.FindColor}{entity.GetType().Name}{Separator}{entity.Id}";
 
         #endregion
     }

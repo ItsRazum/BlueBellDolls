@@ -5,14 +5,14 @@ using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
-    public class ManageTitlesCallback : CallbackHandler
+    public class ManageGeneticTestsCallback : CallbackHandler
     {
         private readonly IEntityHelperService _entityHelperService;
         private readonly IMessagesHelperService _messagesHelperService;
 
-        public ManageTitlesCallback(
+        public ManageGeneticTestsCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
@@ -23,7 +23,7 @@ namespace BlueBellDolls.Bot.Commands
             _entityHelperService = entityHelperService;
             _messagesHelperService = messagesHelperService;
 
-            AddCommandHandler(CallbackDataProvider.GetManagePhotosCallback<ParentCat>(Enums.PhotosManagementMode.Titles), HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetManagePhotosCallback<ParentCat>(Enums.PhotosManagementMode.GenTests), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
@@ -33,10 +33,10 @@ namespace BlueBellDolls.Bot.Commands
 
             var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<ParentCat>(entityId, token);
 
-            if (entity == null || entity.Titles.Count == 0) return;
+            if (entity == null || entity.GeneticTests.Count == 0) return;
             await BotService.DeleteMessageAsync(c.Chat, c.MessageId, token);
 
-            await _messagesHelperService.SendTitlesManagementMessageAsync(c.Chat, entity, token);
+            await _messagesHelperService.SendGeneticTestsManagementMessageAsync(c.Chat, entity, token);
         }
     }
 }

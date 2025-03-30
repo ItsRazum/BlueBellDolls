@@ -2,7 +2,7 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
-using Telegram.Bot.Types;
+using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -10,6 +10,11 @@ namespace BlueBellDolls.Bot.Providers
     {
         private readonly IMessagesProvider _messagesProvider;
         private readonly IKeyboardsProvider _keyboardsProvider;
+
+        public MessageParameters GetStartParameters()
+            => new MessageParameters(
+                _messagesProvider.CreateStartMessage(),
+                _keyboardsProvider.CreateStartKeyboard());
 
         public MessageParametersProvider(
             IMessagesProvider messagesProvider,
@@ -79,6 +84,13 @@ namespace BlueBellDolls.Bot.Providers
             return new MessageParameters(
                 _messagesProvider.CreateEntityFormMessage(entity),
                 _keyboardsProvider.CreateEntityFromLitterKeyboard(entity, litterId));
+        }
+
+        public MessageParameters GetColorPickerParameters(Cat cat, string buildedColor, string[] findedColorParts)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateColorPickerMessage(cat, buildedColor),
+                _keyboardsProvider.CreateColorPickerKeyboard(cat, buildedColor, findedColorParts));
         }
     }
 }

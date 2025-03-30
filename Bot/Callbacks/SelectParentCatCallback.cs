@@ -5,7 +5,7 @@ using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class SelectParentCatCallback : CallbackHandler
     {

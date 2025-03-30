@@ -6,7 +6,7 @@ using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 
-namespace BlueBellDolls.Bot.Commands
+namespace BlueBellDolls.Bot.Callbacks
 {
     public class SelectToLitterCallback : CallbackHandler
     {

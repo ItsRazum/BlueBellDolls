@@ -3,10 +3,10 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BlueBellDolls.Bot.Types
 {
-    public class MessageParameters(string text, InlineKeyboardMarkup? inlineKeyboard = null, IEnumerable<InputMediaPhoto>? inputFiles = null)
+    public class MessageParameters(string text, IReplyMarkup? replyMarkup = null, IEnumerable<InputMediaPhoto>? inputFiles = null)
     {
         public string Text { get; } = text;
-        public InlineKeyboardMarkup? InlineKeyboard { get; } = inlineKeyboard;
+        public IReplyMarkup? ReplyMarkup { get; } = replyMarkup;
         public InputMediaPhoto[]? InputFiles { get; } = inputFiles?.ToArray();
     }
 }

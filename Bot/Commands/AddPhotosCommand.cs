@@ -34,7 +34,7 @@ namespace BlueBellDolls.Bot.Commands
             _photosDownloaderService = photosDownloaderService;
             _entitySettings = entitySettings.Value;
 
-            AddCommandHandler("Фото", HandleCommandAsync);
+            AddCommandHandler("фото", HandleCommandAsync);
         }
 
         private async Task HandleCommandAsync(MessageAdapter m, CancellationToken token)

@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Interfaces
 {
@@ -20,6 +21,7 @@ namespace BlueBellDolls.Bot.Interfaces
         string GetSelectToLitterCallback();
         string GetSetDefaultPhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity;
         string GetTogglePhotoSelectionCallback<T>() where T : IDisplayableEntity;
+        string GetFindColorCallback<T>() where T : Cat;
 
         string CreateConfirmCallback(string baseCallback);
         string CreateEditEntityCallback(IDisplayableEntity entity);
@@ -37,5 +39,7 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity, PhotosManagementMode photosManagementMode);
         string CreateDeleteMessagesCallback(int[] messagesId);
         string CreateDeleteMessagesCallback();
+        string CreateFindColorCallback(Cat entity, string buildedColor, string colorPart);
+        string CreateStartFindColorCallback(Cat entity);
     }
 }

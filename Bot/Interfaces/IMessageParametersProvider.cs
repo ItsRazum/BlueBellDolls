@@ -1,6 +1,7 @@
 ﻿using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Interfaces
 {
@@ -34,5 +35,8 @@ namespace BlueBellDolls.Bot.Interfaces
             where TEntity : class, IDisplayableEntity;
 
         MessageParameters GetEntityFromLitterParameters(IDisplayableEntity entity, int litterId);
+
+        MessageParameters GetColorPickerParameters(Cat cat, string buildedColor, string[] findedColorParts);
+        MessageParameters GetStartParameters();
     }
 }

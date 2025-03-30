@@ -25,6 +25,7 @@ namespace BlueBellDolls.Common.Models
             BirthDay = DateOnly.FromDateTime(DateTime.Now);
             IsMale = true;
             Description = "Добавьте описание!";
+            Color = "Не указан";
             Photos = [];
             Titles = [];
             GeneticTests = [];

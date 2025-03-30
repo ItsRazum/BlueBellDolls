@@ -29,7 +29,7 @@ namespace BlueBellDolls.Bot.Interfaces
         /// <param name="messageParameters"></param>
         /// <returns></returns>
         async Task<Message[]> SendMessageAsync(Chat chat, MessageParameters messageParameters, CancellationToken token = default)
-            => await SendMessageAsync(chat, messageParameters.Text, messageParameters.InlineKeyboard, messageParameters.InputFiles, token);
+            => await SendMessageAsync(chat, messageParameters.Text, messageParameters.ReplyMarkup, messageParameters.InputFiles, token);
 
         /// <summary>
         /// Отправляет ответ на CallbackQuery.
@@ -52,7 +52,7 @@ namespace BlueBellDolls.Bot.Interfaces
                 chat,
                 messageId, 
                 messageParameters.Text,
-                messageParameters.InlineKeyboard,
+                (InlineKeyboardMarkup?)messageParameters.ReplyMarkup,
                 messageParameters.InputFiles?.First(),
                 token);
 
@@ -69,7 +69,7 @@ namespace BlueBellDolls.Bot.Interfaces
                 chat,
                 messageId,
                 messageParameters.Text,
-                messageParameters.InlineKeyboard,
+                (InlineKeyboardMarkup?)messageParameters.ReplyMarkup,
                 messageParameters.InputFiles,
                 token);
         

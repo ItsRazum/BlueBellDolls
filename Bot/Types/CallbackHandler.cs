@@ -13,6 +13,7 @@ namespace BlueBellDolls.Bot.Types
 
         protected IBotService BotService { get; }
         protected string CallbackArgsSeparator { get; }
+        protected string MultipleCallbackSeparator { get; }
         protected ICallbackDataProvider CallbackDataProvider { get; }
 
         public CallbackHandler(
@@ -22,6 +23,7 @@ namespace BlueBellDolls.Bot.Types
         {
             BotService = botService;
             CallbackArgsSeparator = botSettings.Value.CallbackDataSettings.ArgsSeparator;
+            MultipleCallbackSeparator = botSettings.Value.CallbackDataSettings.MultipleCallbackSeparator;
             CallbackDataProvider = callbackDataProvider;
         }
 

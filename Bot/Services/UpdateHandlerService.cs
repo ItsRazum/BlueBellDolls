@@ -1,7 +1,9 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
@@ -18,6 +20,7 @@ namespace BlueBellDolls.Bot.Services
         #region Fields
 
         private readonly ILogger<UpdateHandlerService> _logger;
+        private readonly CallbackDataSettings _callbackDataSettings;
         private readonly IBotService _botService;
         private readonly ConcurrentDictionary<string, List<PhotoAdapter>> _photoUploaders;
 
@@ -34,11 +37,13 @@ namespace BlueBellDolls.Bot.Services
 
         public UpdateHandlerService(
             ILogger<UpdateHandlerService> logger,
+            IOptions<BotSettings> options,
             IBotService botService,
             IEnumerable<CommandHandler> messageHandlers,
             IEnumerable<CallbackHandler> callbackHandlers)
         {
             _logger = logger;
+            _callbackDataSettings = options.Value.CallbackDataSettings;
             _botService = botService;
 
             _photoUploaders = [];
@@ -79,7 +84,7 @@ namespace BlueBellDolls.Bot.Services
 
                 case UpdateType.CallbackQuery:
                     if (update.CallbackQuery is not null)
-                        await HandleCallbackAsync(update.CallbackQuery, update.CallbackQuery.Data!.Contains('-'), cancellationToken);
+                        await HandleCallbackAsync(update.CallbackQuery, update.CallbackQuery.Data!.Contains(_callbackDataSettings.ArgsSeparator), cancellationToken);
                     break;
 
                 default:
@@ -127,9 +132,9 @@ namespace BlueBellDolls.Bot.Services
                         $"\nId чата: {c.Message?.Chat.Id}" +
                         $"\n", "Входящий Callback");
 
-            foreach (var callback in c.Data!.Split('\n'))
+            foreach (var callback in c.Data!.Split(_callbackDataSettings.MultipleCallbackSeparator))
             {
-                var commandData = containsArgs ? callback.Split('-').First() : callback;
+                var commandData = containsArgs ? callback.Split(_callbackDataSettings.ArgsSeparator).First() : callback;
 
                 if (CallbackCommands.TryGetValue(commandData, out var command))
                     await command(c.ToAdaper(callback), token);
