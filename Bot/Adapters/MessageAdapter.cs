@@ -16,7 +16,7 @@ namespace BlueBellDolls.Bot.Adapters
                 ReplyToMessage = _message.ReplyToMessage.ToAdaper();
         }
 
-        public string Text => _message.Text ?? string.Empty;
+        public string Text => _message.Text ?? _message.Caption ?? string.Empty;
 
         public int MessageId => _message.MessageId;
 

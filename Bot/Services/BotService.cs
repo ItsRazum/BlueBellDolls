@@ -51,7 +51,7 @@ namespace BlueBellDolls.Bot.Services
                     return await _botClient.SendMediaGroup(chat, inputFiles, cancellationToken: token);
                 }
                 else
-                    return [await _botClient.SendPhoto(chat, inputFiles.First().Media, messageText, cancellationToken: token)];
+                    return [await _botClient.SendPhoto(chat, inputFiles.First().Media, messageText, replyMarkup: replyMarkup, cancellationToken: token)];
             }
             else
                 return [await _botClient.SendMessage(chat, messageText, replyMarkup: replyMarkup, cancellationToken: token)];

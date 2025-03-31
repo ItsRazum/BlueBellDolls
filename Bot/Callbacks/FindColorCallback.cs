@@ -39,67 +39,70 @@ namespace BlueBellDolls.Bot.Callbacks
 
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
         {
-            string[] findedColors;
-            var args = c.CallbackData.Split(CallbackArgsSeparator, StringSplitOptions.RemoveEmptyEntries); //[0]Command, [1]? Builded Color, [2] Entity Id
-            var entityId = int.Parse(args.Last());
-            TEntity? entity;
+            var args = c.CallbackData.Split(CallbackArgsSeparator, StringSplitOptions.RemoveEmptyEntries);
+            var entityId = int.Parse(args[^1]);
+            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
+
+            if (entity == null)
+            {
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                return;
+            }
 
             if (args.Length < 3)
             {
-                findedColors = [.. _catColors.Keys];
-                entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
-
-                if (entity == null)
-                {
-                    await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
-                    return;
-                }
-
-                await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetColorPickerParameters(entity, string.Empty, findedColors), token);
-
+                await UpdateColorPicker(entity, string.Empty, _catColors.Keys.ToArray(), c, token);
+                return;
             }
-            else if (args.Length == 3)
+
+            var buildedColor = args[1];
+            if (buildedColor.Count(c => c == '_') == 2)
             {
-                var buildedColor = args[1];
-                if (buildedColor.Split('_').Length == 3)
-                {
-                    var finalColor = buildedColor.Replace('_', ' ').Replace("/", "").Trim();
-                    entity = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
-                    {
-                        var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
-                        ArgumentNullException.ThrowIfNull(entity);
-
-                        entity.Color = finalColor;
-
-                        await unit.SaveChangesAsync(ct);
-                        return entity;
-                    }, token);
-
-                    await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(finalColor), token: token);
-                    await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(entity), token);
-                }
-                else
-                {
-                    var colorParts = buildedColor.Split('_', StringSplitOptions.RemoveEmptyEntries);
-                    findedColors = colorParts.Length switch
-                    {
-                        1 => [.. _catColors[colorParts.First()].Keys],
-                        2 => _catColors[colorParts.First()][colorParts.Last()],
-                        _ => []
-                    };
-
-                    entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
-
-                    if (entity == null)
-                    {
-                        await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
-                        return;
-                    }
-
-                    await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetColorPickerParameters(entity, buildedColor, findedColors), token);
-
-                }
+                var finalColor = buildedColor.Replace('_', ' ').Replace("/", "").Trim();
+                entity = await UpdateEntityColor<TEntity>(entityId, finalColor, c, token);
+                await UpdateEntityForm(entity, c, token);
             }
+            else
+            {
+                var colorParts = buildedColor.Split('_', StringSplitOptions.RemoveEmptyEntries);
+                var colors = colorParts.Length switch
+                {
+                    1 => _catColors[colorParts[0]].Keys.ToArray(),
+                    2 => _catColors[colorParts[0]][colorParts[1]],
+                    _ => Array.Empty<string>()
+                };
+                await UpdateColorPicker(entity, buildedColor, colors, c, token);
+            }
+        }
+
+        private async Task UpdateColorPicker<TEntity>(TEntity entity, string builtColor, string[] colors, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
+        {
+            await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId,
+                _messageParametersProvider.GetColorPickerParameters(entity, builtColor, colors), token);
+        }
+
+        private async Task<TEntity> UpdateEntityColor<TEntity>(int entityId, string color, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
+        {
+            var updatedEntity = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+            {
+                var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
+                ArgumentNullException.ThrowIfNull(entity);
+                entity.Color = color;
+                await unit.SaveChangesAsync(ct);
+                return entity;
+            }, token);
+
+            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(color), token: token);
+            return updatedEntity;
+        }
+
+        private async Task UpdateEntityForm<TEntity>(TEntity entity, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
+        {
+            await BotService.EditOrSendNewMessageAsync(
+                c.Chat,
+                c.MessageId,
+                _messageParametersProvider.GetEntityFormParameters(entity),
+                token);
         }
     }
 }

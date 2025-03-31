@@ -49,7 +49,7 @@ namespace BlueBellDolls.Bot.Providers
                 "\n" +
                 "📌 Основные команды:\n" +
                 "├ /newcat - Создать нового производителя\n" +
-                "├ /newlitter - Создать новый помёт\n" +
+                "└ /newlitter - Создать новый помёт\n" +
                 "\n" +
                 "📂 Списки сущностей:\n" +
                 "├ /catlist - Список производителей\n" +
@@ -174,16 +174,14 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateSelectedPhotosOverviewMessage(IDisplayableEntity entity, int photosCount)
         {
             var entityData = $"{entity.GetType().Name} {entity.Id}";
-            return photosCount == 1
-                ? $"📷 Будет удалено 1 фото у {entityData}\nПодтвердите действие"
-                : $"📷 Будет удалено {photosCount} фото у {entityData}\nПодтвердите действие";
+            return $"📷 Будет удалено {photosCount} фото у {entityData}\nПодтвердите действие";
         }
 
         public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] sendedPhotoMessageIds)
         {
             return
                 $"⚠️ Подтвердите удаление {selectedPhotoIndexes.Length} фото:\n" +
-                $"Сущность: {entity.DisplayName}\n" +
+                $"Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" +
                 $"Номера : ID сообщений:\n" +
                 $"{string.Join(", ", selectedPhotoIndexes)} : {string.Join(", ", sendedPhotoMessageIds)}";
         }
@@ -222,7 +220,7 @@ namespace BlueBellDolls.Bot.Providers
         {
             return
                 $"📸 Основное фото обновлено!\n" +
-                $"├ Сущность: {entity.GetType().Name} {entity.Id}\n" +
+                $"├ Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" +
                 $"└ Номер фото: {photoIndex + 1}";
         }
 
@@ -243,7 +241,7 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateColorPickerMessage(Cat cat, string buildedColor)
         {
-            var parts = buildedColor.Split('_');
+            var parts = buildedColor.Split('_', StringSplitOptions.RemoveEmptyEntries);
             var sb = new StringBuilder();
 
             sb.AppendLine($"🎨 Выбор цвета для {cat.DisplayName} ({cat.GetType().Name} {cat.Id})")

@@ -23,6 +23,7 @@ namespace BlueBellDolls.Bot.Services
         private readonly CallbackDataSettings _callbackDataSettings;
         private readonly IBotService _botService;
         private readonly ConcurrentDictionary<string, List<PhotoAdapter>> _photoUploaders;
+        private readonly long[] _authorizedUsers;
 
         #endregion
 
@@ -44,6 +45,7 @@ namespace BlueBellDolls.Bot.Services
         {
             _logger = logger;
             _callbackDataSettings = options.Value.CallbackDataSettings;
+            _authorizedUsers = options.Value.AuthorizedUsers;
             _botService = botService;
 
             _photoUploaders = [];
@@ -67,6 +69,7 @@ namespace BlueBellDolls.Bot.Services
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             _logger.LogDebug(JsonConvert.SerializeObject(update.Message));
+
             switch (update.Type)
             {
                 case UpdateType.Message:
@@ -74,7 +77,10 @@ namespace BlueBellDolls.Bot.Services
                     {
                         var message = update.Message;
 
-                        if (message.ReplyToMessage is not null && message.ReplyToMessage.Text != null)
+                        if (!_authorizedUsers.Contains(message.From?.Id ?? -1))
+                            return;
+
+                        if (message.ReplyToMessage is not null)
                             await HandleReplyToMessageAsync(update.Message, cancellationToken);
 
                         else
@@ -83,6 +89,9 @@ namespace BlueBellDolls.Bot.Services
                     break;
 
                 case UpdateType.CallbackQuery:
+                    if (!_authorizedUsers.Contains(update.CallbackQuery?.From.Id ?? -1))
+                        return;
+
                     if (update.CallbackQuery is not null)
                         await HandleCallbackAsync(update.CallbackQuery, update.CallbackQuery.Data!.Contains(_callbackDataSettings.ArgsSeparator), cancellationToken);
                     break;

@@ -47,13 +47,12 @@ namespace BlueBellDolls.Bot.Callbacks
 
                 var page = int.Parse(args.Last());
                 var (entityList, pagesCount, entitiesCount) = await _entityHelperService.GetEntityListAsync<TEntity>(page, token);
-                await BotService.EditMessageAsync(
+                await BotService.EditOrSendNewMessageAsync(
                     c.Chat,
                     c.MessageId,
                     _messageParametersProvider.GetEntityListParameters(entityList, actionType, (page, pagesCount, entitiesCount), owner),
                     token);
             }
-
         }
     }
 }

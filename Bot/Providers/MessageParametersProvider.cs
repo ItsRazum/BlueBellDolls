@@ -3,6 +3,8 @@ using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Types;
+using Microsoft.AspNetCore.Components.Forms;
+using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -26,9 +28,17 @@ namespace BlueBellDolls.Bot.Providers
 
         public MessageParameters GetEntityFormParameters(IDisplayableEntity entity)
         {
+            InputMediaPhoto[]? photos = null;
+
+            if (entity.Photos.Count != 0)
+            {
+                photos = [new(entity.PhotoIds.First())];
+            }
+
             return new MessageParameters(
                 _messagesProvider.CreateEntityFormMessage(entity),
-                _keyboardsProvider.CreateEntityOptionsKeyboard(entity)
+                _keyboardsProvider.CreateEntityOptionsKeyboard(entity),
+                photos
                 );
         }
 
