@@ -26,44 +26,14 @@ namespace BlueBellDolls.Service.Services
 
         #region Methods
 
-        public async Task<IEnumerable<ParentCat>> GetCatsByGenderAsync(bool isMale, CancellationToken token = default)
+        public async Task<IEnumerable<ParentCat>> GetActiveCatsByGenderAsync(bool isMale, CancellationToken token = default)
         {
-            return (await _unitOfWork.GetRepository<ParentCat>().GetAllAsync(token)).Where(c => c.IsMale == isMale);
+            return await _unitOfWork.GetRepository<ParentCat>().GetAllAsync(c => c.IsMale == isMale && c.IsEnabled, token);
         }
 
-        public async Task<IEnumerable<Litter>> GetLittersAsync(CancellationToken token = default)
+        public async Task<IEnumerable<Litter>> GetActiveLittersAsync(CancellationToken token = default)
         {
-            return await _unitOfWork.GetRepository<Litter>().GetAllAsync(token);
-        }
-
-        public async Task<bool> AddNewEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : class, IEntity
-        {
-            try
-            {
-                await _unitOfWork.GetRepository<TEntity>().AddAsync(entity, token);
-                await _unitOfWork.SaveChangesAsync(token);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Exception thrown in CatService.AddNewEntityAsync<{entity}>()", typeof(TEntity).Name);
-                return false;
-            }
-        }
-
-        public async Task<bool> UpdateEntityAsync<TEntity>(TEntity entity, CancellationToken token = default) where TEntity : class, IEntity
-        {
-            try
-            {
-                await _unitOfWork.GetRepository<TEntity>().UpdateAsync(entity, token);
-                await _unitOfWork.SaveChangesAsync(token);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Exception thrown in CatService.AddNewEntityAsync<{entity}>()", typeof(TEntity).Name);
-                return false;
-            }
+            return await _unitOfWork.GetRepository<Litter>().GetAllAsync(l => l.IsActive, token);
         }
 
         #endregion

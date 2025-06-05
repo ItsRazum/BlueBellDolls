@@ -3,42 +3,28 @@ using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Types;
-using Microsoft.AspNetCore.Components.Forms;
 using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Providers
 {
-    public class MessageParametersProvider : IMessageParametersProvider
+    public class MessageParametersProvider(
+        IMessagesProvider messagesProvider,
+        IKeyboardsProvider keyboardsProvider) : IMessageParametersProvider
     {
-        private readonly IMessagesProvider _messagesProvider;
-        private readonly IKeyboardsProvider _keyboardsProvider;
+        private readonly IMessagesProvider _messagesProvider = messagesProvider;
+        private readonly IKeyboardsProvider _keyboardsProvider = keyboardsProvider;
 
         public MessageParameters GetStartParameters()
             => new MessageParameters(
                 _messagesProvider.CreateStartMessage(),
                 _keyboardsProvider.CreateStartKeyboard());
 
-        public MessageParametersProvider(
-            IMessagesProvider messagesProvider,
-            IKeyboardsProvider keyboardsProvider)
-        {
-            _messagesProvider = messagesProvider;
-            _keyboardsProvider = keyboardsProvider;
-        }
-
         public MessageParameters GetEntityFormParameters(IDisplayableEntity entity)
         {
-            InputMediaPhoto[]? photos = null;
-
-            if (entity.Photos.Count != 0)
-            {
-                photos = [new(entity.PhotoIds.First())];
-            }
-
             return new MessageParameters(
                 _messagesProvider.CreateEntityFormMessage(entity),
                 _keyboardsProvider.CreateEntityOptionsKeyboard(entity),
-                photos
+                [..entity.Photos.Take(1).Select(p => new InputMediaPhoto(p.Key))]
                 );
         }
 
@@ -86,14 +72,15 @@ namespace BlueBellDolls.Bot.Providers
         {
             return new MessageParameters(
                 _messagesProvider.CreateEntityListMessage<TEntity>(actionMode, pageParameters.totalEntitiesCount),
-                _keyboardsProvider.CreateEntityListKeyboard(entities, actionMode, (pageParameters.page, pageParameters.totalPagesCount), unitOwner));
+                _keyboardsProvider.CreateEntityListKeyboard(entities, actionMode, 1, (pageParameters.page, pageParameters.totalPagesCount), unitOwner));
         }
 
         public MessageParameters GetEntityFromLitterParameters(IDisplayableEntity entity, int litterId)
         {
             return new MessageParameters(
-                _messagesProvider.CreateEntityFormMessage(entity),
-                _keyboardsProvider.CreateEntityFromLitterKeyboard(entity, litterId));
+                _messagesProvider.CreateEntityFormMessage(entity, false),
+                _keyboardsProvider.CreateEntityFromLitterKeyboard(entity, litterId),
+                [.. entity.Photos.Take(1).Select(p => new InputMediaPhoto(p.Key))]);
         }
 
         public MessageParameters GetColorPickerParameters(Cat cat, string buildedColor, string[] findedColorParts)

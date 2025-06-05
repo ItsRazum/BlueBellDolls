@@ -21,14 +21,13 @@ namespace BlueBellDolls.Bot.Services
 
         public async Task<TEntity?> GetDisplayableEntityByIdAsync<TEntity>(
             int entityId, 
-            CancellationToken token = default, 
-            params Expression<Func<TEntity, object?>>[] includes) 
+            CancellationToken token = default) 
             where TEntity : IDisplayableEntity
         {
             return await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
             {
                 var repo = unit.GetRepository<TEntity>();
-                var result = await repo.GetByIdAsync(entityId, ct, includes);
+                var result = await repo.GetByIdAsync(entityId, ct);
                 return result;
 
             }, token);
@@ -62,20 +61,9 @@ namespace BlueBellDolls.Bot.Services
                 var repo = unit.GetRepository<TEntity>();
                 return (
                     await repo.GetByPageAsync(expression, page, _botSettings.InlineKeyboardsSettings.PageSize, ct),
-                    await repo.PagesCountAsync(_botSettings.InlineKeyboardsSettings.PageSize, token),
-                    await repo.CountAsync(ct)
+                    await repo.PagesCountAsync(expression, _botSettings.InlineKeyboardsSettings.PageSize, token),
+                    await repo.CountAsync(expression, ct)
                 );
-            }, token);
-        }
-
-        public async Task<TEntity> AddNewEntityAsync<TEntity>(CancellationToken token = default) where TEntity : class, IDisplayableEntity, new()
-        {
-            return await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
-            {
-                var result = new TEntity();
-                await unit.GetRepository<TEntity>().AddAsync(result, ct);
-                await unit.SaveChangesAsync(ct);
-                return result;
             }, token);
         }
     }

@@ -1,19 +1,18 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Types;
+﻿using BlueBellDolls.Common.Types;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
-    public class ParentCat : Cat, IDisplayableEntity
+    public class ParentCat : Cat
     {
 
         #region Properties
 
         public Dictionary<string, string> GeneticTests { get; set; }
-        public Dictionary<string, string> Titles { get; set; }
-        public string? OldDescription { get; set; }
 
-        public List<Litter> Litters { get; set; }
+        public Dictionary<string, string> Titles { get; set; }
+
+        public string? OldDescription { get; set; }
 
         #endregion
 

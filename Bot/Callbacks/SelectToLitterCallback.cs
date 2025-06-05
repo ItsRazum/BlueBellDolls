@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
@@ -10,22 +11,25 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class SelectToLitterCallback : CallbackHandler
     {
-        private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
+        private readonly IManagementService _managementService;
+        private readonly IEntityHelperService _entityHelperService;
 
         public SelectToLitterCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IDatabaseService databaseService,
             IMessageParametersProvider messageParametersProvider,
-            IMessagesProvider messagesProvider) 
+            IMessagesProvider messagesProvider,
+            IManagementService managementService,
+            IEntityHelperService entityHelperService) 
             : base(botService, botSettings, callbackDataProvider)
         {
-            _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
+            _managementService = managementService;
+            _entityHelperService = entityHelperService;
 
             AddCommandHandler(CallbackDataProvider.GetSelectToLitterCallback(), HandleCommandAsync);
         }
@@ -37,49 +41,28 @@ namespace BlueBellDolls.Bot.Callbacks
             var litterId = int.Parse(args[1]);
             var parentCatId = int.Parse(args[3]);
 
-            var result = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+            var result = await _managementService.SetParentCatForLitterAsync(litterId, parentCatId, token);
+
+            if (result.Success)
             {
-                var parentCatTask = unit.GetRepository<ParentCat>().GetByIdAsync(parentCatId, ct);
-                var litterRepo = unit.GetRepository<Litter>();
-                var litterTask = litterRepo.GetByIdAsync(litterId, ct, l => l.Kittens, l => l.FatherCat, l => l.MotherCat);
+                var parentCat = await _entityHelperService.GetDisplayableEntityByIdAsync<ParentCat>(parentCatId, token);
+                ArgumentNullException.ThrowIfNull(parentCat);
 
-                await Task.WhenAll(parentCatTask, litterTask);
+                var litter = result.Result!;
+                await BotService.AnswerCallbackQueryAsync(
+                    c.CallbackId,
+                    _messagesProvider.CreateParentCatSetForLitter(parentCat, litter),
+                    token: token
+                );
 
-                var parentCat = await parentCatTask;
-                var litter = await litterTask;
-
-                if (parentCat == null || litter == null)
-                    return (litter, parentCat);
-
-                if (parentCat.IsMale)
-                    litter.FatherCat = parentCat;
-                else
-                    litter.MotherCat = parentCat;
-
-                await unit.SaveChangesAsync(ct);
-
-                return (litter, parentCat);
-            }, token);
-
-            if (result.parentCat == null || result.litter == null)
-            {
-                (var entityType, var entityId) = result.parentCat == null ? (typeof(ParentCat), parentCatId) : (typeof(Litter), litterId);
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(entityType, entityId), token: token);
-                return;
+                await BotService.EditMessageAsync(
+                    c.Chat,
+                    c.MessageId,
+                    _messageParametersProvider.GetEntityFormParameters(litter),
+                    token
+                );
             }
 
-            await BotService.AnswerCallbackQueryAsync(
-                c.CallbackId,
-                _messagesProvider.CreateParentCatSetForLitter(result.parentCat, result.litter),
-                token: token
-            );
-
-            await BotService.EditMessageAsync(
-                c.Chat,
-                c.MessageId,
-                _messageParametersProvider.GetEntityFormParameters(result.litter),
-                token
-            );
         }
     }
 }

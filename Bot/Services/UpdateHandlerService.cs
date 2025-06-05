@@ -69,36 +69,50 @@ namespace BlueBellDolls.Bot.Services
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             _logger.LogDebug(JsonConvert.SerializeObject(update.Message));
-
-            switch (update.Type)
+            Chat? chat = null;
+            try
             {
-                case UpdateType.Message:
-                    if (update.Message is not null)
-                    {
-                        var message = update.Message;
+                switch (update.Type)
+                {
+                    case UpdateType.Message:
+                        if (update.Message is not null)
+                        {
+                            var message = update.Message;
+                            chat = message.Chat;
 
-                        if (!_authorizedUsers.Contains(message.From?.Id ?? -1))
+                            if (!_authorizedUsers.Contains(message.From?.Id ?? -1))
+                                return;
+
+                            if (message.ReplyToMessage is not null)
+                                await HandleReplyToMessageAsync(update.Message, cancellationToken);
+
+                            else
+                                await HandleCommandAsync(message, message.Text != null && message.Text.Contains(' '), cancellationToken);
+                        }
+                        break;
+
+                    case UpdateType.CallbackQuery:
+                        if (!_authorizedUsers.Contains(update.CallbackQuery?.From.Id ?? -1))
                             return;
 
-                        if (message.ReplyToMessage is not null)
-                            await HandleReplyToMessageAsync(update.Message, cancellationToken);
+                        if (update.CallbackQuery is not null)
+                        {
+                            chat = update.CallbackQuery.Message?.Chat;
+                            await HandleCallbackAsync(update.CallbackQuery, update.CallbackQuery.Data!.Contains(_callbackDataSettings.ArgsSeparator), cancellationToken);
+                        }
 
-                        else
-                            await HandleCommandAsync(message, message.Text != null && message.Text.Contains(' '), cancellationToken);
-                    }
-                    break;
+                        break;
 
-                case UpdateType.CallbackQuery:
-                    if (!_authorizedUsers.Contains(update.CallbackQuery?.From.Id ?? -1))
-                        return;
-
-                    if (update.CallbackQuery is not null)
-                        await HandleCallbackAsync(update.CallbackQuery, update.CallbackQuery.Data!.Contains(_callbackDataSettings.ArgsSeparator), cancellationToken);
-                    break;
-
-                default:
-                    _logger.LogWarning("Необработанный тип обновления: {UpdateType}", update.Type);
-                    break;
+                    default:
+                        _logger.LogWarning("Необработанный тип обновления: {UpdateType}", update.Type);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Произошла непредвиденная ошибка!");
+                if (chat != null)
+                    await _botService.SendMessageAsync(chat, "Произошла необработанная ошибка, пожалуйста, свяжитесь с разработчиком бота (@NtRazum)", token: cancellationToken);
             }
         }
 
@@ -143,6 +157,8 @@ namespace BlueBellDolls.Bot.Services
 
             foreach (var callback in c.Data!.Split(_callbackDataSettings.MultipleCallbackSeparator))
             {
+                if (callback == "...") return;
+
                 var commandData = containsArgs ? callback.Split(_callbackDataSettings.ArgsSeparator).First() : callback;
 
                 if (CallbackCommands.TryGetValue(commandData, out var command))
@@ -206,9 +222,11 @@ namespace BlueBellDolls.Bot.Services
 
             async Task tryHandleCommand(Message m, IEnumerable<PhotoAdapter>? photos = null, CancellationToken token = default)
             {
-                if (TextCommands.TryGetValue(m.Text ?? string.Empty, out var commandHandler) 
+                var command = (m.Text ?? m.Caption ?? string.Empty).ToLower();
+                var replyData = (m.ReplyToMessage!.Text ?? m.ReplyToMessage.Caption ?? string.Empty).ToLower();
+                if (TextCommands.TryGetValue(command, out var commandHandler) 
                     || TextCommands.TryGetValue(
-                    $"updateEntityByReply-{m.ReplyToMessage!.Text!.Split(' ').First()}",
+                    $"update_entity_by_reply_{replyData.Split(' ').First()}",
                     out commandHandler))
                     await commandHandler(m.ToAdaper(photos), token);
             }

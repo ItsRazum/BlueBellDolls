@@ -39,6 +39,8 @@ message Litter {
 	string description = 8;
 	// photos
 	map<string, string> photos = 9;
+	// is enabled
+	bool is_enabled = 10;
 }
 
 message ParentCat {
@@ -62,6 +64,8 @@ message ParentCat {
 	map<string, string> titles = 9;
 	// old description
 	google.protobuf.StringValue old_description = 10;
+	// is enabled
+	bool is_enabled = 11;
 }
 
 message Kitten {
@@ -83,4 +87,6 @@ message Kitten {
 	string class = 8;
 	// status
 	string status = 9;
+	// is enabled
+	bool is_enabled = 10;
 }

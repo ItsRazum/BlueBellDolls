@@ -31,10 +31,11 @@ namespace BlueBellDolls.Bot.Callbacks
 
         private async Task HandleCommandAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]IsMale, [2]LitterId
+            var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]IsMale, [2]Page, [3]LitterId
 
             var isMale = bool.Parse(args[1]);
-            var litterId = int.Parse(args[2]);
+            var page = int.Parse(args[2]);
+            var litterId = int.Parse(args.Last());
 
             var litter = await _entityHelperService.GetDisplayableEntityByIdAsync<Litter>(litterId, token);
 
@@ -44,12 +45,12 @@ namespace BlueBellDolls.Bot.Callbacks
                 return;
             }
 
-            var (entityList, pagesCount, entitiesCount) = await _entityHelperService.GetEntityListAsync<ParentCat>(c => c.IsMale == isMale, 1, token);
+            var (entityList, pagesCount, entitiesCount) = await _entityHelperService.GetEntityListAsync<ParentCat>(c => c.IsMale == isMale, page, token);
 
-            await BotService.EditMessageAsync(
+            await BotService.EditOrSendNewMessageAsync(
                 c.Chat,
                 c.MessageId,
-                _messageParametersProvider.GetEntityListParameters(entityList, Enums.ListUnitActionMode.Select, (1, pagesCount, entitiesCount), litter),
+                _messageParametersProvider.GetEntityListParameters(entityList, Enums.ListUnitActionMode.Select, (page, pagesCount, entitiesCount), litter),
                 token);
         }
     }

@@ -1,11 +1,10 @@
 ﻿using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Types;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
-    public class Kitten : Cat, IDisplayableEntity
+    public class Kitten : Cat
     {
 
         #region Properties

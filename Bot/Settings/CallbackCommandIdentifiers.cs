@@ -16,6 +16,7 @@
         public string DeletePhoto { get; set; }
         public string DeleteMessages { get; set; }
         public string FindColor { get; set; }
+        public string ToggleEntityVisibility { get; set; }
         public string ConfirmationSuffix { get; set; }
     }
 }

@@ -9,17 +9,7 @@ package bluebelldolls.grpc;
 
 service BlueBellDollsService {
 	//
-	rpc GetLitters(google.protobuf.Empty) returns (GetLittersResponce);
+	rpc GetActiveLitters(google.protobuf.Empty) returns (GetLittersResponce);
 	//
-	rpc GetCatsByGender(google.protobuf.BoolValue) returns (GetFemaleCatsResponce);
-	//
-	rpc AddNewCat(ParentCat) returns (google.protobuf.BoolValue);
-	//
-	rpc AddNewLitter(Litter) returns (google.protobuf.BoolValue);
-	//
-	rpc UpdateCat(ParentCat) returns (google.protobuf.BoolValue);
-	//
-	rpc UpdateLitter(Litter) returns (google.protobuf.BoolValue);
-	//
-	rpc UpdateKitten(Kitten) returns (google.protobuf.BoolValue);
+	rpc GetActiveCatsByGender(google.protobuf.BoolValue) returns (GetFemaleCatsResponce);
 }

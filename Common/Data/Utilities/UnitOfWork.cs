@@ -5,25 +5,16 @@ using System.Collections.Concurrent;
 
 namespace BlueBellDolls.Common.Data.Utilities
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public class UnitOfWork(
+        ApplicationDbContext dbContext,
+        IServiceProvider serviceProvider) : IUnitOfWork, IDisposable
     {
+
         #region Fields
 
-        private readonly ApplicationDbContext _dbContext;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ApplicationDbContext _dbContext = dbContext;
+        private readonly IServiceProvider _serviceProvider = serviceProvider;
         private readonly ConcurrentDictionary<Type, object> _repositories = new();
-
-        #endregion
-
-        #region Constructor
-
-        public UnitOfWork(
-            ApplicationDbContext dbContext,
-            IServiceProvider serviceProvider)
-        {
-            _dbContext = dbContext;
-            _serviceProvider = serviceProvider;
-        }
 
         #endregion
 

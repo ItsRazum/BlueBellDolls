@@ -7,7 +7,9 @@ using BlueBellDolls.Bot.ValueConverters;
 using BlueBellDolls.Common.Data.Contexts;
 using BlueBellDolls.Common.Data.Utilities;
 using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Types.Generic;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Repositories;
+using BlueBellDolls.Common.Repositories.Generic;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -48,13 +50,14 @@ internal class Program
         // Entity Framework
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlite(
+            options.UseNpgsql(
                 builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)), 
-                b => b.MigrationsAssembly("BlueBellDolls.Common"));
+                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly));
         });
 
         // Репозитории
         builder.Services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
+        builder.Services.AddScoped<IEntityRepository<Litter>, LitterRepository>();
 
         // Провайдеры
         builder.Services
@@ -94,10 +97,10 @@ internal class Program
             .AddSingleton<IEntityFormService, EntityFormService>()
             .AddSingleton<IValueConverter, EntityValueConverter>()
             .AddSingleton<IEntityHelperService, EntityHelperService>()
-            .AddSingleton<IEntityUpdateService, EntityUpdateService>()
             .AddSingleton<IArgumentParseHelperService, ArgumentParseHelperService>()
             .AddSingleton<IMessagesHelperService, MessagesHelperService>()
-            .AddSingleton<IPhotosDownloaderService, PhotosDownloaderService>();
+            .AddSingleton<IPhotosDownloaderService, PhotosDownloaderService>()
+            .AddSingleton<IManagementService, ManagementService>();
 
         // Доп. настройки
         builder.Host.UseDefaultServiceProvider(options =>
@@ -142,6 +145,6 @@ internal class Program
     {
         using var scope = app.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.EnsureCreated();
+        dbContext.Database.Migrate();
     }
 }

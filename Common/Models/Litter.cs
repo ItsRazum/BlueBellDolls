@@ -1,17 +1,12 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using System.ComponentModel.DataAnnotations;
+﻿using BlueBellDolls.Common.Types;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
-    public class Litter : IDisplayableEntity
+    public class Litter : DisplayableEntityBase
     {
 
         #region Properties
-
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
 
         public char Letter { get; set; }
         public DateOnly BirthDay { get; set; }
@@ -48,9 +43,7 @@ namespace BlueBellDolls.Common.Models
         #region IDisplayableEntity implementation
 
         [NotMapped]
-        public string DisplayName => "Помёт " + Letter;
-
-        public Dictionary<string, string> Photos { get; set; }
+        public override string DisplayName => "Помёт " + Letter;
 
         #endregion
 

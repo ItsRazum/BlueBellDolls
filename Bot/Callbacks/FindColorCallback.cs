@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
@@ -13,8 +14,8 @@ namespace BlueBellDolls.Bot.Callbacks
         private readonly Dictionary<string, Dictionary<string, string[]>> _catColors;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IDatabaseService _databaseService;
         private readonly IEntityHelperService _entityHelperService;
+        private readonly IManagementService _managementService;
 
         public FindColorCallback(
             IBotService botService, 
@@ -23,15 +24,15 @@ namespace BlueBellDolls.Bot.Callbacks
             IOptions<EntitySettings> entitySettings, 
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
-            IDatabaseService databaseService,
-            IEntityHelperService entityHelperService) 
+            IEntityHelperService entityHelperService,
+            IManagementService managementService) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _catColors = entitySettings.Value.CatColors;
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _databaseService = databaseService;
             _entityHelperService = entityHelperService;
+            _managementService = managementService;
 
             AddCommandHandler("findColorParentCat", HandleCallbackAsync<ParentCat>);
             AddCommandHandler("findColorKitten", HandleCallbackAsync<Kitten>);
@@ -40,7 +41,7 @@ namespace BlueBellDolls.Bot.Callbacks
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
         {
             var args = c.CallbackData.Split(CallbackArgsSeparator, StringSplitOptions.RemoveEmptyEntries);
-            var entityId = int.Parse(args[^1]);
+            var entityId = int.Parse(args.Last());
             var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
 
             if (entity == null)
@@ -51,7 +52,7 @@ namespace BlueBellDolls.Bot.Callbacks
 
             if (args.Length < 3)
             {
-                await UpdateColorPicker(entity, string.Empty, _catColors.Keys.ToArray(), c, token);
+                await UpdateColorPicker(entity, string.Empty, [.. _catColors.Keys], c, token);
                 return;
             }
 
@@ -67,9 +68,9 @@ namespace BlueBellDolls.Bot.Callbacks
                 var colorParts = buildedColor.Split('_', StringSplitOptions.RemoveEmptyEntries);
                 var colors = colorParts.Length switch
                 {
-                    1 => _catColors[colorParts[0]].Keys.ToArray(),
+                    1 => [.. _catColors[colorParts[0]].Keys],
                     2 => _catColors[colorParts[0]][colorParts[1]],
-                    _ => Array.Empty<string>()
+                    _ => []
                 };
                 await UpdateColorPicker(entity, buildedColor, colors, c, token);
             }
@@ -83,17 +84,17 @@ namespace BlueBellDolls.Bot.Callbacks
 
         private async Task<TEntity> UpdateEntityColor<TEntity>(int entityId, string color, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
         {
-            var updatedEntity = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+            var result = await _managementService.UpdateEntityColorAsync<TEntity>(entityId, color, token);
+            if (result.Success && result.Result != null)
             {
-                var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
-                ArgumentNullException.ThrowIfNull(entity);
-                entity.Color = color;
-                await unit.SaveChangesAsync(ct);
-                return entity;
-            }, token);
-
-            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(color), token: token);
-            return updatedEntity;
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(color), token: token);
+                return result.Result;
+            }
+            else
+            {
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
+                return await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token) ?? throw new NullReferenceException("Не удалось найти сущность!");
+            }
         }
 
         private async Task UpdateEntityForm<TEntity>(TEntity entity, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat

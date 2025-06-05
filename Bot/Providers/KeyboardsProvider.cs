@@ -6,6 +6,7 @@ using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 using Telegram.Bot.Types.ReplyMarkups;
+using static Grpc.Core.Metadata;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -43,6 +44,7 @@ namespace BlueBellDolls.Bot.Providers
         public InlineKeyboardMarkup CreateEntityListKeyboard<TEntity>(
             IEnumerable<TEntity> entities,
             ListUnitActionMode actionMode = ListUnitActionMode.Edit,
+            int chunkSize = 1,
             (int page, int totalPagesCount)? pageParameters = null,
             IEntity? unitOwner = null)
             where TEntity : class, IDisplayableEntity
@@ -51,8 +53,8 @@ namespace BlueBellDolls.Bot.Providers
             if (unitOwner != null)
                 result.AddNewRow(CreateBackToLitterButton(unitOwner.Id));
 
-            foreach (var entity in entities)
-                result.AddNewRow(CreateListEntityReferenceButton(entity, actionMode, unitOwner));
+            foreach (var chunk in entities.OrderBy(e => e.DisplayName).Chunk(chunkSize))
+                result.AddNewRow([.. chunk.Select(e => CreateListEntityReferenceButton(e, actionMode, unitOwner))]);
 
             if (pageParameters != null)
                 result.AddNewRow(CreatePageControlsButtons<TEntity>(pageParameters.Value));
@@ -70,6 +72,7 @@ namespace BlueBellDolls.Bot.Providers
             foreach (var row in _entityOptionsKeyboards[entity.GetType()](entity).InlineKeyboard)
                 result.AddNewRow([.. row]);
 
+            result.AddNewRow(CreateToggleEntityVisibilityButton(entity));
             return result;
         }
 
@@ -116,11 +119,11 @@ namespace BlueBellDolls.Bot.Providers
                 result.AddNewRow(
                     InlineKeyboardButton.WithCallbackData(
                         "Сменить родителя",
-                        _callbackDataProvider.CreateSelectParentCatCallback(parentCat.IsMale, litterId)
+                        _callbackDataProvider.CreateSelectParentCatCallback(parentCat.IsMale, 1, litterId)
                         )
                     );
 
-            result.AddNewRow(CreateDeleteButton(entity, _callbackDataProvider.CreateDeleteEntityCallback(entity, litterId)));
+            result.AddNewRow(CreateEditEntityButton(entity));
 
             return result;
         }
@@ -140,6 +143,7 @@ namespace BlueBellDolls.Bot.Providers
             var result = new ReplyKeyboardMarkup();
             result.AddNewRow(new KeyboardButton("/litterlist"));
             result.AddNewRow(new KeyboardButton("/catlist"));
+            result.AddNewRow(new KeyboardButton("/kittenlist"));
             result.ResizeKeyboard = true;
 
             return result;
@@ -151,7 +155,7 @@ namespace BlueBellDolls.Bot.Providers
 
         private InlineKeyboardMarkup CreateLitterOptionsKeyboard(Litter litter)
         {
-            var result = CreateEntityListKeyboard(litter.Kittens);
+            var result = CreateEntityListKeyboard(litter.Kittens, chunkSize: 3);
 
             if (litter.Kittens.Count < 10)
                 result.AddNewRow(
@@ -165,14 +169,14 @@ namespace BlueBellDolls.Bot.Providers
                 "Мама",
                 litter.MotherCat != null
                     ? _callbackDataProvider.CreateOpenEntityInLitterCallback(litter.MotherCat, litter.Id)
-                    : _callbackDataProvider.CreateSelectParentCatCallback(false, litter.Id)
+                    : _callbackDataProvider.CreateSelectParentCatCallback(false, 1, litter.Id)
             );
 
             (string fatherButtonText, string fatherButtonCallbackData) = (
                 "Папа",
                 litter.FatherCat != null
                     ? _callbackDataProvider.CreateOpenEntityInLitterCallback(litter.FatherCat, litter.Id)
-                    : _callbackDataProvider.CreateSelectParentCatCallback(true, litter.Id)
+                    : _callbackDataProvider.CreateSelectParentCatCallback(true, 1, litter.Id)
             );
 
             result.AddNewRow(
@@ -224,20 +228,21 @@ namespace BlueBellDolls.Bot.Providers
             return result;
         }
 
+        //TODO: Исправить смену страниц при выборе ParentCat в помёт
         private InlineKeyboardButton[] CreatePageControlsButtons<TEntity>((int page, int totalPagesCount) pageParameters)
         {
-            var entityName = typeof(TEntity).Name;
+            var entityTypeName = typeof(TEntity).Name;
             var pageCounterString = pageParameters.totalPagesCount == 0
                 ? "Список пуст!"
                 : $"{pageParameters.page}/{pageParameters.totalPagesCount}";
             var buttons = new List<InlineKeyboardButton?>
         {
             pageParameters.page > 1
-                ? InlineKeyboardButton.WithCallbackData("«", _callbackDataProvider.CreateListEntityCallback(entityName, pageParameters.page - 1))
+                ? InlineKeyboardButton.WithCallbackData("«", _callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page - 1))
                 : null,
-            InlineKeyboardButton.WithCallbackData(pageCounterString, _callbackDataProvider.CreateListEntityCallback(entityName, pageParameters.page)),
+            InlineKeyboardButton.WithCallbackData(pageCounterString, "..."),
             pageParameters.page < pageParameters.totalPagesCount
-                ? InlineKeyboardButton.WithCallbackData("»", _callbackDataProvider.CreateListEntityCallback(entityName, pageParameters.page + 1))
+                ? InlineKeyboardButton.WithCallbackData("»", _callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page + 1))
                 : null
         };
 
@@ -270,14 +275,14 @@ namespace BlueBellDolls.Bot.Providers
         private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
         {
             return InlineKeyboardButton.WithCallbackData(
-                entity.DisplayName,
+                $"{(entity.IsEnabled ? "" : "(Скрыто) ")}" + entity.DisplayName + $" (Id {entity.Id})",
                 _callbackDataProvider.CreateEntityReferenceCallback(entity, actionMode, unitOwner)
             );
         }
 
         private InlineKeyboardButton CreateAddButton<TEntity>() where TEntity : class, IDisplayableEntity
             => InlineKeyboardButton.WithCallbackData(
-                "Добавить ещё",
+                "Новая сущность...",
                 _callbackDataProvider.CreateAddEntityCallback(typeof(TEntity).Name)
             );
 
@@ -343,6 +348,13 @@ namespace BlueBellDolls.Bot.Providers
         private InlineKeyboardButton CreateSelectColorButton(Cat entity)
             => InlineKeyboardButton.WithCallbackData("Указать окрас", _callbackDataProvider.CreateStartFindColorCallback(entity));
 
+        private InlineKeyboardButton CreateEditEntityButton(IDisplayableEntity entity)
+            => InlineKeyboardButton.WithCallbackData("Редактировать", _callbackDataProvider.CreateEditEntityCallback(entity));
+
+        private InlineKeyboardButton CreateToggleEntityVisibilityButton(IDisplayableEntity entity)
+            => InlineKeyboardButton.WithCallbackData($"{(entity.IsEnabled ? "Скрыть с сайта" : "Вернуть на сайт")}", _callbackDataProvider.CreateToggleEntityVisibilityCallback(entity));
+
         #endregion
+
     }
 }

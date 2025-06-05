@@ -10,7 +10,8 @@ namespace BlueBellDolls.Bot.Interfaces
     {
         InlineKeyboardMarkup CreateEntityListKeyboard<TEntity>(
             IEnumerable<TEntity> entities, 
-            ListUnitActionMode actionMode = ListUnitActionMode.Edit, 
+            ListUnitActionMode actionMode = ListUnitActionMode.Edit,
+            int chunkSize = 1,
             (int page, int totalPagesCount)? pageParameters = null, 
             IEntity? unitOwner = null) 
             where TEntity : class, IDisplayableEntity;

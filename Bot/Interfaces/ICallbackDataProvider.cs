@@ -22,10 +22,11 @@ namespace BlueBellDolls.Bot.Interfaces
         string GetSetDefaultPhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity;
         string GetTogglePhotoSelectionCallback<T>() where T : IDisplayableEntity;
         string GetFindColorCallback<T>() where T : Cat;
+        string GetToggleEntityVisibilityCallback<T>() where T : IDisplayableEntity;
 
         string CreateConfirmCallback(string baseCallback);
         string CreateEditEntityCallback(IDisplayableEntity entity);
-        string CreateSelectParentCatCallback(bool isMale, int litterId);
+        string CreateSelectParentCatCallback(bool isMale, int page, int litterId);
         string CreateOpenEntityInLitterCallback(IEntity entity, int litterId);
         string CreateAddKittenToLitterCallback(int litterId);
         string CreateBackToLitterCallback(int litterId);
@@ -41,5 +42,6 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreateDeleteMessagesCallback();
         string CreateFindColorCallback(Cat entity, string buildedColor, string colorPart);
         string CreateStartFindColorCallback(Cat entity);
+        string CreateToggleEntityVisibilityCallback(IDisplayableEntity entity);
     }
 }

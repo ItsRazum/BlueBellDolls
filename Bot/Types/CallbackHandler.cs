@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Types
 {
-    public class CallbackHandler
+    public abstract class CallbackHandler
     {
         private readonly Dictionary<string, Func<CallbackQueryAdapter, CancellationToken, Task>> _handlers = [];
 

@@ -20,7 +20,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateEntityNotFoundMessage(Type entityType, int entityId);
 
-        string CreateEntityFormMessage(IEntity entity);
+        string CreateEntityFormMessage(IEntity entity, bool enableEdit = true);
 
         string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosManagementMode photosManagementMode);
 
@@ -53,7 +53,13 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreatePhotosDeletionSuccessMessage();
 
         string CreatePhotosDeletionFailureMessage();
+
         string CreateColorSetSuccessfullyMessage(string color);
+
         string CreateColorPickerMessage(Cat cat, string buildedColor);
+
+        string CreateSavingSuccessMessage((int parentCatsCount, int littersCount, int kittensCount) values);
+
+        string CreateToggleEntityVisibilitySuccessMessage(IDisplayableEntity entity);
     }
 }

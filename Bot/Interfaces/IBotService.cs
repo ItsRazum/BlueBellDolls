@@ -56,6 +56,8 @@ namespace BlueBellDolls.Bot.Interfaces
                 messageParameters.InputFiles?.First(),
                 token);
 
+        Task<bool> EditInlineKeyboardAsync(Chat chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default);
+
         /// <summary>
         /// Пытается отредактировать сообщение, упираясь в ограничения Telegram API. Если отредактировать сообщение не удаётся, то оно удаляется, и отправляется новое сообщение с теми-же параметрами 
         /// </summary>

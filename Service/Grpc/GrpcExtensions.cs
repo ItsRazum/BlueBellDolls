@@ -25,6 +25,7 @@ namespace BlueBellDolls.Service.Grpc
                 Description = parentCat.Description,
                 OldDescription = parentCat.OldDescription,
                 BirthDay = parentCat.BirthDay.ToString(_cultureInfo),
+                IsEnabled = parentCat.IsEnabled,
             };
 
             result.Photos.Add(parentCat.Photos);
@@ -45,7 +46,8 @@ namespace BlueBellDolls.Service.Grpc
                 OldDescription = parentCat.OldDescription,
                 GeneticTests = new(parentCat.GeneticTests),
                 Photos = new(parentCat.Photos),
-                Titles = new(parentCat.Titles)
+                Titles = new(parentCat.Titles),
+                IsEnabled = parentCat.IsEnabled
             };
         }
 
@@ -63,7 +65,8 @@ namespace BlueBellDolls.Service.Grpc
                 BirthDay = kitten.BirthDay.ToString(_cultureInfo),
                 Class = kitten.Class.ToString(),
                 Status = kitten.Status.ToString(),
-                Description = kitten.Description
+                Description = kitten.Description,
+                IsEnabled = kitten.IsEnabled,
             };
 
             result.Photos.Add(kitten.Photos);
@@ -85,7 +88,8 @@ namespace BlueBellDolls.Service.Grpc
                 Class = Enum.Parse<KittenClass>(kitten.Class),
                 Status = Enum.Parse<KittenStatus>(kitten.Status),
                 Description = kitten.Description,
-                Photos = new(kitten.Photos)
+                Photos = new(kitten.Photos),
+                IsEnabled = kitten.IsEnabled,
             };
         }
 
@@ -103,7 +107,8 @@ namespace BlueBellDolls.Service.Grpc
                 IsActive = litter.IsActive,
                 Description = litter.Description,
                 MotherCat = litter.MotherCat?.Compress(),
-                FatherCat = litter.FatherCat?.Compress()
+                FatherCat = litter.FatherCat?.Compress(),
+                IsEnabled = litter.IsEnabled,
             };
 
             result.Photos.Add(litter.Photos);
@@ -124,7 +129,8 @@ namespace BlueBellDolls.Service.Grpc
                 IsActive = litter.IsActive,
                 Description = litter.Description,
                 MotherCat = litter.MotherCat.Decompress(),
-                FatherCat = litter.FatherCat.Decompress()
+                FatherCat = litter.FatherCat.Decompress(),
+                IsEnabled = litter.IsEnabled,
             };
 
             foreach (var kitten in litter.Kittens)

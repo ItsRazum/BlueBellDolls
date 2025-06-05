@@ -2,29 +2,25 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Callbacks
 {
     public class AddKittenToLitterCallback : CallbackHandler
     {
-        private readonly IDatabaseService _databaseService;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IMessagesProvider _messagesProvider;
+        private readonly IManagementService _managementService;
 
         public AddKittenToLitterCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IDatabaseService databaseService,
             IMessageParametersProvider messageParametersProvider,
-            IMessagesProvider messagesProvider)
+            IManagementService managementService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _databaseService = databaseService;
             _messageParametersProvider = messageParametersProvider;
-            _messagesProvider = messagesProvider;
+            _managementService = managementService;
 
             AddCommandHandler(CallbackDataProvider.GetAddKittenToLitterCallback(), HandleCallbackAsync);
         }
@@ -33,31 +29,15 @@ namespace BlueBellDolls.Bot.Callbacks
         {
             var litterId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var kitten = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+            var result = await _managementService.AddNewKittenToLitterAsync(litterId, token);
+
+            if (result.Result == null)
             {
-                var kitten = new Kitten();
-
-                var litterRepo = unit.GetRepository<Litter>();
-
-                var litter = await litterRepo.GetByIdAsync(litterId, ct, l => l.Kittens);
-
-                if (litter == null)
-                    return null;
-
-                litter.Kittens.Add(kitten);
-                await unit.SaveChangesAsync(token);
-
-                return kitten;
-
-            }, token);
-
-            if (kitten == null)
-            {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(typeof(Litter), litterId), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
                 return;
             }
 
-            await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(kitten), token);
+            await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
         }
     }
 }

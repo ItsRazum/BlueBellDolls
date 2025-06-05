@@ -56,7 +56,7 @@ namespace BlueBellDolls.Bot.Callbacks
                     CallbackDataProvider.CreateBackToLitterCallback(litterId));
             }
 
-            await BotService.EditMessageAsync(
+            await BotService.EditOrSendNewMessageAsync(
                 c.Chat, 
                 c.MessageId,
                 _messageParametersProvider.GetDeleteEntityConfirmationParameters(

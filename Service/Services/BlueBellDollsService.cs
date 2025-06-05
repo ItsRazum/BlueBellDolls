@@ -31,30 +31,14 @@ namespace BlueBellDolls.Service.Services
 
         #region BlueBellDollsServiceBase implementation
 
-        public override async Task<BoolValue> AddNewCat(ParentCat request, ServerCallContext context)
-        {
-            return new BoolValue
-            {
-                Value = await AddNewEntityAsync(request.Decompress(), context.CancellationToken)
-            };
-        }
-
-        public override async Task<BoolValue> AddNewLitter(Litter request, ServerCallContext context)
-        {
-            return new BoolValue
-            {
-                Value = await AddNewEntityAsync(request.Decompress(), context.CancellationToken)
-            };
-        }
-
-        public override async Task<GetFemaleCatsResponce> GetCatsByGender(BoolValue isMale, ServerCallContext context)
+        public override async Task<GetFemaleCatsResponce> GetActiveCatsByGender(BoolValue isMale, ServerCallContext context)
         {
             _logger.LogInformation("Called BlueBellDollsService.GetCatsByGender()");
 
             var result = new GetFemaleCatsResponce();
             try
             {
-                var cats = await _catService.GetCatsByGenderAsync(isMale.Value, context.CancellationToken);
+                var cats = await _catService.GetActiveCatsByGenderAsync(isMale.Value, context.CancellationToken);
 
                 result.FemaleCats.AddRange(cats.Select(c => c.Compress()));
                 return result;
@@ -67,14 +51,14 @@ namespace BlueBellDolls.Service.Services
 
         }
 
-        public override async Task<GetLittersResponce> GetLitters(Empty request, ServerCallContext context)
+        public override async Task<GetLittersResponce> GetActiveLitters(Empty request, ServerCallContext context)
         {
             _logger.LogInformation("Called BlueBellDollsService.GetLitters()");
 
             var result = new GetLittersResponce();
             try
             {
-                var litters = await _catService.GetLittersAsync(context.CancellationToken);
+                var litters = await _catService.GetActiveLittersAsync(context.CancellationToken);
 
                 result.Litters.AddRange(litters.Select(l => l.Compress()));
                 return result;
@@ -89,23 +73,5 @@ namespace BlueBellDolls.Service.Services
 
         #endregion
 
-        #region Methods
-
-        private async Task<bool> AddNewEntityAsync(IEntity entity, CancellationToken token)
-        {
-            try
-            {
-                _logger.LogInformation("Called BlueBellDollsService.AddNewEntityAsync()");
-                await _catService.AddNewEntityAsync(entity, token);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Exception thrown in BlueBellDollsService.AddNewEntityAsync()");
-                return false;
-            }
-        }
-
-        #endregion
     }
 }

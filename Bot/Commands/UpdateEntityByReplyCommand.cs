@@ -8,27 +8,24 @@ namespace BlueBellDolls.Bot.Commands
 {
     public class UpdateEntityByReplyCommand : CommandHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IEntityUpdateService _entityUpdateService;
         private readonly IMessagesProvider _messagesProvider;
+        private readonly IManagementService _managementService;
 
         public UpdateEntityByReplyCommand(
             IBotService botService,
-            IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
-            IEntityUpdateService entityUpdateService,
-            IMessagesProvider messagesProvider)
+            IMessagesProvider messagesProvider,
+            IManagementService managementService)
             : base(botService)
         {
-            _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
-            _entityUpdateService = entityUpdateService;
             _messagesProvider = messagesProvider;
+            _managementService = managementService;
 
-            AddCommandHandler("updateEntityByReply-ParentCat", HandleCommandAsync<ParentCat>);
-            AddCommandHandler("updateEntityByReply-Litter", HandleCommandAsync<Litter>);
-            AddCommandHandler("updateEntityByReply-Kitten", HandleCommandAsync<Kitten>);
+            AddCommandHandler("update_entity_by_reply_parentcat", HandleCommandAsync<ParentCat>);
+            AddCommandHandler("update_entity_by_reply_litter", HandleCommandAsync<Litter>);
+            AddCommandHandler("update_entity_by_reply_kitten", HandleCommandAsync<Kitten>);
         }
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity
@@ -37,7 +34,7 @@ namespace BlueBellDolls.Bot.Commands
             {
                 var args = m.ReplyToMessage.Text.Split('\n');
 
-                if (IsValidMessageFormat(args.First(), out var result))
+                if (IsValidMessageFormat(args.First(), out var modelId))
                 {
                     var properties = m.Text.Split('\n')
                         .Select(line => line.Split(": ", 2))
@@ -47,9 +44,9 @@ namespace BlueBellDolls.Bot.Commands
                     if (properties == null || properties.Count == 0)
                         return;
 
-                    var success = await _entityUpdateService.HandleUpdateEntityByReplyAsync<TEntity>(m, result.modelName, result.modelId, properties, token);
+                    var result = await _managementService.UpdateEntityByReplyAsync<TEntity>(modelId, properties, token);
 
-                    if (success)
+                    if (result.Success)
                     {
                         if (!await BotService.DeleteMessageAsync(m.Chat, m.ReplyToMessage!.MessageId, token))
                         {
@@ -58,7 +55,7 @@ namespace BlueBellDolls.Bot.Commands
                         }
 
                         await BotService.DeleteMessageAsync(m.Chat, m.MessageId, token);
-                        var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(result.modelId, token);
+                        var entity = result.Result;
 
                         await BotService.SendMessageAsync(m.Chat,
                             _messageParametersProvider.GetEntityFormParameters(entity!), token);
@@ -67,16 +64,15 @@ namespace BlueBellDolls.Bot.Commands
                         await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateEntityUpdateFailureMessage(), token: token);
                 }
 
-                static bool IsValidMessageFormat(string message, out (string modelName, int modelId) values)
+                static bool IsValidMessageFormat(string message, out int modelId)
                 {
-                    values = (string.Empty, 0);
+                    modelId = 0;
 
                     var parts = message.Split(' ');
                     if (parts.Length < 2)
                         return false;
 
-                    values.modelName = parts[0];
-                    if (!int.TryParse(parts[1], out values.modelId))
+                    if (!int.TryParse(parts[1], out modelId))
                         return false;
 
                     return true;

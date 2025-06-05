@@ -5,7 +5,6 @@ using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
-using System.Linq.Expressions;
 
 namespace BlueBellDolls.Bot.Callbacks
 {
@@ -35,20 +34,8 @@ namespace BlueBellDolls.Bot.Callbacks
 
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            Expression<Func<TEntity, object?>>[] includes = typeof(TEntity) switch
-            {
-                _ when typeof(TEntity) == typeof(Litter) =>
-                [
-                    e => (e as Litter)!.Kittens,
-                    e => (e as Litter)!.MotherCat,
-                    e => (e as Litter)!.FatherCat
-                ],
-                _ => []
-            };
-
-
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync(entityId, token, includes);
+            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
 
             if (entity == null)
             {

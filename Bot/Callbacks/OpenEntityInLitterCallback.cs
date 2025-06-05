@@ -48,7 +48,7 @@ namespace BlueBellDolls.Bot.Callbacks
                 return;
             }
 
-            await BotService.EditMessageAsync(
+            await BotService.EditOrSendNewMessageAsync(
                 c.Chat,
                 c.MessageId,
                 _messageParametersProvider.GetEntityFromLitterParameters(entity, litterId),

@@ -57,11 +57,6 @@ namespace BlueBellDolls.Bot.Services
             return UpdateEntity(entity, displayName, value);
         }
 
-        public bool UpdateProperty(IEntity entity, string displayName, string value)
-        {
-            return UpdateEntity(entity, displayName, value);
-        }
-
         private bool UpdateEntity(IEntity entity, string displayName, string value)
         {
             if (string.IsNullOrWhiteSpace(displayName))

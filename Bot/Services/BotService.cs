@@ -83,6 +83,20 @@ namespace BlueBellDolls.Bot.Services
             }
         }
 
+        public async Task<bool> EditInlineKeyboardAsync(Chat chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default)
+        {
+            try
+            {
+                await _botClient.EditMessageReplyMarkup(chat, messageId, inlineKeyboard, cancellationToken: token);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось изменить клавиатуру для сообщения");
+                return false;
+            }
+        }
+
         public async Task EditOrSendNewMessageAsync(
             Chat chat,
             int messageId,

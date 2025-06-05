@@ -1,26 +1,25 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
-using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
     public class NewEntityCommand : CommandHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly IManagementService _managementService;
 
         public NewEntityCommand(
             IBotService botService,
-            IEntityHelperService entityHelperService,
-            IMessageParametersProvider messageParametersProvider)
+            IMessageParametersProvider messageParametersProvider,
+            IManagementService managementService)
             : base(botService)
         {
-            _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
+            _managementService = managementService;
 
             AddCommandHandler("/newcat", HandleCommandAsync<ParentCat>);
             AddCommandHandler("/newlitter", HandleCommandAsync<Litter>);
@@ -28,8 +27,12 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity, new()
         {
-            var newEntity = await _entityHelperService.AddNewEntityAsync<TEntity>(token);
-            await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(newEntity), token);
+            var result = await _managementService.AddNewEntityAsync<TEntity>(token);
+
+            if (result.Result != null)
+                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
+            else
+                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
         }
     }
 }

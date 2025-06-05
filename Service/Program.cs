@@ -8,7 +8,7 @@ using System.Net;
 using BlueBellDolls.Common.Data.Contexts;
 using BlueBellDolls.Common.Data.Utilities;
 using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Types.Generic;
+using BlueBellDolls.Common.Repositories.Generic;
 
 namespace BlueBellDolls.Service;
 
@@ -54,7 +54,9 @@ class Program
         // Entity Framework
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
-            options.UseSqlite(builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)));
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)),
+                x => x.MigrationsAssembly(typeof(ApplicationDbContext).Assembly));
         });
 
         // Репозитории
@@ -68,7 +70,6 @@ class Program
 
         // Сервисы
         builder.Services.AddScoped<ICatService, CatService>();
-
 
         // Доп. настройки
         builder.Host.UseDefaultServiceProvider(options =>

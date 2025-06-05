@@ -7,8 +7,7 @@ namespace BlueBellDolls.Bot.Interfaces
     {
         Task<TEntity?> GetDisplayableEntityByIdAsync<TEntity>(
             int entityId, 
-            CancellationToken token = default, 
-            params Expression<Func<TEntity, object?>>[] includes)
+            CancellationToken token = default)
             where TEntity : IDisplayableEntity;
 
         Task<(IEnumerable<TEntity> entityList, int pagesCount, int entitiesCount)> GetEntityListAsync<TEntity>(
@@ -21,8 +20,5 @@ namespace BlueBellDolls.Bot.Interfaces
             int page,
             CancellationToken token = default)
             where TEntity : IDisplayableEntity;
-
-        Task<TEntity> AddNewEntityAsync<TEntity>(CancellationToken token = default) 
-            where TEntity : class, IDisplayableEntity, new();
     }
 }

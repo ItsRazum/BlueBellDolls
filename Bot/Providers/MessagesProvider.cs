@@ -18,7 +18,7 @@ namespace BlueBellDolls.Bot.Providers
 
         private readonly EntityFormSettings _entityFormSettings;
         private readonly EntitySettings _entitySettings;
-        private readonly Dictionary<Type, Func<IEntity, string>> _entityFormMessages;
+        private readonly Dictionary<Type, Func<IEntity, bool, string>> _entityFormMessages;
 
         #endregion
 
@@ -32,9 +32,9 @@ namespace BlueBellDolls.Bot.Providers
             _entitySettings = entityOptions.Value;
             _entityFormMessages = new()
             {
-                { typeof(ParentCat), (entity) => CreateParentCatFormMessage((ParentCat)entity) },
-                { typeof(Litter),    (entity) => CreateLitterFormMessage((Litter)entity) },
-                { typeof(Kitten),    (entity) => CreateKittenFormMessage((Kitten)entity) }
+                { typeof(ParentCat), (entity, enableEdit) => CreateParentCatFormMessage((ParentCat)entity, enableEdit) },
+                { typeof(Litter),    (entity, enableEdit) => CreateLitterFormMessage((Litter)entity, enableEdit) },
+                { typeof(Kitten),    (entity, enableEdit) => CreateKittenFormMessage((Kitten)entity, enableEdit) }
             };
         }
 
@@ -95,9 +95,9 @@ namespace BlueBellDolls.Bot.Providers
             return $"🔍 {entityType.Name} {entityId} не найден(а)!";
         }
 
-        public string CreateEntityFormMessage(IEntity entity)
+        public string CreateEntityFormMessage(IEntity entity, bool enableEdit = true)
         {
-            return _entityFormMessages[entity.GetType()](entity);
+            return _entityFormMessages[entity.GetType()](entity, enableEdit);
         }
 
         public string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosManagementMode photosManagementMode)
@@ -258,20 +258,53 @@ namespace BlueBellDolls.Bot.Providers
               .AppendLine()
               .AppendLine($"📍 Текущий путь: {buildedColor.Replace("_", " → ")}")
               .AppendLine("─────────────────────────")
-              .AppendLine("➡️ Сделайте выбор, отправив номер пункта");
+              .AppendLine("➡️ Сделайте выбор, указав нужный подпункт");
 
             return sb.ToString();
+        }
+
+        public string CreateSavingSuccessMessage((int parentCatsCount, int littersCount, int kittensCount) values)
+        {
+            if (values is {
+                    parentCatsCount: 0,
+                    kittensCount: 0,
+                    littersCount: 0
+                })
+                return "🤷‍♂️В базе нету сущностей, требующих сохранения!";
+
+            var sb = new StringBuilder($"✅ Успешно сохранены сущности ({values.parentCatsCount + values.littersCount + values.kittensCount} шт.)");
+            sb
+                .AppendLine()
+                .AppendLine("Из них:");
+
+            if (values.parentCatsCount > 0)
+                sb.AppendLine($"- Кошки производители: {values.parentCatsCount} шт.");
+
+            if (values.littersCount > 0)
+                sb.AppendLine($"- Помёты: {values.littersCount} шт.");
+
+            if (values.kittensCount > 0)
+                sb.AppendLine($"- Котята: {values.kittensCount} шт.");
+
+            return sb.ToString();
+        }
+
+        public string CreateToggleEntityVisibilitySuccessMessage(IDisplayableEntity entity)
+        {
+            return $"✅ Сущность \"{entity.DisplayName}\" " +
+                (entity.IsEnabled 
+                ? "теперь отображается на сайте!"
+                : "скрыта с сайта!");
         }
 
         #endregion
 
         #region Methods
 
-        private string CreateParentCatFormMessage(ParentCat parentCat)
+        private string CreateParentCatFormMessage(ParentCat parentCat, bool enableEdit)
         {
             return
-                $"{nameof(ParentCat)} {parentCat.Id}\n" +
-                "\n" +
+                (enableEdit ? $"{nameof(ParentCat)} {parentCat.Id}\n\n" : "") +
                 $"🐾 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Name)]}: {parentCat.Name}\n" +
                 $"📅 {_entityFormSettings.ParentCatProperties[nameof(parentCat.BirthDay)]}: {parentCat.BirthDay.ToString(new CultureInfo("ru-RU"))}\n" +
                 $"♂♀ {_entityFormSettings.ParentCatProperties[nameof(parentCat.IsMale)]}: {(parentCat.IsMale ? "мужской" : "женский")}\n" +
@@ -285,11 +318,10 @@ namespace BlueBellDolls.Bot.Providers
                 "══════════════════════════";
         }
 
-        private string CreateLitterFormMessage(Litter litter)
+        private string CreateLitterFormMessage(Litter litter, bool enableEdit)
         {
             return
-                $"{nameof(Litter)} {litter.Id}\n" +
-                "\n" +
+                (enableEdit ? $"{nameof(Litter)} {litter.Id}\n\n" : "") +
                 $"🔤 {_entityFormSettings.LitterProperties[nameof(litter.Letter)]}: {litter.Letter}\n" +
                 $"📅 {_entityFormSettings.LitterProperties[nameof(litter.BirthDay)]}: {litter.BirthDay}\n" +
                 "\n" +
@@ -304,11 +336,10 @@ namespace BlueBellDolls.Bot.Providers
                 "══════════════════════════";
         }
 
-        private string CreateKittenFormMessage(Kitten kitten)
+        private string CreateKittenFormMessage(Kitten kitten, bool enableEdit)
         {
             return
-                $"{nameof(Kitten)} {kitten.Id}\n" +
-                "\n" +
+                (enableEdit ? $"{nameof(Kitten)} {kitten.Id}\n\n" : "") +
                 $"🐾 {_entityFormSettings.KittenProperties[nameof(kitten.Name)]}: {kitten.Name}\n" +
                 $"📅 {_entityFormSettings.KittenProperties[nameof(kitten.BirthDay)]}: {kitten.BirthDay.ToString(new CultureInfo("ru-RU"))}\n" +
                 $"♂♀ {_entityFormSettings.KittenProperties[nameof(kitten.IsMale)]}: {(kitten.IsMale ? "мужской" : "женский")}\n" +

@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
@@ -10,21 +11,21 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class ConfirmDeleteEntityCallback : CallbackHandler
     {
-        private readonly IDatabaseService _databaseService;
         private readonly IMessagesProvider _messagesProvider;
+        private readonly IManagementService _managementService;
 
         public ConfirmDeleteEntityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IDatabaseService databaseService,
-            IMessagesProvider messagesProvider)
+            IMessagesProvider messagesProvider,
+            IManagementService managementService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _databaseService = databaseService;
             _messagesProvider = messagesProvider;
+            _managementService = managementService;
 
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<ParentCat>(), HandleDeleteParentCatCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<ParentCat>(), HandleCallbackAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<Litter>(), HandleCallbackAsync<Litter>);
             AddCommandHandler(CallbackDataProvider.GetConfirmDeleteEntityCallback<Kitten>(), HandleCallbackAsync<Kitten>);
         }
@@ -33,41 +34,14 @@ namespace BlueBellDolls.Bot.Callbacks
         {
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
-            {
-                var repo = unit.GetRepository<TEntity>();
+            var result = await _managementService.DeleteEntityAsync<TEntity>(entityId, token);
 
-                if(await repo.DeleteByIdAsync(entityId, ct))
-                    await unit.SaveChangesAsync(ct);
-            }, token);
-
-            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityDeletionSuccess(), token: token);
-        }
-
-        private async Task HandleDeleteParentCatCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
-        {
-            var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
-
-            await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
-            {
-                var parentCatRepo = unit.GetRepository<ParentCat>();
-                var targetParentCat = await parentCatRepo.GetByIdAsync(entityId, ct);
-
-                if (targetParentCat != null)
-                {
-                    var litterRepo = unit.GetRepository<Litter>();
-
-                    IEnumerable<Litter> entities = targetParentCat.IsMale
-                        ? await litterRepo.GetAllAsync(l => l.FatherCatId == targetParentCat.Id, ct, l => l.FatherCat)
-                        : await litterRepo.GetAllAsync(l => l.MotherCatId == targetParentCat.Id, ct, l => l.MotherCat);
-
-                    await parentCatRepo.DeleteByIdAsync(entityId, ct);
-                    await unit.SaveChangesAsync(ct);
-                }
-
-            }, token);
-
-            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityDeletionSuccess(), token: token);
+            await BotService.AnswerCallbackQueryAsync(
+                c.CallbackId, 
+                result.Success 
+                ? _messagesProvider.CreateEntityDeletionSuccess() 
+                : result.ErrorText!,
+                token: token);
         }
     }
 }

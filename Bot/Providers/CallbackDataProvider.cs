@@ -71,9 +71,13 @@ namespace BlueBellDolls.Bot.Providers
         public string GetFindColorCallback<T>() where T : Cat
             => $"{_settings.FindColor}{typeof(T).Name}";
 
+        public string GetToggleEntityVisibilityCallback<T>() where T : IDisplayableEntity
+            => $"{_settings.ToggleEntityVisibility}{typeof(T).Name}";
+
+
         #endregion
 
-            #region Create methods
+        #region Create methods
 
         public string CreateConfirmCallback(string baseCallback)
             => $"{_settings.ConfirmationSuffix}{baseCallback}";
@@ -81,8 +85,8 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateEditEntityCallback(IDisplayableEntity entity)
             => $"{_settings.EditEntity}{entity.GetType().Name}{Separator}{entity.Id}";
 
-        public string CreateSelectParentCatCallback(bool isMale, int litterId)
-            => $"{_settings.SelectEntity}{nameof(ParentCat)}{Separator}{isMale}{Separator}{litterId}";
+        public string CreateSelectParentCatCallback(bool isMale, int page, int litterId)
+            => $"{_settings.SelectEntity}{nameof(ParentCat)}{Separator}{isMale}{Separator}{page}{Separator}{litterId}";
 
         public string CreateOpenEntityInLitterCallback(IEntity entity, int litterId)
             => $"{_settings.OpenEntity}{entity.GetType().Name}{Separator}{litterId}{Separator}{entity.Id}";
@@ -139,6 +143,9 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateStartFindColorCallback(Cat entity)
             => $"{_settings.FindColor}{entity.GetType().Name}{Separator}{entity.Id}";
+
+        public string CreateToggleEntityVisibilityCallback(IDisplayableEntity entity)
+            => $"{_settings.ToggleEntityVisibility}{entity.GetType().Name}{Separator}{entity.Id}";
 
         #endregion
     }

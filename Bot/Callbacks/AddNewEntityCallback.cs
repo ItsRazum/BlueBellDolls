@@ -10,19 +10,20 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class AddNewEntityCallback : CallbackHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly IManagementService _managementService;
 
         public AddNewEntityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IEntityHelperService entityHelperService,
-            IMessageParametersProvider messageParametersProvider)
+            IMessageParametersProvider messageParametersProvider,
+            IManagementService managementService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _entityHelperService = entityHelperService;
             _messageParametersProvider = messageParametersProvider;
+            _managementService = managementService;
 
             AddCommandHandler(CallbackDataProvider.GetAddEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetAddEntityCallback<Litter>(), HandleCommandAsync<Litter>);
@@ -30,8 +31,13 @@ namespace BlueBellDolls.Bot.Callbacks
 
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity, new()
         {
-            var newEntity = await _entityHelperService.AddNewEntityAsync<TEntity>(token);
-            await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(newEntity), token);
+            var result = await _managementService.AddNewEntityAsync<TEntity>(token);
+
+            if (result.Result != null)
+                await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
+
+            else
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
         }
     }
 }
