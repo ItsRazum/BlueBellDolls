@@ -323,7 +323,7 @@ namespace BlueBellDolls.Bot.Providers
             return
                 (enableEdit ? $"{nameof(Litter)} {litter.Id}\n\n" : "") +
                 $"🔤 {_entityFormSettings.LitterProperties[nameof(litter.Letter)]}: {litter.Letter}\n" +
-                $"📅 {_entityFormSettings.LitterProperties[nameof(litter.BirthDay)]}: {litter.BirthDay}\n" +
+                $"📅 {_entityFormSettings.LitterProperties[nameof(litter.BirthDay)]}: {litter.BirthDay.ToString(new CultureInfo("ru-RU"))}\n" +
                 "\n" +
                 "👪 Родители:\n" +
                 $"├ Мама: {litter.MotherCat?.Name ?? "—"}\n" +
