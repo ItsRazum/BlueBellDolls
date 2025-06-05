@@ -53,7 +53,7 @@ namespace BlueBellDolls.Bot.Interfaces
                 messageId, 
                 messageParameters.Text,
                 (InlineKeyboardMarkup?)messageParameters.ReplyMarkup,
-                messageParameters.InputFiles?.First(),
+                messageParameters.InputFiles?.FirstOrDefault(),
                 token);
 
         Task<bool> EditInlineKeyboardAsync(Chat chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default);
