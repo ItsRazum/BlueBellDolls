@@ -24,8 +24,6 @@ namespace BlueBellDolls.Bot.Services
         {
             var kitten = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
             {
-                var kitten = new Kitten();
-
                 var litterRepo = unit.GetRepository<Litter>();
 
                 var litter = await litterRepo.GetByIdAsync(litterId, ct);
@@ -33,6 +31,10 @@ namespace BlueBellDolls.Bot.Services
                 if (litter == null)
                     return null;
 
+                var kitten = new Kitten() 
+                {
+                    BirthDay = litter.BirthDay 
+                };
                 litter.Kittens.Add(kitten);
                 await unit.SaveChangesAsync(token);
 
