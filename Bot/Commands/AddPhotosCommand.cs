@@ -41,12 +41,6 @@ namespace BlueBellDolls.Bot.Commands
         {
             if (m.Photos == null) return;
 
-            if (m.Photos.Length > _entitySettings.MaxPhotosCount)
-            {
-                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitReachedMessage(), token: token);
-                return;
-            }
-
             var repliedMessageText = m.ReplyToMessage!.Text;
             if (repliedMessageText == null) return;
 
@@ -70,7 +64,7 @@ namespace BlueBellDolls.Bot.Commands
             if (entity != null)
             {
                 if (photosLimitIsReached)
-                    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitReachedMessage(), token: token);
+                    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLimitReachedMessage(entity), token: token);
                 else
                 {
                     await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
@@ -84,11 +78,11 @@ namespace BlueBellDolls.Bot.Commands
         {
             try
             {
-                var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId);
+                var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
                 if (entity == null) 
                     return (null, false);
 
-                if (entity.Photos.Count + photos.Length > _entitySettings.MaxPhotosCount)
+                if (entity.Photos.Count + photos.Length > _entitySettings.MaxPhotos[entity.GetType().Name])
                     return (entity, true);
 
                 var base64Photos = await _photosDownloaderService.DownloadAndConvertPhotosToBase64(photos, token);
@@ -100,7 +94,7 @@ namespace BlueBellDolls.Bot.Commands
                     var entityFromDb = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
                     if (entityFromDb == null) return (null, false);
 
-                    if (entityFromDb.Photos.Count + base64Photos.Count > _entitySettings.MaxPhotosCount)
+                    if (entityFromDb.Photos.Count + base64Photos.Count > _entitySettings.MaxPhotos[entity.GetType().Name])
                         return (entityFromDb, true);
 
                     foreach (var photo in base64Photos)

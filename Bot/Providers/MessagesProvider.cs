@@ -8,6 +8,7 @@ using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
+using static Grpc.Core.Metadata;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -106,7 +107,7 @@ namespace BlueBellDolls.Bot.Providers
             {
                 PhotosManagementMode.Photos =>
                     $"📷 {entity.DisplayName}\n" +
-                    $"├ Количество: {entity.Photos.Count}/{_entitySettings.MaxPhotosCount}\n" +
+                    $"├ Количество: {entity.Photos.Count}/{_entitySettings.MaxPhotos[entity.GetType().Name]}\n" +
                     "└ Используйте номера для управления фото\n" +
                     "   ▪ Выберите одно как заглавное\n" +
                     "   ▪ Удалите ненужные",
@@ -131,9 +132,9 @@ namespace BlueBellDolls.Bot.Providers
             return "⏳ Загрузка...";
         }
 
-        public string CreatePhotosLimitReachedMessage()
+        public string CreatePhotosLimitReachedMessage(IDisplayableEntity entity)
         {
-            return $"🚫 Максимум фотографий: {_entitySettings.MaxPhotosCount}";
+            return $"🚫 Максимум фотографий: {_entitySettings.MaxPhotos[entity.GetType().Name]}";
         }
 
         public string CreateTitlesLimitReachedMessage()
@@ -310,7 +311,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"♂♀ {_entityFormSettings.ParentCatProperties[nameof(parentCat.IsMale)]}: {(parentCat.IsMale ? "мужской" : "женский")}\n" +
                 $"🎨 Окрас: {parentCat.Color}\n" +
                 "\n" +
-                $"📸 Фото: {parentCat.Photos.Count}/{_entitySettings.MaxPhotosCount}\n" +
+                $"📸 Фото: {parentCat.Photos.Count}/{_entitySettings.MaxPhotos[nameof(ParentCat)]}\n" +
                 $"🏆 Титулы: {parentCat.Titles.Count}/{_entitySettings.MaxParentCatTitlesCount}\n" +
                 $"🧬 Тесты: {parentCat.GeneticTests.Count}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
                 "\n" +
@@ -329,7 +330,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"├ Мама: {litter.MotherCat?.Name ?? "—"}\n" +
                 $"└ Папа: {litter.FatherCat?.Name ?? "—"}\n" +
                 "\n" +
-                $"📸 Фото: {litter.Photos.Count}/{_entitySettings.MaxPhotosCount}\n" +
+                $"📸 Фото: {litter.Photos.Count}/{_entitySettings.MaxPhotos[nameof(Litter)]}\n" +
                 $"🐱 Котят: {litter.Kittens.Count}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.LitterProperties[nameof(litter.Description)]}:\n{litter.Description}\n" +
@@ -349,7 +350,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"📌 Статус: {kitten.Status}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.KittenProperties[nameof(kitten.Description)]}:\n{kitten.Description}\n" +
-                $"📸 Фото: {kitten.Photos.Count}/{_entitySettings.MaxPhotosCount}\n" +
+                $"📸 Фото: {kitten.Photos.Count}/{_entitySettings.MaxPhotos[nameof(Kitten)]}\n" +
                 "══════════════════════════";
         }
 

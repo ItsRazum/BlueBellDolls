@@ -26,7 +26,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreatePhotosLoadingMessage();
 
-        string CreatePhotosLimitReachedMessage();
+        string CreatePhotosLimitReachedMessage(IDisplayableEntity entity);
 
         string CreateTitlesLimitReachedMessage();
 

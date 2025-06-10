@@ -2,7 +2,7 @@
 {
     public class EntitySettings
     {
-        public int MaxPhotosCount { get; set; }
+        public Dictionary<string, int> MaxPhotos { get; set; }
         public int MaxParentCatTitlesCount { get; set; }
         public int MaxParentCatGeneticTestsCount { get; set; }
 
