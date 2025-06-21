@@ -262,7 +262,7 @@ namespace BlueBellDolls.Bot.Services
 
         #region Photos
 
-        private async Task<ManagementOperationResult<IDisplayableEntity>> AddPhotosToEntity<TEntity>(
+        public async Task<ManagementOperationResult<IDisplayableEntity>> AddPhotosToEntity<TEntity>(
             PhotoAdapter[] photos,
             int entityId, 
             CancellationToken token) where TEntity : IDisplayableEntity
