@@ -14,11 +14,20 @@ namespace BlueBellDolls.Bot.Services
         IEntityHelperService entityHelperService,
         IEntityFormService entityFormService) : IManagementService
     {
+
+        #region Fields
+
         private readonly IDatabaseService _databaseService = databaseService;
         private readonly IMessagesProvider _messagesProvider = messagesProvider;
         private readonly ILogger<ManagementService> _logger = logger;
         private readonly IEntityHelperService _entityHelperService = entityHelperService;
         private readonly IEntityFormService _entityFormService = entityFormService;
+
+        #endregion
+
+        #region IManagementService implementation
+
+        #region Add/delete entities
 
         public async Task<ManagementOperationResult<Kitten>> AddNewKittenToLitterAsync(int litterId, CancellationToken token)
         {
@@ -31,9 +40,9 @@ namespace BlueBellDolls.Bot.Services
                 if (litter == null)
                     return null;
 
-                var kitten = new Kitten() 
+                var kitten = new Kitten()
                 {
-                    BirthDay = litter.BirthDay 
+                    BirthDay = litter.BirthDay
                 };
                 litter.Kittens.Add(kitten);
                 await unit.SaveChangesAsync(token);
@@ -109,57 +118,9 @@ namespace BlueBellDolls.Bot.Services
 
         }
 
-        public async Task<ManagementOperationResult> DeleteEntityPhotosAsync<TEntity>(int entityId, IEnumerable<int> photoIndexes, PhotosManagementMode photosManagementMode, CancellationToken token) where TEntity : IDisplayableEntity
-        {
-            try
-            {
-                var result = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
-                {
-                    var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
-                    if (entity != null)
-                    {
-                        Dictionary<string, string> photos;
-                        if (entity is ParentCat parentCat)
-                        {
-                            photos = photosManagementMode switch
-                            {
-                                PhotosManagementMode.Photos => entity.Photos,
-                                PhotosManagementMode.Titles => parentCat.Titles,
-                                PhotosManagementMode.GenTests => parentCat.GeneticTests,
-                                _ => []
-                            };
-                        }
-                        else
-                        {
-                            if (photosManagementMode != PhotosManagementMode.Photos)
-                                throw new InvalidOperationException($"Сущность {entity.GetType().Name} не поддерживает удаление {photosManagementMode}.");
+        #endregion
 
-                            photos = entity.Photos;
-                        }
-
-                        var keysToRemove = photoIndexes
-                        .Select(x => photos.Keys.ElementAt(x))
-                        .ToList();
-
-                        foreach (var photoKey in keysToRemove)
-                            photos.Remove(photoKey);
-
-                        await unit.SaveChangesAsync(token);
-
-                        return new ManagementOperationResult(true);
-                    }
-
-                    return new ManagementOperationResult(false, _messagesProvider.CreateEntityNotFoundMessage());
-                }, token);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{Service}.{Method}<{TEntity}>(): Произошла необработанная ошибка", nameof(ManagementService), nameof(DeleteEntityPhotosAsync), typeof(TEntity).Name);
-                return new(false, "Не удалось удалить фото у сущности: " + ex.Message);
-            }
-        }
+        #region Update entities
 
         public async Task<ManagementOperationResult<TEntity>> UpdateEntityColorAsync<TEntity>(int entityId, string color, CancellationToken token) where TEntity : Cat
         {
@@ -219,41 +180,11 @@ namespace BlueBellDolls.Bot.Services
             }
         }
 
-        public async Task<ManagementOperationResult<TEntity>> SetDefaultPhotoForEntityAsync<TEntity>(int entityId, int photoIndex, CancellationToken token) where TEntity : class, IDisplayableEntity
-        {
-            try
-            {
-                var result = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
-                {
-                    var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
-                    if (entity == null)
-                        return new ManagementOperationResult<TEntity>(false, _messagesProvider.CreateEntityNotFoundMessage());
-
-                    var photosList = entity.Photos.ToList();
-                    var photo = photosList[photoIndex];
-                    photosList.RemoveAt(photoIndex);
-                    photosList.Insert(0, photo);
-
-                    entity.Photos = photosList.ToDictionary(x => x.Key, x => x.Value);
-                    await unit.SaveChangesAsync(ct);
-                    return new ManagementOperationResult<TEntity>(true, null, entity);
-                }, token);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{Service}.{Method}<{TEntity}>(): Произошла необработанная ошибка", nameof(ManagementService), nameof(UpdateEntityColorAsync), typeof(TEntity).Name);
-                return new(false, "Не удалось установить заглавное фото для сущности: " + ex.Message);
-            }
-
-        }
-
         public async Task<ManagementOperationResult<TEntity>> UpdateEntityByReplyAsync<TEntity>(
             int modelId,
             Dictionary<string, string>
             properties,
-            CancellationToken token = default) 
+            CancellationToken token = default)
             where TEntity : class, IDisplayableEntity
         {
             try
@@ -318,8 +249,97 @@ namespace BlueBellDolls.Bot.Services
                 _logger.LogError(ex, "{Service}.{Method}<{TEntity}>(): Произошла необработанная ошибка", nameof(ManagementService), nameof(UpdateEntityByReplyAsync), typeof(TEntity).Name);
                 return new(false, "Не удалось обновить сущность: " + ex.Message);
             }
+        }
+
+        #endregion
+
+        #region Photos
+
+        public async Task<ManagementOperationResult> DeleteEntityPhotosAsync<TEntity>(int entityId, IEnumerable<int> photoIndexes, PhotosManagementMode photosManagementMode, CancellationToken token) where TEntity : IDisplayableEntity
+        {
+            try
+            {
+                var result = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+                {
+                    var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
+                    if (entity != null)
+                    {
+                        Dictionary<string, string> photos;
+                        if (entity is ParentCat parentCat)
+                        {
+                            photos = photosManagementMode switch
+                            {
+                                PhotosManagementMode.Photos => entity.Photos,
+                                PhotosManagementMode.Titles => parentCat.Titles,
+                                PhotosManagementMode.GenTests => parentCat.GeneticTests,
+                                _ => []
+                            };
+                        }
+                        else
+                        {
+                            if (photosManagementMode != PhotosManagementMode.Photos)
+                                throw new InvalidOperationException($"Сущность {entity.GetType().Name} не поддерживает удаление {photosManagementMode}.");
+
+                            photos = entity.Photos;
+                        }
+
+                        var keysToRemove = photoIndexes
+                        .Select(x => photos.Keys.ElementAt(x))
+                        .ToList();
+
+                        foreach (var photoKey in keysToRemove)
+                            photos.Remove(photoKey);
+
+                        await unit.SaveChangesAsync(token);
+
+                        return new ManagementOperationResult(true);
+                    }
+
+                    return new ManagementOperationResult(false, _messagesProvider.CreateEntityNotFoundMessage());
+                }, token);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Service}.{Method}<{TEntity}>(): Произошла необработанная ошибка", nameof(ManagementService), nameof(DeleteEntityPhotosAsync), typeof(TEntity).Name);
+                return new(false, "Не удалось удалить фото у сущности: " + ex.Message);
+            }
+        }
+
+        public async Task<ManagementOperationResult<TEntity>> SetDefaultPhotoForEntityAsync<TEntity>(int entityId, int photoIndex, CancellationToken token) where TEntity : class, IDisplayableEntity
+        {
+            try
+            {
+                var result = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) =>
+                {
+                    var entity = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
+                    if (entity == null)
+                        return new ManagementOperationResult<TEntity>(false, _messagesProvider.CreateEntityNotFoundMessage());
+
+                    var photosList = entity.Photos.ToList();
+                    var photo = photosList[photoIndex];
+                    photosList.RemoveAt(photoIndex);
+                    photosList.Insert(0, photo);
+
+                    entity.Photos = photosList.ToDictionary(x => x.Key, x => x.Value);
+                    await unit.SaveChangesAsync(ct);
+                    return new ManagementOperationResult<TEntity>(true, null, entity);
+                }, token);
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{Service}.{Method}<{TEntity}>(): Произошла необработанная ошибка", nameof(ManagementService), nameof(UpdateEntityColorAsync), typeof(TEntity).Name);
+                return new(false, "Не удалось установить заглавное фото для сущности: " + ex.Message);
+            }
 
         }
+
+        #endregion
+
+        #region Entitites visibility
 
         public async Task<ManagementOperationResult<StructWrapper<(int parentCatsCount, int littersCount, int kittensCount)>>> ActivateEntitiesAsync(CancellationToken token)
         {
@@ -332,9 +352,9 @@ namespace BlueBellDolls.Bot.Services
                         var parentCatsCount = await ActivateAsync<ParentCat>(unit, token);
                         var littersCount = await ActivateAsync<Litter>(unit, token);
                         var kittensCount = await ActivateAsync<Kitten>(unit, token);
-                        
+
                         await unit.SaveChangesAsync(token);
-                        return new (true, null, new((parentCatsCount, littersCount, kittensCount)));
+                        return new(true, null, new((parentCatsCount, littersCount, kittensCount)));
                     }, token);
             }
             catch (Exception ex)
@@ -377,5 +397,10 @@ namespace BlueBellDolls.Bot.Services
                 return new(false, "Не удалось изменить состояние активности сущности: " + ex.Message);
             }
         }
+
+        #endregion
+
+        #endregion
+
     }
 }
