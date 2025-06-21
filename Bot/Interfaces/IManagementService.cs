@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Bot.Enums;
+﻿using BlueBellDolls.Bot.Adapters;
+using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Records;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
@@ -11,6 +12,7 @@ namespace BlueBellDolls.Bot.Interfaces
         Task<ManagementOperationResult<TEntity>> AddNewEntityAsync<TEntity>(CancellationToken token = default) where TEntity : class, IDisplayableEntity, new();
         Task<ManagementOperationResult<Kitten>> AddNewKittenToLitterAsync(int litterId, CancellationToken token);
         Task<ManagementOperationResult> DeleteEntityAsync<TEntity>(int entityId, CancellationToken token) where TEntity : class, IDisplayableEntity;
+        Task<ManagementOperationResult<IDisplayableEntity>> AddPhotosToEntity<TEntity>(PhotoAdapter[] photos, int entityId, CancellationToken token) where TEntity : IDisplayableEntity;
         Task<ManagementOperationResult> DeleteEntityPhotosAsync<TEntity>(int entityId, IEnumerable<int> photoIndexes, PhotosManagementMode photosManagementMode, CancellationToken token) where TEntity : IDisplayableEntity;
         Task<ManagementOperationResult<TEntity>> SetDefaultPhotoForEntityAsync<TEntity>(int entityId, int photoIndex, CancellationToken token) where TEntity : class, IDisplayableEntity;
         Task<ManagementOperationResult<Litter>> SetParentCatForLitterAsync(int litterId, int parentCatId, CancellationToken token);

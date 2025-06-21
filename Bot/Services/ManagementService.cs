@@ -1,9 +1,12 @@
-﻿using BlueBellDolls.Bot.Enums;
+﻿using BlueBellDolls.Bot.Adapters;
+using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Records;
+using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Services
 {
@@ -12,7 +15,9 @@ namespace BlueBellDolls.Bot.Services
         IMessagesProvider messagesProvider,
         ILogger<ManagementService> logger,
         IEntityHelperService entityHelperService,
-        IEntityFormService entityFormService) : IManagementService
+        IEntityFormService entityFormService,
+        IPhotosDownloaderService photosDownloaderService,
+        IOptions<EntitySettings> entotyOptions) : IManagementService
     {
 
         #region Fields
@@ -22,6 +27,8 @@ namespace BlueBellDolls.Bot.Services
         private readonly ILogger<ManagementService> _logger = logger;
         private readonly IEntityHelperService _entityHelperService = entityHelperService;
         private readonly IEntityFormService _entityFormService = entityFormService;
+        private readonly IPhotosDownloaderService _photosDownloaderService = photosDownloaderService;
+        private readonly EntitySettings _entitySettings = entotyOptions.Value;
 
         #endregion
 
@@ -254,6 +261,46 @@ namespace BlueBellDolls.Bot.Services
         #endregion
 
         #region Photos
+
+        private async Task<ManagementOperationResult<IDisplayableEntity>> AddPhotosToEntity<TEntity>(
+            PhotoAdapter[] photos,
+            int entityId, 
+            CancellationToken token) where TEntity : IDisplayableEntity
+        {
+            try
+            {
+                var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
+                if (entity == null)
+                    return new(false, _messagesProvider.CreateEntityNotFoundMessage());
+
+                if (entity.Photos.Count + photos.Length > _entitySettings.MaxPhotos[entity.GetType().Name])
+                    return new(false, _messagesProvider.CreatePhotosLimitReachedMessage(entity));
+
+                var base64Photos = await _photosDownloaderService.DownloadAndConvertPhotosToBase64(photos, token);
+                if (base64Photos.Count == 0)
+                    return new(false, null, entity);
+
+                return await _databaseService.ExecuteDbOperationAsync<ManagementOperationResult<IDisplayableEntity>>(async (unit, ct) =>
+                {
+                    var entityFromDb = await unit.GetRepository<TEntity>().GetByIdAsync(entityId, ct);
+                    if (entityFromDb == null) return new(false, _messagesProvider.CreateEntityNotFoundMessage());
+
+                    if (entityFromDb.Photos.Count + base64Photos.Count > _entitySettings.MaxPhotos[entity.GetType().Name])
+                        return new(false, _messagesProvider.CreatePhotosLimitReachedMessage(entityFromDb));
+
+                    foreach (var photo in base64Photos)
+                        entityFromDb.Photos.Add(photo.Key, photo.Value);
+
+                    await unit.SaveChangesAsync(ct);
+                    return new(true, null, entityFromDb);
+
+                }, token);
+            }
+            catch (Exception ex)
+            {
+                return new(false, $"Не удалось добавить фото сущности: " + ex.Message);
+            }
+        }
 
         public async Task<ManagementOperationResult> DeleteEntityPhotosAsync<TEntity>(int entityId, IEnumerable<int> photoIndexes, PhotosManagementMode photosManagementMode, CancellationToken token) where TEntity : IDisplayableEntity
         {
