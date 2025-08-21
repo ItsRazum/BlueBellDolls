@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Service", "Service\BlueBellDolls.Service.csproj", "{827478FA-4FDB-43DE-8733-041F89679181}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Server", "Service\BlueBellDolls.Server.csproj", "{827478FA-4FDB-43DE-8733-041F89679181}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5C796C94-EF04-4737-8190-7878D822263E}"
 	ProjectSection(SolutionItems) = preProject
@@ -13,6 +13,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Bot", "Bot\BlueBellDolls.Bot.csproj", "{1EFE815D-2330-44AC-8E85-DAFBA354EE26}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Common", "Common\BlueBellDolls.Common.csproj", "{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "bluebelldolls.client", "BlueBellDolls.Client\bluebelldolls.client.esproj", "{39B88E49-93F0-EE89-FF02-8E9E64BA299C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Data", "BlueBellDolls.Data\BlueBellDolls.Data.csproj", "{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,8 +36,21 @@ Global
 		{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DE3EECCC-DAAF-4401-972C-F6861DA605B8}
 	EndGlobalSection
 EndGlobal

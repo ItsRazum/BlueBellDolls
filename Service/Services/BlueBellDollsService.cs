@@ -1,11 +1,10 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Grpc;
-using BlueBellDolls.Service.Grpc;
-using BlueBellDolls.Service.Interfaces;
+﻿using BlueBellDolls.Grpc;
+using BlueBellDolls.Server.Grpc;
+using BlueBellDolls.Server.Interfaces;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
-namespace BlueBellDolls.Service.Services
+namespace BlueBellDolls.Server.Services
 {
     internal sealed class BlueBellDollsService : BlueBellDolls.Grpc.BlueBellDollsService.BlueBellDollsServiceBase
     {

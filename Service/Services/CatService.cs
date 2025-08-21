@@ -1,8 +1,8 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Service.Interfaces;
+﻿using BlueBellDolls.Common.Models;
+using BlueBellDolls.Data.Interfaces;
+using BlueBellDolls.Server.Interfaces;
 
-namespace BlueBellDolls.Service.Services
+namespace BlueBellDolls.Server.Services
 {
     internal sealed class CatService : ICatService
     {

@@ -1,9 +1,10 @@
-﻿using BlueBellDolls.Common.Data.Contexts;
-using BlueBellDolls.Common.Interfaces;
+﻿using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Data.Contexts;
+using BlueBellDolls.Data.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 
-namespace BlueBellDolls.Common.Data.Utilities
+namespace BlueBellDolls.Data.Utilities
 {
     public class UnitOfWork(
         ApplicationDbContext dbContext,

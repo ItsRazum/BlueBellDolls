@@ -1,7 +1,6 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Models;
+﻿using BlueBellDolls.Common.Models;
 
-namespace BlueBellDolls.Service.Interfaces
+namespace BlueBellDolls.Server.Interfaces
 {
     internal interface ICatService
     {

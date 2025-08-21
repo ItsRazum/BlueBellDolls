@@ -1,9 +1,9 @@
 ﻿using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Static;
+using BlueBellDolls.Data.Static;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace BlueBellDolls.Common.Data.Configurations
+namespace BlueBellDolls.Data.Configurations
 {
     public class KittenEntityTypeConfiguration : IEntityTypeConfiguration<Kitten>
     {

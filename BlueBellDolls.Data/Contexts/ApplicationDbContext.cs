@@ -2,7 +2,7 @@
 using BlueBellDolls.Common.Types;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlueBellDolls.Common.Data.Contexts
+namespace BlueBellDolls.Data.Contexts
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {

@@ -89,4 +89,6 @@ message Kitten {
 	string status = 9;
 	// is enabled
 	bool is_enabled = 10;
+	// litter id
+	int32 litter_id = 11;
 }

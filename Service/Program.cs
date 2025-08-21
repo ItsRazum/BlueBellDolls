@@ -1,14 +1,15 @@
-using BlueBellDolls.Service.Interfaces;
-using BlueBellDolls.Service.Services;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Data.Contexts;
+using BlueBellDolls.Data.Interfaces;
+using BlueBellDolls.Data.Repositories.Generic;
+using BlueBellDolls.Data.Utilities;
+using BlueBellDolls.Server.Interfaces;
+using BlueBellDolls.Server.Services;
 using BlueBellDolls.Service.Settings;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Net;
-using BlueBellDolls.Common.Data.Contexts;
-using BlueBellDolls.Common.Data.Utilities;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Repositories.Generic;
 
 namespace BlueBellDolls.Service;
 
@@ -97,7 +98,7 @@ class Program
 
     private static void ConfigureMiddleware(WebApplication app)
     {
-        app.MapGrpcService<BlueBellDollsService>();
+        app.MapGrpcService<BlueBellDollsService>().EnableGrpcWeb();
     }
 
     private static void InitializeDatabase(WebApplication app)

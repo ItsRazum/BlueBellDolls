@@ -8,6 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
+		<PackageReference Include="Grpc.AspNetCore.Web" Version="2.64.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="9.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.2">
 		  <PrivateAssets>all</PrivateAssets>
@@ -21,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\BlueBellDolls.Data\BlueBellDolls.Data.csproj" />
 	  <ProjectReference Include="..\Common\BlueBellDolls.Common.csproj" />
 	</ItemGroup>
 

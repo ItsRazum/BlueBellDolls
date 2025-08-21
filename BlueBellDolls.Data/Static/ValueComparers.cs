@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace BlueBellDolls.Common.Static
+namespace BlueBellDolls.Data.Static
 {
     internal static class ValueComparers
     {

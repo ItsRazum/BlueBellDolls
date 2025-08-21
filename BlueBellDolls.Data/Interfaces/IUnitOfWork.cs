@@ -1,4 +1,6 @@
-﻿namespace BlueBellDolls.Common.Interfaces
+﻿using BlueBellDolls.Common.Interfaces;
+
+namespace BlueBellDolls.Data.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {

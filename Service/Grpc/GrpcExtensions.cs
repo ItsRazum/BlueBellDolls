@@ -2,7 +2,7 @@
 using BlueBellDolls.Common.Enums;
 using System.Globalization;
 
-namespace BlueBellDolls.Service.Grpc
+namespace BlueBellDolls.Server.Grpc
 {
     public static class GrpcExtensions
     {
@@ -67,6 +67,7 @@ namespace BlueBellDolls.Service.Grpc
                 Status = kitten.Status.ToString(),
                 Description = kitten.Description,
                 IsEnabled = kitten.IsEnabled,
+                LitterId = kitten.LitterId
             };
 
             result.Photos.Add(kitten.Photos);
@@ -90,6 +91,7 @@ namespace BlueBellDolls.Service.Grpc
                 Description = kitten.Description,
                 Photos = new(kitten.Photos),
                 IsEnabled = kitten.IsEnabled,
+                LitterId = kitten.LitterId
             };
         }
 
@@ -97,7 +99,7 @@ namespace BlueBellDolls.Service.Grpc
 
         #region BlueBellDollsService Litter <-> Protobuf Litter
 
-        public static BlueBellDolls.Grpc.Litter Compress(this Common.Models.Litter litter)
+        public static BlueBellDolls.Grpc.Litter Compress(this Litter litter)
         {
             var result = new BlueBellDolls.Grpc.Litter
             {

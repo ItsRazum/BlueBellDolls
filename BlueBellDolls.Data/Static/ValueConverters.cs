@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
 
-namespace BlueBellDolls.Common.Static
+namespace BlueBellDolls.Data.Static
 {
     internal static class ValueConverters
     {

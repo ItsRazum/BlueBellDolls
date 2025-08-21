@@ -1,9 +1,9 @@
-﻿using BlueBellDolls.Common.Data.Contexts;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Repositories.Generic;
+﻿using BlueBellDolls.Common.Models;
+using BlueBellDolls.Data.Contexts;
+using BlueBellDolls.Data.Repositories.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace BlueBellDolls.Common.Repositories
+namespace BlueBellDolls.Data.Repositories
 {
     public class LitterRepository(ApplicationDbContext dbContext) : EntityRepository<Litter>(dbContext)
     {

@@ -1,9 +1,9 @@
-﻿using BlueBellDolls.Common.Data.Contexts;
-using BlueBellDolls.Common.Interfaces;
+﻿using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace BlueBellDolls.Common.Repositories.Generic
+namespace BlueBellDolls.Data.Repositories.Generic
 {
     public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntity : class, IEntity
     {
