@@ -1,0 +1,20 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.app.json"
+    }
+  ],
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "es2020",
+
+    "moduleResolution": "node16",
+    "strict": true,
+    "jsx": "preserve",
+    "types": [ "vite-plugin-ssr/client" ]
+  }
+}
