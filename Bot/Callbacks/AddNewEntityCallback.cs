@@ -17,7 +17,6 @@ namespace BlueBellDolls.Bot.Callbacks
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IEntityHelperService entityHelperService,
             IMessageParametersProvider messageParametersProvider,
             IManagementService managementService)
             : base(botService, botSettings, callbackDataProvider)

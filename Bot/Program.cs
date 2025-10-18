@@ -13,8 +13,10 @@ using BlueBellDolls.Data.Repositories.Generic;
 using BlueBellDolls.Data.Utilities;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Serilog;
 using System.Net;
+using Telegram.Bot;
 
 internal class Program
 {
@@ -90,6 +92,10 @@ internal class Program
 
         // Hosted сервисы
         builder.Services.AddHostedService<UpdateHandlerService>();
+
+        // Клиент бота
+        builder.Services.AddSingleton<ITelegramBotClient>(sp => 
+            new TelegramBotClient(sp.GetRequiredService<IOptions<BotSettings>>().Value.Token));
 
         // Остальные сервисы
         builder.Services

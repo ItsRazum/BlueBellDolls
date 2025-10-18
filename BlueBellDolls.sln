@@ -14,9 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Bot", "Bot\Bl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Common", "Common\BlueBellDolls.Common.csproj", "{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "bluebelldolls.client", "BlueBellDolls.Client\bluebelldolls.client.esproj", "{39B88E49-93F0-EE89-FF02-8E9E64BA299C}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Data", "BlueBellDolls.Data\BlueBellDolls.Data.csproj", "{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlueBellDolls.Data", "Data\BlueBellDolls.Data.csproj", "{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,12 +34,6 @@ Global
 		{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B45F3CA-2351-4A92-AF98-6C6BB6123C86}.Release|Any CPU.Build.0 = Release|Any CPU
-		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{39B88E49-93F0-EE89-FF02-8E9E64BA299C}.Release|Any CPU.Deploy.0 = Release|Any CPU
 		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE8B6733-8C6C-4A63-86FA-3E2D1DDFF6A5}.Release|Any CPU.ActiveCfg = Release|Any CPU

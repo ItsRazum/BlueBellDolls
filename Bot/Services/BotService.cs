@@ -1,6 +1,4 @@
 ﻿using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Settings;
-using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -8,25 +6,19 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BlueBellDolls.Bot.Services
 {
-    public class BotService : IBotService
+    public class BotService(
+        ILogger<BotService> logger,
+        ITelegramBotClient botClient) : IBotService
     {
 
         #region Fields
 
-        private readonly ITelegramBotClient _botClient;
-        private readonly ILogger<BotService> _logger;
+        private readonly ITelegramBotClient _botClient = botClient;
+        private readonly ILogger<BotService> _logger = logger;
 
         #endregion
 
         #region Constructor
-
-        public BotService(
-            ILogger<BotService> logger,
-            IOptions<BotSettings> botSettings)
-        {
-            _logger = logger;
-            _botClient = new TelegramBotClient(botSettings.Value.Token);
-        }
 
         #endregion
 

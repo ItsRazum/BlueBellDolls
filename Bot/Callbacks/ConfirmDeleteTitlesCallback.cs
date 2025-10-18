@@ -1,10 +1,8 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 

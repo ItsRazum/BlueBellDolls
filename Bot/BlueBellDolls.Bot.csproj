@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\BlueBellDolls.Data\BlueBellDolls.Data.csproj" />
     <ProjectReference Include="..\Common\BlueBellDolls.Common.csproj" />
+    <ProjectReference Include="..\Data\BlueBellDolls.Data.csproj" />
   </ItemGroup>
 
 	<ItemGroup>
