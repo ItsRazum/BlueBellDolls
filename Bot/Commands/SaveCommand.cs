@@ -6,16 +6,16 @@ namespace BlueBellDolls.Bot.Commands
 {
     public class SaveCommand : CommandHandler
     {
-        private readonly IManagementService _managementService;
         private readonly IMessagesProvider _messagesProvider;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public SaveCommand(
-            IBotService botService, 
-            IManagementService managementService,
-            IMessagesProvider messagesProvider)
+            IBotService botService,
+            IMessagesProvider messagesProvider, 
+            IManagementServicesFactory managementServicesFactory)
             : base(botService)
         {
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
             _messagesProvider = messagesProvider;
 
             AddCommandHandler("/save", HandleCommandAsync);
@@ -23,13 +23,14 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleCommandAsync(MessageAdapter m, CancellationToken token)
         {
-            var result = await _managementService.ActivateEntitiesAsync(token);
+            //var managementService = _managementServicesFactory.GetEntityManagementService();
+            //var result = await _entityManagementService.ActivateEntitiesAsync(token);
 
-            if (result.Success)
-                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateSavingSuccessMessage(result.Result!.Value), token: token);
+            //if (result.Success)
+            //    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateSavingSuccessMessage(result.Result!.Value), token: token);
 
-            else
-                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
+            //else
+            //    await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
         }
     }
 }

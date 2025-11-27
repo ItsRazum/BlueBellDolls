@@ -1,4 +1,6 @@
 ﻿using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Types
 {
@@ -7,7 +9,10 @@ namespace BlueBellDolls.Common.Types
 
         public abstract string DisplayName { get; }
 
-        public virtual Dictionary<string, string> Photos { get; set; }
+        public virtual List<EntityPhoto> Photos { get; set; }
+
+        [Column("is_enabled")]
+        public virtual bool IsEnabled { get; set; }
 
     }
 }

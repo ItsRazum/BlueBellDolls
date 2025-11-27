@@ -17,6 +17,10 @@
         public string DeleteMessages { get; set; }
         public string FindColor { get; set; }
         public string ToggleEntityVisibility { get; set; }
+        public string OpenKittenClass { get; set; }
+        public string OpenKittenStatus { get; set; }
+        public string SetKittenClass { get; set; }
+        public string SetKittenStatus { get; set; }
         public string ConfirmationSuffix { get; set; }
     }
 }

@@ -2,6 +2,6 @@
 {
     public interface IArgumentParseHelperService
     {
-        (IEnumerable<int> photoIndexes, IEnumerable<int> photoMessageIds) ParsePhotosArgs(string data);
+        (IEnumerable<int> photoIds, IEnumerable<int> photoMessageIds) ParsePhotosArgs(string data);
     }
 }

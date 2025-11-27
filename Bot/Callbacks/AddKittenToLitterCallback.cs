@@ -9,18 +9,18 @@ namespace BlueBellDolls.Bot.Callbacks
     public class AddKittenToLitterCallback : CallbackHandler
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementService _managementService;
+        private readonly ILitterManagementService _litterManagementService;
 
         public AddKittenToLitterCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IMessageParametersProvider messageParametersProvider,
-            IManagementService managementService)
+            ILitterManagementService managementService)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messageParametersProvider = messageParametersProvider;
-            _managementService = managementService;
+            _litterManagementService = managementService;
 
             AddCommandHandler(CallbackDataProvider.GetAddKittenToLitterCallback(), HandleCallbackAsync);
         }
@@ -29,7 +29,7 @@ namespace BlueBellDolls.Bot.Callbacks
         {
             var litterId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var result = await _managementService.AddNewKittenToLitterAsync(litterId, token);
+            var result = await _litterManagementService.AddNewKittenToLitterAsync(litterId, token);
 
             if (result.Result == null)
             {

@@ -1,8 +1,8 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
@@ -13,7 +13,7 @@ namespace BlueBellDolls.Bot.Callbacks
     {
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementService _managementService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public ConfirmDeletePhotosCallback(
             IBotService botService,
@@ -21,24 +21,25 @@ namespace BlueBellDolls.Bot.Callbacks
             ICallbackDataProvider callbackDataProvider,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider,
-            IManagementService managementService) 
+            IManagementServicesFactory managementServicesFactory) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
 
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(PhotosManagementMode.Photos), HandleCallbackAsync<ParentCat>);
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Litter>(PhotosManagementMode.Photos), HandleCallbackAsync<Litter>);
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Kitten>(PhotosManagementMode.Photos), HandleCallbackAsync<Kitten>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(PhotosType.Photos), HandleCallbackAsync<ParentCat>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Litter>(PhotosType.Photos), HandleCallbackAsync<Litter>);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Kitten>(PhotosType.Photos), HandleCallbackAsync<Kitten>);
         }
 
-        private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : IDisplayableEntity
+        private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            var (photoIndexes, _) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText.Split('\n').Last());
+            var (photoKeys, _) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText.Split('\n').Last());
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var result = await _managementService.DeleteEntityPhotosAsync<TEntity>(entityId, photoIndexes, PhotosManagementMode.Photos, token);
+            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
+            var result = await managementService.DeleteEntityPhotosAsync(entityId, [.. photoKeys], token);
 
             await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.Success
                 ? _messagesProvider.CreatePhotosDeletionSuccessMessage()

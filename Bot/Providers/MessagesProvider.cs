@@ -2,13 +2,13 @@
 using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
-using static Grpc.Core.Metadata;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -20,6 +20,7 @@ namespace BlueBellDolls.Bot.Providers
         private readonly EntityFormSettings _entityFormSettings;
         private readonly EntitySettings _entitySettings;
         private readonly Dictionary<Type, Func<IEntity, bool, string>> _entityFormMessages;
+        private readonly IEnumMapperService _enumMapperService;
 
         #endregion
 
@@ -27,10 +28,12 @@ namespace BlueBellDolls.Bot.Providers
 
         public MessagesProvider(
             IOptions<EntityFormSettings> entityFormSettings, 
-            IOptions<EntitySettings> entityOptions)
+            IOptions<EntitySettings> entityOptions,
+            IEnumMapperService enumMapperService)
         {
             _entityFormSettings = entityFormSettings.Value;
             _entitySettings = entityOptions.Value;
+            _enumMapperService = enumMapperService;
             _entityFormMessages = new()
             {
                 { typeof(ParentCat), (entity, enableEdit) => CreateParentCatFormMessage((ParentCat)entity, enableEdit) },
@@ -44,82 +47,60 @@ namespace BlueBellDolls.Bot.Providers
         #region IMessagesProvider implementation
 
         public string CreateStartMessage()
-        {
-            return
-                "Это главное меню панели управления сайтом BlueBellDolls.\n" +
-                "\n" +
-                "📌 Основные команды:\n" +
-                "├ /newcat - Создать нового производителя\n" +
-                "└ /newlitter - Создать новый помёт\n" +
-                "\n" +
-                "📂 Списки сущностей:\n" +
-                "├ /catlist - Список производителей\n" +
-                "├ /kittenlist - Список всех котят\n" +
-                "└ /litterlist - Список всех помётов\n" +
-                "\n" +
-                "⚙️ Работа с данными:\n" +
-                "└ /save - Отправить новые данные на сервер\n" +
-                "\n" +
-                "ℹ️ Инструкция по редактированию:\n" +
-                "Используйте ответ на сообщение сущности с новыми значениями в формате:\n" +
-                "\"Поле: Значение\"\n" +
-                "\n" +
-                "🔄 /start - Обновить это меню\n" +
-                "══════════════════════════";
-        }
+            => "Это главное меню панели управления сайтом BlueBellDolls.\n" 
+             + "\n" + "📌 Основные команды:\n" 
+             + "├ /newcat - Создать нового производителя\n" 
+             + "└ /newlitter - Создать новый помёт\n" 
+             + "\n" 
+             + "📂 Списки сущностей:\n" 
+             + "├ /catlist - Список производителей\n" 
+             + "├ /kittenlist - Список всех котят\n" 
+             + "└ /litterlist - Список всех помётов\n" 
+             + "\n" 
+             + "ℹ️ Инструкция по редактированию:\n" 
+             + "Используйте ответ на сообщение сущности с новыми значениями в формате:\n" 
+             + "\"Поле: Значение\"\n" 
+             + "\n" 
+             + "🔄 /start - Обновить это меню\n"
+             + "══════════════════════════";
 
         public string CreateMessagesDeletingError()
-        {
-            return
-                "⚠️ Боту не удалось удалить сообщение с фотографиями выше.\n" +
-                "Причина: ограничения Telegram (удаление возможно только в течение 48 часов)\n" +
-                "Рекомендация: удалите фотографии вручную 🗑️";
-        }
+            => "⚠️ Боту не удалось удалить сообщение с фотографиями выше.\n" + "Причина: ограничения Telegram (удаление возможно только в течение 48 часов)\n" + "Рекомендация: удалите фотографии вручную 🗑️";
 
         public string CreateEntityUpdateSuccessMessage()
-        {
-            return "✅ Сущность успешно обновлена!";
-        }
+            => "✅ Сущность успешно обновлена!";
 
         public string CreateEntityUpdateFailureMessage()
-        {
-            return "❌ Не удалось обновить сущность! Проверьте правильность ввода данных";
-        }
+            => "❌ Не удалось обновить сущность! Проверьте правильность ввода данных";
 
         public string CreateEntityNotFoundMessage()
-        {
-            return "🔍 Запрашиваемая сущность не найдена!";
-        }
+            => "🔍 Запрашиваемая сущность не найдена!";
 
         public string CreateEntityNotFoundMessage(Type entityType, int entityId)
-        {
-            return $"🔍 {entityType.Name} {entityId} не найден(а)!";
-        }
+            => $"🔍 {entityType.Name} {entityId} не найден(а)!";
 
         public string CreateEntityFormMessage(IEntity entity, bool enableEdit = true)
-        {
-            return _entityFormMessages[entity.GetType()](entity, enableEdit);
-        }
+            => _entityFormMessages[entity.GetType()](entity, enableEdit);
 
-        public string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosManagementMode photosManagementMode)
+        public string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosType photosManagementMode)
         {
             var result = photosManagementMode switch
             {
-                PhotosManagementMode.Photos =>
+                PhotosType.Photos =>
                     $"📷 {entity.DisplayName}\n" +
-                    $"├ Количество: {entity.Photos.Count}/{_entitySettings.MaxPhotos[entity.GetType().Name]}\n" +
+                    $"├ Количество: {entity.Photos.Where(p => p.Type == PhotosType.Photos).Count()}/{_entitySettings.MaxPhotos[entity.GetType().Name]}\n" +
                     "└ Используйте номера для управления фото\n" +
                     "   ▪ Выберите одно как заглавное\n" +
                     "   ▪ Удалите ненужные",
 
-                PhotosManagementMode.Titles =>
+                PhotosType.Titles =>
                     "🏆 Управление титулами:\n" +
-                    $"├ Текущее количество: {((ParentCat)entity).Titles.Count}/{_entitySettings.MaxParentCatTitlesCount}\n" +
+                    $"├ Текущее количество: {((ParentCat)entity).Photos.Where(p => p.Type == PhotosType.Titles).Count()}/{_entitySettings.MaxParentCatTitlesCount}\n" +
                     "└ Укажите номера для удаления",
 
-                PhotosManagementMode.GenTests =>
+                PhotosType.GenTests =>
                     "🧬 Генетические тесты:\n" +
-                    $"├ Загружено: {((ParentCat)entity).GeneticTests.Count}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
+                    $"├ Загружено: {((ParentCat)entity).Photos.Where(p => p.Type == PhotosType.GenTests).Count()}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
                     "└ Укажите номера для удаления",
 
                 _ => "❌ Произошла ошибка"
@@ -128,49 +109,34 @@ namespace BlueBellDolls.Bot.Providers
         }
 
         public string CreatePhotosLoadingMessage()
-        {
-            return "⏳ Загрузка...";
-        }
+            => "⏳ Загрузка...";
 
         public string CreatePhotosLimitReachedMessage(IDisplayableEntity entity)
-        {
-            return $"🚫 Максимум фотографий: {_entitySettings.MaxPhotos[entity.GetType().Name]}";
-        }
+            => $"🚫 Максимум фотографий: {_entitySettings.MaxPhotos[entity.GetType().Name]}";
 
         public string CreateTitlesLimitReachedMessage()
-        {
-            return $"🚫 Максимум титулов: {_entitySettings.MaxParentCatTitlesCount}";
-        }
+            => $"🚫 Максимум титулов: {_entitySettings.MaxParentCatTitlesCount}";
 
         public string CreateGeneticTestsLimitReachedMessage()
-        {
-            return $"🚫 Максимум тестов: {_entitySettings.MaxParentCatGeneticTestsCount}";
-        }
+            => $"🚫 Максимум тестов: {_entitySettings.MaxParentCatGeneticTestsCount}";
 
-        public string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds)
+        public string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] photoMessageIds)
         {
-            var key = (selectedPhotoIndexes.Length > 0
-                ? string.Join(", ", selectedPhotoIndexes)
+            var key = (selectedPhotoIds.Length > 0
+                ? string.Join(", ", selectedPhotoIds)
                 : "-") + " : " + string.Join(", ", photoMessageIds);
 
             return
                 $"📸 {entity.DisplayName}\n" +
-                "🔢 Выбранные фото (номера : ID сообщений):\n" +
+                "🔢 Выбранные фото (Ключи фотографий : ID сообщений):\n" +
                 $"{key}";
         }
 
         public string CreateDeleteConfirmationMessage(IDisplayableEntity entity)
-        {
-            return
-                $"⚠️ Подтверждение удаления:\n" +
-                $"{entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" +
-                "══════════════════════════";
-        }
+            => $"⚠️ Подтверждение удаления:\n" + $"{entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" + "══════════════════════════";
 
         public string CreateEntityDeletionSuccess()
-        {
-            return "✅ Сущность успешно удалена!";
-        }
+            => "✅ Сущность успешно удалена!";
 
         public string CreateSelectedPhotosOverviewMessage(IDisplayableEntity entity, int photosCount)
         {
@@ -178,14 +144,11 @@ namespace BlueBellDolls.Bot.Providers
             return $"📷 Будет удалено {photosCount} фото у {entityData}\nПодтвердите действие";
         }
 
-        public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] sendedPhotoMessageIds)
-        {
-            return
-                $"⚠️ Подтвердите удаление {selectedPhotoIndexes.Length} фото:\n" +
-                $"Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" +
-                $"Номера : ID сообщений:\n" +
-                $"{string.Join(", ", selectedPhotoIndexes)} : {string.Join(", ", sendedPhotoMessageIds)}";
-        }
+        public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] sendedPhotoMessageIds)
+            => $"⚠️ Подтвердите удаление {selectedPhotoIds.Length} фото:\n" 
+             + $"Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" 
+             + $"Ключи : ID сообщений:\n" 
+             + $"{string.Join(", ", selectedPhotoIds)} : {string.Join(", ", sendedPhotoMessageIds)}";
 
         public string CreateEntityListMessage<TEntity>(
             ListUnitActionMode actionMode,
@@ -204,9 +167,7 @@ namespace BlueBellDolls.Bot.Providers
         }
 
         public string CreateCouldNotExtractMessagesFromCallbackMessage(CallbackQueryAdapter c)
-        {
-            return $"❌ Ошибка обработки callback: {c.CallbackData}";
-        }
+            => $"❌ Ошибка обработки callback: {c.CallbackData}";
 
         public string CreateParentCatSetForLitter(ParentCat parentCat, Litter litter)
         {
@@ -217,28 +178,19 @@ namespace BlueBellDolls.Bot.Providers
                 $"└ Дата рождения: {litter.BirthDay.ToString("d", new CultureInfo("ru-RU"))}";
         }
 
-        public string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoIndex)
-        {
-            return
-                $"📸 Основное фото обновлено!\n" +
-                $"├ Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" +
-                $"└ Номер фото: {photoIndex + 1}";
-        }
+        public string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoId)
+            => $"📸 Основное фото обновлено!\n" 
+             + $"├ Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" 
+             + $"└ Номер фото: {photoId + 1}";
 
         public string CreatePhotosDeletionSuccessMessage()
-        {
-            return "✅ Фотографии успешно удалены!";
-        }
+            => "✅ Фотографии успешно удалены!";
 
         public string CreatePhotosDeletionFailureMessage()
-        {
-            return CreateEntityNotFoundMessage();
-        }
+            => CreateEntityNotFoundMessage();
 
         public string CreateColorSetSuccessfullyMessage(string color)
-        {
-            return $"🎨 Цвет успешно установлен: {color}";
-        }
+            => $"🎨 Цвет успешно установлен: {color}";
 
         public string CreateColorPickerMessage(Cat cat, string buildedColor)
         {
@@ -291,12 +243,84 @@ namespace BlueBellDolls.Bot.Providers
         }
 
         public string CreateToggleEntityVisibilitySuccessMessage(IDisplayableEntity entity)
+        => $"✅ Сущность \"{entity.DisplayName}\" " + (entity.IsEnabled ? "теперь отображается на сайте!" : "скрыта с сайта!");
+
+        public string CreateKittenRequiresLitterMessage() 
+            => "❌ Не удалось добавить котёнка! Требуется привязка к помёту.";
+
+        public string CreateApiGetEntityFailureMessage() 
+            => "❌ Не удалось получить сущность: сервер не ответил или отклонил запрос";
+
+        public string CreateApiUpdateEntityFailureMessage()
+            => "❌ Не удалось обновить сущность: сервер не ответил или отклонил запрос";
+
+        public string CreateApiGetEntityAfterUpdateFailureMessage()
+            => "❌ Не удалось получить обновлённую сущность: сервер не ответил или отклонил запрос";
+
+        public string CreateEntityAdditionErrorMessage()
+            => "❌ Не удалось добавить сущность: сервер не ответил или отклонил запрос";
+
+        public string CreatePropertyUpdateFailureMessage(string propertyName) 
+            => $"❌ Не удалось обновить свойство \"{propertyName}\": сервер не ответил или отклонил запрос";
+
+        public string CreateNoPhotosToUploadMessage()
+            => "❌ Нет фотографий для загрузки!";
+
+        public string CreatePhotoDownloadFailedMessage()
+            => "❌ Не удалось скачать фотографию из Telegram!";
+
+        public string CreateApiUploadFailedMessage(int[]? unloadedPhotoIndexes = null)
         {
-            return $"✅ Сущность \"{entity.DisplayName}\" " +
-                (entity.IsEnabled 
-                ? "теперь отображается на сайте!"
-                : "скрыта с сайта!");
+            if (unloadedPhotoIndexes == null || unloadedPhotoIndexes.Length == 0) return "❌ Не удалось загрузить фотографии на сервер!";
+            if (unloadedPhotoIndexes.Length == 1) return $"❌ Фотографию под номером {unloadedPhotoIndexes.First()} не удалось загрузить на сервер!";
+
+            return $"❌ Фотографии под номером {string.Join(", ", unloadedPhotoIndexes)} удалось загрузить на сервер!";
         }
+
+        public string CreateInvalidPhotoTypeSupportMessage<TEntity>(PhotosType photosType) 
+            => $"❌ Сущность {typeof(TEntity).Name} не поддерживает работу с фотографиями типа {photosType}!";
+
+        public string CreateApiGetPageFailureMessage<TEntity>()
+            => $"❌ Не удалось получить страницу с сущностями {typeof(TEntity).Name}: сервер не ответил или отклонил запрос";
+
+        public string CreateLitterNotFoundMessage(int litterId)
+            => $"🔍 Помёт {litterId} не найден!";
+
+        public string CreateLitterParentIsWrongGenderMessage(string parentName, bool isMale)
+            => $"❌ Родитель {parentName} имеет неправильный пол! Ожидался представитель {(isMale ? "мужского" : "женского")} пола.";
+
+        public string CreateColorUpdateErrorMessage()
+            => "❌ Не удалось обновить цвет: сервер не ответил или отклонил запрос";
+
+        public string CreateUnknownErrorMessage(string? message = null)
+            => "❌ Произошла неизвестная ошибка" + (message != null ? $": {message}" : "");
+
+        public string CreateEntityDeletionError()
+            => "❌ Не удалось удалить сущность: сервер не ответил или отклонил запрос";
+
+        public string CreateDefaultPhotoSetErrorMessage()
+            => "❌ Не удалось установить основное фото: сервер не ответил или отклонил запрос";
+
+        public string CreateToggleEntityVisibilityErrorMessage()
+            => "❌ Не удалось изменить видимость сущности: сервер не ответил или отклонил запрос";
+
+        public string CreateKittenClassSelectionMenuMessage(Kitten kitten)
+            => $"🎖 Выбор класса для {kitten.DisplayName} ({kitten.GetType().Name} {kitten.Id})\n" +
+               $"Текущее значение: {kitten.Class}\n" +
+               "══════════════════════════\n" +
+               "➡️ Сделайте выбор, указав нужный класс";
+
+        public string CreateKittenClassSetSuccessMessage(Kitten kitten)
+            => $"✅ Котёнок {kitten.DisplayName} успешно получил класс «{kitten.Class}»!";
+
+        public string CreateKittenStatusSelectionMenuMessage(Kitten kitten)
+            => $"📌 Выбор статуса для {kitten.DisplayName} ({kitten.GetType().Name} {kitten.Id})\n" +
+               $"Текущее значение: {_enumMapperService.GetMapping(kitten.Status)}\n" +
+               "══════════════════════════\n" +
+               "➡️ Сделайте выбор, указав нужный статус";
+
+        public string CreateKittenStatusSetSuccessMessage(Kitten kitten)
+            => $"✅ Котёнок {kitten.DisplayName} успешно получил статус «{_enumMapperService.GetMapping(kitten.Status, kitten.IsMale)}»!";
 
         #endregion
 
@@ -311,9 +335,9 @@ namespace BlueBellDolls.Bot.Providers
                 $"♂♀ {_entityFormSettings.ParentCatProperties[nameof(parentCat.IsMale)]}: {(parentCat.IsMale ? "мужской" : "женский")}\n" +
                 $"🎨 Окрас: {parentCat.Color}\n" +
                 "\n" +
-                $"📸 Фото: {parentCat.Photos.Count}/{_entitySettings.MaxPhotos[nameof(ParentCat)]}\n" +
-                $"🏆 Титулы: {parentCat.Titles.Count}/{_entitySettings.MaxParentCatTitlesCount}\n" +
-                $"🧬 Тесты: {parentCat.GeneticTests.Count}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
+                $"📸 Фото: {parentCat.Photos.Where(p => p.Type == PhotosType.Photos).Count()}/{_entitySettings.MaxPhotos[nameof(ParentCat)]}\n" +
+                $"🏆 Титулы: {parentCat.Photos.Where(p => p.Type == PhotosType.Titles).Count()}/{_entitySettings.MaxParentCatTitlesCount}\n" +
+                $"🧬 Тесты: {parentCat.Photos.Where(p => p.Type == PhotosType.GenTests).Count()}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Description)]}:\n{parentCat.Description}\n" +
                 "══════════════════════════";
@@ -347,7 +371,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"🎨 Окрас: {kitten.Color}\n" +
                 "\n" +
                 $"🏅 Класс: {kitten.Class}\n" +
-                $"📌 Статус: {kitten.Status}\n" +
+                $"📌 Статус: {_enumMapperService.GetMapping(kitten.Status)}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.KittenProperties[nameof(kitten.Description)]}:\n{kitten.Description}\n" +
                 $"📸 Фото: {kitten.Photos.Count}/{_entitySettings.MaxPhotos[nameof(Kitten)]}\n" +

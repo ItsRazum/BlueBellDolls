@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace BlueBellDolls.Common.Migrations
+namespace BlueBellDolls.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -22,90 +22,141 @@ namespace BlueBellDolls.Common.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BlueBellDolls.Common.Models.EntityPhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_main");
+
+                    b.Property<int?>("KittenId")
+                        .HasColumnType("integer")
+                        .HasColumnName("kitten_id");
+
+                    b.Property<int?>("LitterId")
+                        .HasColumnType("integer")
+                        .HasColumnName("litter_id");
+
+                    b.Property<int?>("ParentCatId")
+                        .HasColumnType("integer")
+                        .HasColumnName("parent_cat_id");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer")
+                        .HasColumnName("type");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("url");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KittenId");
+
+                    b.HasIndex("LitterId");
+
+                    b.HasIndex("ParentCatId");
+
+                    b.ToTable("photos");
+                });
+
             modelBuilder.Entity("BlueBellDolls.Common.Models.Kitten", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateOnly>("BirthDay")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("birthday");
 
                     b.Property<string>("Class")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("class");
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("color");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
 
                     b.Property<bool>("IsMale")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_male");
 
                     b.Property<int>("LitterId")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("litter_id");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Photos")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("status");
 
                     b.HasKey("Id");
 
                     b.HasIndex("LitterId");
 
-                    b.ToTable("Kittens");
+                    b.ToTable("kittens");
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.Litter", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateOnly>("BirthDay")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("birth_day");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<int?>("FatherCatId")
-                        .HasColumnType("integer");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
+                        .HasColumnType("integer")
+                        .HasColumnName("father_cat_id");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
 
                     b.Property<char>("Letter")
-                        .HasColumnType("character(1)");
+                        .HasColumnType("character(1)")
+                        .HasColumnName("letter");
 
                     b.Property<int?>("MotherCatId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Photos")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("integer")
+                        .HasColumnName("mother_cat_id");
 
                     b.HasKey("Id");
 
@@ -113,56 +164,98 @@ namespace BlueBellDolls.Common.Migrations
 
                     b.HasIndex("MotherCatId");
 
-                    b.ToTable("Litters");
+                    b.ToTable("litters");
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.ParentCat", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateOnly>("BirthDay")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasColumnName("birthday");
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("color");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("GeneticTests")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("description");
 
                     b.Property<bool>("IsEnabled")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
 
                     b.Property<bool>("IsMale")
-                        .HasColumnType("boolean");
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_male");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OldDescription")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Photos")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Titles")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasColumnName("name");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cats");
+                    b.ToTable("cats");
+                });
+
+            modelBuilder.Entity("BlueBellDolls.Common.Models.TelegramPhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EntityPhotoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("entity_photo_id");
+
+                    b.Property<string>("FileId")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("file_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityPhotoId")
+                        .IsUnique();
+
+                    b.ToTable("telegram_photos");
+                });
+
+            modelBuilder.Entity("BlueBellDolls.Common.Models.EntityPhoto", b =>
+                {
+                    b.HasOne("BlueBellDolls.Common.Models.Kitten", "Kitten")
+                        .WithMany("Photos")
+                        .HasForeignKey("KittenId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BlueBellDolls.Common.Models.Litter", "Litter")
+                        .WithMany("Photos")
+                        .HasForeignKey("LitterId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("BlueBellDolls.Common.Models.ParentCat", "ParentCat")
+                        .WithMany("Photos")
+                        .HasForeignKey("ParentCatId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Kitten");
+
+                    b.Navigation("Litter");
+
+                    b.Navigation("ParentCat");
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.Kitten", b =>
@@ -193,9 +286,37 @@ namespace BlueBellDolls.Common.Migrations
                     b.Navigation("MotherCat");
                 });
 
+            modelBuilder.Entity("BlueBellDolls.Common.Models.TelegramPhoto", b =>
+                {
+                    b.HasOne("BlueBellDolls.Common.Models.EntityPhoto", "EntityPhoto")
+                        .WithOne("TelegramPhoto")
+                        .HasForeignKey("BlueBellDolls.Common.Models.TelegramPhoto", "EntityPhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EntityPhoto");
+                });
+
+            modelBuilder.Entity("BlueBellDolls.Common.Models.EntityPhoto", b =>
+                {
+                    b.Navigation("TelegramPhoto");
+                });
+
+            modelBuilder.Entity("BlueBellDolls.Common.Models.Kitten", b =>
+                {
+                    b.Navigation("Photos");
+                });
+
             modelBuilder.Entity("BlueBellDolls.Common.Models.Litter", b =>
                 {
                     b.Navigation("Kittens");
+
+                    b.Navigation("Photos");
+                });
+
+            modelBuilder.Entity("BlueBellDolls.Common.Models.ParentCat", b =>
+                {
+                    b.Navigation("Photos");
                 });
 #pragma warning restore 612, 618
         }

@@ -30,10 +30,10 @@ namespace BlueBellDolls.Data.Configurations
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder
-                .Property(l => l.Photos)
-                .HasConversion(ValueConverters.DictionaryStringConverter)
-                .Metadata
-                .SetValueComparer(ValueComparers.DictionaryStringComparer);
+                .HasMany(l => l.Photos)
+                .WithOne(p => p.Litter)
+                .HasForeignKey(p => p.LitterId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

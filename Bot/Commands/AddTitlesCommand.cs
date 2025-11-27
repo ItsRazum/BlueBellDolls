@@ -1,82 +1,63 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Models;
-using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Commands
 {
     public class AddTitlesCommand : CommandHandler
     {
         private readonly IMessagesProvider _messagesProvider;
+        private readonly IManagementServicesFactory _managementServicesFactory;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IDatabaseService _databaseService;
-        private readonly IPhotosDownloaderService _photosDownloaderService;
-        private readonly IEntityHelperService _entityHelperService;
-        private readonly EntitySettings _entitySettings;
 
         public AddTitlesCommand(
             IBotService botService,
             IMessagesProvider messagesProvider,
-            IMessageParametersProvider messageParametersProvider,
-            IDatabaseService databaseService,
-            IPhotosDownloaderService photosDownloaderService,
-            IEntityHelperService entityHelperService,
-            IOptions<EntitySettings> options)
+            IManagementServicesFactory managementServicesFactory,
+            IMessageParametersProvider messageParametersProvider)
             : base(botService)
         {
             _messagesProvider = messagesProvider;
+            _managementServicesFactory = managementServicesFactory;
             _messageParametersProvider = messageParametersProvider;
-            _databaseService = databaseService;
-            _photosDownloaderService = photosDownloaderService;
-            _entityHelperService = entityHelperService;
-            _entitySettings = options.Value;
 
             AddCommandHandler("титулы", HandleCommandAsync);
         }
 
         private async Task HandleCommandAsync(MessageAdapter m, CancellationToken token)
         {
-            if (m.ReplyToMessage == null) return;
+            if (m.Photos == null) return;
 
-            var entityArgs = m.ReplyToMessage.Text.Split('\n').First().Split(' '); //[0] ParentCat, [1] Entity Id
+            var repliedMessageText = m.ReplyToMessage?.Text;
+            if (repliedMessageText == null) return;
 
-            if (entityArgs[0] != nameof(ParentCat)) return;
-            if (m.Photos == null || m.Photos.Length == 0) return;
-
-            var entityId = int.Parse(entityArgs.Last());
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<ParentCat>(entityId, token);
-            if (entity == null)
-            {
-                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
-                return;
-            }
-
-            if (entity.Titles.Count + m.Photos.Length > _entitySettings.MaxParentCatTitlesCount)
-            {
-                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateTitlesLimitReachedMessage(), token: token);
-                return;
-            }
+            var messageArgs = repliedMessageText.Split('\n').First().Split(' ');
+            var entityId = int.Parse(messageArgs[1]);
 
             var loadingMessage = await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLoadingMessage(), token: token);
 
-            var downloadedPhotos = await _photosDownloaderService.DownloadAndConvertPhotosToBase64(m.Photos, token);
+            var managementService = _managementServicesFactory.GetParentCatManagementService();
+            var result = await managementService.AddPhotosToEntityAsync(entityId, m.Photos, PhotosType.Titles, token);
 
-            entity = await _databaseService.ExecuteDbOperationAsync(async (unit, ct) => //Присваивание нужно для обновления сущности
+            await BotService.DeleteMessageAsync(m.Chat, loadingMessage.Single().MessageId, token);
+
+            if (result.Success)
             {
-                var entity = await unit.GetRepository<ParentCat>().GetByIdAsync(entityId, ct);
-                ArgumentNullException.ThrowIfNull(entity);
+                var entity = await managementService.GetEntityAsync(entityId, token);
 
-                foreach (var photo in downloadedPhotos)
-                    entity.Titles.Add(photo.Key, photo.Value);
+                if (entity == null)
+                {
+                    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                    return;
+                }
 
-                await unit.SaveChangesAsync(ct);
-                return entity;
-            }, token);
-
-            await BotService.DeleteMessagesAsync(m.Chat, [m.ReplyToMessage.MessageId, .. loadingMessage.Select(m => m.MessageId), .. m.Photos.Select(p => p.MessageId)], token);
-            await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
+                await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
+                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
+            }
+            else
+                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
         }
     }
 }

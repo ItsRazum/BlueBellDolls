@@ -1,10 +1,11 @@
 ﻿using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
+using BlueBellDolls.Data.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace BlueBellDolls.Data.Contexts
 {
-    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options), IApplicationDbContext
     {
 
         #region DbSets
@@ -12,9 +13,9 @@ namespace BlueBellDolls.Data.Contexts
         public DbSet<ParentCat> Cats => Set<ParentCat>();
         public DbSet<Kitten> Kittens => Set<Kitten>();
         public DbSet<Litter> Litters => Set<Litter>();
-
-        #endregion
-        #region Constructor
+        public DbSet<EntityPhoto> Photos => Set<EntityPhoto>();
+        public DbSet<TelegramPhoto> TelegramPhotos => Set<TelegramPhoto>();
+        public DbSet<CatColor> CatColors => Set<CatColor>();
 
         #endregion
 
@@ -27,14 +28,14 @@ namespace BlueBellDolls.Data.Contexts
 
         public override int SaveChanges()
         {
-            var entities = ChangeTracker.Entries<EntityBase>()
+            var entities = ChangeTracker.Entries< DisplayableEntityBase> ()
                 .Where(e => e.State == EntityState.Modified)
                 .ToList();
 
             foreach (var entry in entities)
             {
                 var hasNonIsEnabledChanges = entry.Properties
-                    .Any(p => p.Metadata.Name != nameof(EntityBase.IsEnabled) && p.IsModified);
+                    .Any(p => p.Metadata.Name != nameof(DisplayableEntityBase.IsEnabled) && p.IsModified);
 
                 if (hasNonIsEnabledChanges)
                 {

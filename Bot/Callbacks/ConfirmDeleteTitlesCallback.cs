@@ -1,8 +1,8 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
@@ -12,7 +12,7 @@ namespace BlueBellDolls.Bot.Callbacks
     {
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementService _managementService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public ConfirmDeleteTitlesCallback(
             IBotService botService,
@@ -20,22 +20,23 @@ namespace BlueBellDolls.Bot.Callbacks
             ICallbackDataProvider callbackDataProvider,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider,
-            IManagementService managementService)
+            IManagementServicesFactory managementServicesFactory)
             : base(botService, botSettings, callbackDataProvider)
         {
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
 
-            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(PhotosManagementMode.Titles), HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(PhotosType.Titles), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
         {
-            var (photoIndexes, _) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText.Split('\n').Last());
+            var (photoKeys, _) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText.Split('\n').Last());
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var result = await _managementService.DeleteEntityPhotosAsync<ParentCat>(entityId, photoIndexes, PhotosManagementMode.Titles, token);
+            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<ParentCat>();
+            var result = await managementService.DeleteEntityPhotosAsync(entityId, [.. photoKeys], token);
 
             await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.Success
                 ? _messagesProvider.CreatePhotosDeletionSuccessMessage()

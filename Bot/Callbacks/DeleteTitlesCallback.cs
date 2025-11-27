@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
@@ -9,7 +10,7 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class DeleteTitlesCallback : CallbackHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
@@ -17,16 +18,16 @@ namespace BlueBellDolls.Bot.Callbacks
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IEntityHelperService entityHelperService,
+            IManagementServicesFactory managementServicesFactory,
             IMessagesProvider messagesProvider,
             IMessagesHelperService messagesHelperService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _entityHelperService = entityHelperService;
+            _managementServicesFactory = managementServicesFactory;
             _messagesProvider = messagesProvider;
             _messagesHelperService = messagesHelperService;
 
-            AddCommandHandler(CallbackDataProvider.GetDeletePhotoCallback<ParentCat>(Enums.PhotosManagementMode.Titles), HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetDeletePhotoCallback<ParentCat>(PhotosType.Titles), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
@@ -34,7 +35,8 @@ namespace BlueBellDolls.Bot.Callbacks
 
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
 
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<ParentCat>(int.Parse(args.Last()), token);
+            var managementService = _managementServicesFactory.GetEntityManagementService<ParentCat>();
+            var entity = await managementService.GetEntityAsync(int.Parse(args.Last()), token);
 
             if (entity == null)
             {

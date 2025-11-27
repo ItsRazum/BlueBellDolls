@@ -10,17 +10,20 @@ namespace BlueBellDolls.Bot.Commands
 {
     public class EntityListCommand : CommandHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly InlineKeyboardsSettings _inlineKeyboardsSettings;
 
         public EntityListCommand(
             IBotService botService,
-            IEntityHelperService entityHelperService,
-            IMessageParametersProvider messageParametersProvider)
+            IManagementServicesFactory managementServicesFactory,
+            IMessageParametersProvider messageParametersProvider,
+            IOptions<BotSettings> botSettings)
             : base(botService)
         {
-            _entityHelperService = entityHelperService;
+            _managementServicesFactory = managementServicesFactory;
             _messageParametersProvider = messageParametersProvider;
+            _inlineKeyboardsSettings = botSettings.Value.InlineKeyboardsSettings;
 
             AddCommandHandler("/catlist", HandleCommandAsync<ParentCat>);
             AddCommandHandler("/litterlist", HandleCommandAsync<Litter>);
@@ -29,12 +32,22 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            var (entityList, pagesCount, entitiesCount) = await _entityHelperService.GetEntityListAsync<TEntity>(1, token);
+            var result = await _managementServicesFactory
+                .GetEntityManagementService<TEntity>()
+                .GetByPageAsync(1, _inlineKeyboardsSettings.PageSize, token);
 
-            await BotService.SendMessageAsync(
-                m.Chat,
-                _messageParametersProvider.GetEntityListParameters(entityList, Enums.ListUnitActionMode.Edit, (1, pagesCount, entitiesCount)),
-                token);
+            if (result.Success)
+            {
+                var page = result.Result!;
+                await BotService.SendMessageAsync(
+                    m.Chat,
+                    _messageParametersProvider.GetEntityListParameters(page.Items, Enums.ListUnitActionMode.Edit, (1, page.TotalPages, page.TotalItems)),
+                    token);
+            }
+            else
+            {
+                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
+            }
         }
     }
 }

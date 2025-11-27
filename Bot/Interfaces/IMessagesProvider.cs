@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Enums;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
@@ -22,7 +23,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateEntityFormMessage(IEntity entity, bool enableEdit = true);
 
-        string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosManagementMode photosManagementMode);
+        string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosType photosType);
 
         string CreatePhotosLoadingMessage();
 
@@ -32,7 +33,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateGeneticTestsLimitReachedMessage();
 
-        string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] photoMessageIds);
+        string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] photoMessageIds);
 
         string CreateDeleteConfirmationMessage(IDisplayableEntity entity);
 
@@ -40,7 +41,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateSelectedPhotosOverviewMessage(IDisplayableEntity entity, int photosCount);
 
-        string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIndexes, int[] sendedPhotoMessageIds);
+        string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] sendedPhotoMessageIds);
 
         string CreateEntityListMessage<TEntity>(ListUnitActionMode actionMode, int totalEntitiesCount, IEntity? unitOwner = null) where TEntity : class, IDisplayableEntity;
 
@@ -48,7 +49,7 @@ namespace BlueBellDolls.Bot.Interfaces
 
         string CreateParentCatSetForLitter(ParentCat parentCat, Litter litter);
 
-        string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoIndex);
+        string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoId);
 
         string CreatePhotosDeletionSuccessMessage();
 
@@ -61,5 +62,45 @@ namespace BlueBellDolls.Bot.Interfaces
         string CreateSavingSuccessMessage((int parentCatsCount, int littersCount, int kittensCount) values);
 
         string CreateToggleEntityVisibilitySuccessMessage(IDisplayableEntity entity);
+
+        string CreateEntityAdditionErrorMessage();
+
+        string CreateKittenRequiresLitterMessage();
+
+        string CreateApiGetEntityFailureMessage();
+
+        string CreateApiUpdateEntityFailureMessage();
+
+        string CreateApiGetEntityAfterUpdateFailureMessage();
+
+        string CreatePropertyUpdateFailureMessage(string propertyName);
+
+        string CreateNoPhotosToUploadMessage();
+
+        string CreatePhotoDownloadFailedMessage();
+
+        string CreateApiUploadFailedMessage(int[]? unloadedPhotoIndexes = null);
+
+        string CreateInvalidPhotoTypeSupportMessage<TEntity>(PhotosType photosType);
+
+        string CreateApiGetPageFailureMessage<TEntity>();
+
+        string CreateLitterNotFoundMessage(int litterId);
+
+        string CreateLitterParentIsWrongGenderMessage(string parentName, bool isMale);
+
+        string CreateColorUpdateErrorMessage();
+
+        string CreateUnknownErrorMessage(string? message = null);
+
+        string CreateEntityDeletionError();
+
+        string CreateDefaultPhotoSetErrorMessage();
+
+        string CreateToggleEntityVisibilityErrorMessage();
+        string CreateKittenClassSelectionMenuMessage(Kitten kitten);
+        string CreateKittenClassSetSuccessMessage(Kitten kitten);
+        string CreateKittenStatusSelectionMenuMessage(Kitten kitten);
+        string CreateKittenStatusSetSuccessMessage(Kitten kitten);
     }
 }

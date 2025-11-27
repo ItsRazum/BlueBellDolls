@@ -12,20 +12,20 @@ namespace BlueBellDolls.Bot.Callbacks
     {
         private readonly IMessagesProvider _messagesProvider;
         private readonly IKeyboardsProvider _keyboardsProvider;
-        private readonly IManagementService _managementService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public ToggleEntityVisibilityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
-            IKeyboardsProvider keyboardsProvider,
-            IManagementService managementService) 
+            IManagementServicesFactory managementServicesFactory,
+            IKeyboardsProvider keyboardsProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
             _keyboardsProvider = keyboardsProvider;
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
 
             AddCommandHandler(CallbackDataProvider.GetToggleEntityVisibilityCallback<ParentCat>(), HandleCallbackAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetToggleEntityVisibilityCallback<Litter>(), HandleCallbackAsync<Litter>);
@@ -35,12 +35,21 @@ namespace BlueBellDolls.Bot.Callbacks
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
-            var result = await _managementService.ToggleEntityVisibilityAsync<TEntity>(entityId, token);
+            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
+            var result = await managementService.ToggleEntityVisibilityAsync(entityId, token);
 
             if (result.Success)
             {
-                await BotService.EditInlineKeyboardAsync(c.Chat, c.MessageId, _keyboardsProvider.CreateEntityOptionsKeyboard(result.Result!), token);
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateToggleEntityVisibilitySuccessMessage(result.Result!), token: token);
+                var entity = await managementService.GetEntityAsync(entityId, token);
+
+                if (entity == null)
+                {
+                    await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                    return;
+                }
+
+                await BotService.EditInlineKeyboardAsync(c.Chat, c.MessageId, _keyboardsProvider.CreateEntityOptionsKeyboard(entity), token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateToggleEntityVisibilitySuccessMessage(entity), token: token);
             }
             else
             {

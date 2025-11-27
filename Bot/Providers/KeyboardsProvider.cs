@@ -1,12 +1,12 @@
 ﻿using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 using Telegram.Bot.Types.ReplyMarkups;
-using static Grpc.Core.Metadata;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -17,6 +17,7 @@ namespace BlueBellDolls.Bot.Providers
         private readonly CallbackDataSettings _callbackDataSettings;
         private readonly Dictionary<Type, Func<IDisplayableEntity, InlineKeyboardMarkup>> _entityOptionsKeyboards;
         private readonly ICallbackDataProvider _callbackDataProvider;
+        private readonly IEnumMapperService _enumMapperService;
 
         #endregion
 
@@ -24,10 +25,12 @@ namespace BlueBellDolls.Bot.Providers
 
         public KeyboardsProvider(
             ICallbackDataProvider callbackDataProvider,
-            IOptions<BotSettings> botOptions)
+            IOptions<BotSettings> botOptions,
+            IEnumMapperService enumMapperService)
         {
             _callbackDataProvider = callbackDataProvider;
             _callbackDataSettings = botOptions.Value.CallbackDataSettings;
+            _enumMapperService = enumMapperService;
 
             _entityOptionsKeyboards = new Dictionary<Type, Func<IDisplayableEntity, InlineKeyboardMarkup>>
             {
@@ -44,7 +47,7 @@ namespace BlueBellDolls.Bot.Providers
         public InlineKeyboardMarkup CreateEntityListKeyboard<TEntity>(
             IEnumerable<TEntity> entities,
             ListUnitActionMode actionMode = ListUnitActionMode.Edit,
-            int chunkSize = 1,
+            int rowLength = 1,
             (int page, int totalPagesCount)? pageParameters = null,
             IEntity? unitOwner = null)
             where TEntity : class, IDisplayableEntity
@@ -53,7 +56,7 @@ namespace BlueBellDolls.Bot.Providers
             if (unitOwner != null)
                 result.AddNewRow(CreateBackToLitterButton(unitOwner.Id));
 
-            foreach (var chunk in entities.OrderBy(e => e.DisplayName).Chunk(chunkSize))
+            foreach (var chunk in entities.OrderBy(e => e.DisplayName).Chunk(rowLength))
                 result.AddNewRow([.. chunk.Select(e => CreateListEntityReferenceButton(e, actionMode, unitOwner))]);
 
             if (pageParameters != null)
@@ -76,25 +79,19 @@ namespace BlueBellDolls.Bot.Providers
             return result;
         }
 
-        public InlineKeyboardMarkup CreateEntityPhotosKeyboard(IDisplayableEntity entity, PhotosManagementMode photosManagementMode, int[] photoMessageIds, int[]? selectedPhotosIndexes = null)
+        public InlineKeyboardMarkup CreateEntityPhotosKeyboard(IDisplayableEntity entity, PhotosType photosType, int[] photoMessageIds, int[]? selectedPhotoIds = null)
         {
             var result = new InlineKeyboardMarkup(CreateBackToFormButton(entity, _callbackDataProvider.CreateDeleteMessagesCallback(photoMessageIds)));
-            var photoIndexes = photosManagementMode switch
-            {
-                PhotosManagementMode.Photos => entity.Photos.Count,
-                PhotosManagementMode.Titles => ((ParentCat)entity).Titles.Count,
-                PhotosManagementMode.GenTests => ((ParentCat)entity).GeneticTests.Count,
-                _ => 0
-            };
-            for (int i = 0; i < photoIndexes; i++)
-                result.AddNewRow(CreatePhotoReferenceButton(entity, i, !selectedPhotosIndexes?.Contains(i) ?? true, photosManagementMode));
+            var photoIds = entity.Photos.Where(p => p.Type == photosType).Select(p => p.Id).ToArray();
+            for (int i = 0; i < photoIds.Length; i++)
+                result.AddNewRow(CreatePhotoReferenceButton(entity, i, photoIds[i], !selectedPhotoIds?.Contains(photoIds[i]) ?? true, photosType));
 
-            if (selectedPhotosIndexes?.Length > 0)
+            if (selectedPhotoIds?.Length > 0)
             {
-                if (selectedPhotosIndexes.Length == 1 && photosManagementMode == PhotosManagementMode.Photos)
-                    result.AddNewRow(CreateSelectPhotoAsDefaultButton(entity, selectedPhotosIndexes.First(), photosManagementMode));
+                if (selectedPhotoIds.Length == 1 && photosType == PhotosType.Photos)
+                    result.AddNewRow(CreateSelectPhotoAsDefaultButton(entity, selectedPhotoIds.First(), photosType));
 
-                result.AddNewRow(CreateDeletePhotosButton(entity, photosManagementMode));
+                result.AddNewRow(CreateDeletePhotosButton(entity, photosType));
             }
 
             return result;
@@ -138,6 +135,44 @@ namespace BlueBellDolls.Bot.Providers
             return result;
         }
 
+        public InlineKeyboardMarkup CreateKittenClassSelectionKeyboard(Kitten kitten)
+        {
+            var result = new InlineKeyboardMarkup(CreateBackToFormButton(kitten));
+            foreach (var kittenClass in Enum.GetValues<KittenClass>())
+            {
+                if (kitten.Class == kittenClass)
+                    continue;
+
+                result.AddNewRow(
+                    InlineKeyboardButton.WithCallbackData(
+                        kittenClass.ToString(),
+                        _callbackDataProvider.CreateSetKittenClass(kitten.Id, kittenClass)
+                    )
+                );
+            }
+
+            return result;
+        }
+
+        public InlineKeyboardMarkup CreateKittenStatusSelectionKeyboard(Kitten kitten)
+        {
+            var result = new InlineKeyboardMarkup(CreateBackToFormButton(kitten));
+            foreach (var kittenStatus in Enum.GetValues<KittenStatus>())
+            {
+                if (kitten.Status == kittenStatus)
+                    continue;
+
+                result.AddNewRow(
+                    InlineKeyboardButton.WithCallbackData(
+                        _enumMapperService.GetMapping(kittenStatus, kitten.IsMale),
+                        _callbackDataProvider.CreateSetKittenStatus(kitten.Id, kittenStatus)
+                    )
+                );
+            }
+
+            return result;
+        }
+
         public ReplyKeyboardMarkup CreateStartKeyboard()
         {
             var result = new ReplyKeyboardMarkup();
@@ -155,7 +190,7 @@ namespace BlueBellDolls.Bot.Providers
 
         private InlineKeyboardMarkup CreateLitterOptionsKeyboard(Litter litter)
         {
-            var result = CreateEntityListKeyboard(litter.Kittens, chunkSize: 3);
+            var result = CreateEntityListKeyboard(litter.Kittens, rowLength: 3);
 
             if (litter.Kittens.Count < 10)
                 result.AddNewRow(
@@ -185,10 +220,10 @@ namespace BlueBellDolls.Bot.Providers
                 InlineKeyboardButton.WithCallbackData(fatherButtonText, fatherButtonCallbackData)
             ]);
 
-            result.AddNewRow(CreateDeleteButton(litter, _callbackDataProvider.CreateDeleteEntityCallback(litter)));
+            result.AddNewRow(CreateDeleteButton(litter));
 
             if (litter.Photos.Count > 0)
-                result.AddNewRow(CreateManagePhotosButton(litter, PhotosManagementMode.Photos));
+                result.AddNewRow(CreateManagePhotosButton(litter, PhotosType.Photos));
 
             return result;
         }
@@ -196,18 +231,18 @@ namespace BlueBellDolls.Bot.Providers
         private InlineKeyboardMarkup CreateParentCatOptions(ParentCat parentCat)
         {
             var result = new InlineKeyboardMarkup();
-            result.AddNewRow(CreateDeleteButton(parentCat, _callbackDataProvider.CreateDeleteEntityCallback(parentCat)));
+            result.AddNewRow(CreateDeleteButton(parentCat));
             result.AddNewRow(CreateSelectColorButton(parentCat));
 
             List<InlineKeyboardButton> photosManagementRow = [];
-            if (parentCat.Photos.Count > 0)
-                photosManagementRow.Add(CreateManagePhotosButton(parentCat, PhotosManagementMode.Photos));
+            if (parentCat.Photos.Where(p => p.Type == PhotosType.Photos).Any())
+                photosManagementRow.Add(CreateManagePhotosButton(parentCat, PhotosType.Photos));
 
-            if (parentCat.Titles.Count > 0)
-                photosManagementRow.Add(CreateManagePhotosButton(parentCat, PhotosManagementMode.Titles));
+            if (parentCat.Photos.Where(p => p.Type == PhotosType.Titles).Any())
+                photosManagementRow.Add(CreateManagePhotosButton(parentCat, PhotosType.Titles));
 
-            if (parentCat.GeneticTests.Count > 0)
-                photosManagementRow.Add(CreateManagePhotosButton(parentCat, PhotosManagementMode.GenTests));
+            if (parentCat.Photos.Where(p => p.Type == PhotosType.GenTests).Any())
+                photosManagementRow.Add(CreateManagePhotosButton(parentCat, PhotosType.GenTests));
 
             if (photosManagementRow.Count > 0)
                 result.AddNewRow([.. photosManagementRow]);
@@ -219,11 +254,11 @@ namespace BlueBellDolls.Bot.Providers
         {
             var result = new InlineKeyboardMarkup();
             result.AddNewRow(CreateBackToLitterButton(kitten.LitterId));
-            result.AddNewRow(CreateDeleteButton(kitten, _callbackDataProvider.CreateDeleteEntityCallback(kitten, kitten.LitterId)));
-            result.AddNewRow(CreateSelectColorButton(kitten));
+            result.AddNewRow(CreateDeleteButton(kitten));
+            result.AddNewRow(CreateChangeKittenClassButton(kitten), CreateSelectColorButton(kitten), CreateChangeKittenStatusButton(kitten));
 
             if (kitten.Photos.Count > 0)
-                result.AddNewRow(CreateManagePhotosButton(kitten, PhotosManagementMode.Photos));
+                result.AddNewRow(CreateManagePhotosButton(kitten, PhotosType.Photos));
 
             return result;
         }
@@ -235,16 +270,19 @@ namespace BlueBellDolls.Bot.Providers
             var pageCounterString = pageParameters.totalPagesCount == 0
                 ? "Список пуст!"
                 : $"{pageParameters.page}/{pageParameters.totalPagesCount}";
+
             var buttons = new List<InlineKeyboardButton?>
-        {
-            pageParameters.page > 1
+            {
+                pageParameters.page > 1
                 ? InlineKeyboardButton.WithCallbackData("«", _callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page - 1))
                 : null,
-            InlineKeyboardButton.WithCallbackData(pageCounterString, "..."),
-            pageParameters.page < pageParameters.totalPagesCount
+
+                InlineKeyboardButton.WithCallbackData(pageCounterString, "..."),
+
+                pageParameters.page < pageParameters.totalPagesCount
                 ? InlineKeyboardButton.WithCallbackData("»", _callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page + 1))
                 : null
-        };
+            };
 
             return buttons.Where(b => b != null).ToArray()!;
         }
@@ -264,12 +302,12 @@ namespace BlueBellDolls.Bot.Providers
                 _callbackDataProvider.CreateBackToLitterCallback(litterId)
             );
 
-        private InlineKeyboardButton CreateDeleteButton(IDisplayableEntity entity, string deleteCallback)
+        private InlineKeyboardButton CreateDeleteButton(IDisplayableEntity entity, int fromLitterId = 0)
         {
             return InlineKeyboardButton.WithCallbackData(
-                    $"Удалить {entity.DisplayName}",
-                    deleteCallback
-                );
+                $"Удалить {entity.DisplayName}",
+                _callbackDataProvider.CreateDeleteEntityCallback(entity, fromLitterId)
+            );
         }
 
         private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
@@ -295,32 +333,33 @@ namespace BlueBellDolls.Bot.Providers
         private InlineKeyboardButton CreateDeleteNoButton(string callback)
             => InlineKeyboardButton.WithCallbackData("Нет", callback);
 
-        private InlineKeyboardButton CreateManagePhotosButton(IDisplayableEntity entity, PhotosManagementMode photosManagementMode)
+        private InlineKeyboardButton CreateManagePhotosButton(IDisplayableEntity entity, PhotosType photosManagementMode)
         {
             var buttonText = photosManagementMode switch
             {
-                PhotosManagementMode.Photos => "Фото",
-                PhotosManagementMode.Titles => "Титулы",
-                PhotosManagementMode.GenTests => "Ген. тесты",
+                PhotosType.Photos => "Фото",
+                PhotosType.Titles => "Титулы",
+                PhotosType.GenTests => "Ген. тесты",
                 _ => string.Empty
             };
             return InlineKeyboardButton.WithCallbackData(buttonText, _callbackDataProvider.CreateManagePhotosCallback(entity, photosManagementMode));
         }
-        private InlineKeyboardButton CreatePhotoReferenceButton(IDisplayableEntity entity, int number, bool select, PhotosManagementMode photosManagementMode)
+
+        private InlineKeyboardButton CreatePhotoReferenceButton(IDisplayableEntity entity, int number, int photoId, bool select, PhotosType photosManagementMode)
         {
             var selectionChar = select ? "⚫️" : "🟢";
 
             return InlineKeyboardButton.WithCallbackData(
                 $"{selectionChar}Фото {number + 1}",
-                _callbackDataProvider.CreateTogglePhotoSelectionCallback(entity, number, select, photosManagementMode));
+                _callbackDataProvider.CreateTogglePhotoSelectionCallback(entity, photoId, select, photosManagementMode));
         }
 
-        private InlineKeyboardButton CreateSelectPhotoAsDefaultButton(IDisplayableEntity entity, int photoIndex, PhotosManagementMode photosManagementMode)
+        private InlineKeyboardButton CreateSelectPhotoAsDefaultButton(IDisplayableEntity entity, int photoId, PhotosType photosManagementMode)
             => InlineKeyboardButton.WithCallbackData(
                 "Сделать основным",
-                _callbackDataProvider.CreateMakeDefaultPhotoForEntityCallback(entity, photoIndex, photosManagementMode));
+                _callbackDataProvider.CreateMakeDefaultPhotoForEntityCallback(entity, photoId, photosManagementMode));
 
-        private InlineKeyboardButton CreateDeletePhotosButton(IDisplayableEntity entity, PhotosManagementMode photosManagementMode)
+        private InlineKeyboardButton CreateDeletePhotosButton(IDisplayableEntity entity, PhotosType photosManagementMode)
             => InlineKeyboardButton.WithCallbackData(
                 "Удалить выбранное",
                 _callbackDataProvider.CreateDeletePhotosForEntityCallback(entity, photosManagementMode));
@@ -346,13 +385,19 @@ namespace BlueBellDolls.Bot.Providers
         }
 
         private InlineKeyboardButton CreateSelectColorButton(Cat entity)
-            => InlineKeyboardButton.WithCallbackData("Указать окрас", _callbackDataProvider.CreateStartFindColorCallback(entity));
+            => InlineKeyboardButton.WithCallbackData("Окрас", _callbackDataProvider.CreateStartFindColorCallback(entity));
 
         private InlineKeyboardButton CreateEditEntityButton(IDisplayableEntity entity)
             => InlineKeyboardButton.WithCallbackData("Редактировать", _callbackDataProvider.CreateEditEntityCallback(entity));
 
         private InlineKeyboardButton CreateToggleEntityVisibilityButton(IDisplayableEntity entity)
             => InlineKeyboardButton.WithCallbackData($"{(entity.IsEnabled ? "Скрыть с сайта" : "Вернуть на сайт")}", _callbackDataProvider.CreateToggleEntityVisibilityCallback(entity));
+
+        private InlineKeyboardButton CreateChangeKittenClassButton(Kitten kitten)
+            => InlineKeyboardButton.WithCallbackData("Класс", _callbackDataProvider.CreateOpenKittenClass(kitten.Id));
+
+        private InlineKeyboardButton CreateChangeKittenStatusButton(Kitten kitten)
+            => InlineKeyboardButton.WithCallbackData("Статус", _callbackDataProvider.CreateOpenKittenStatus(kitten.Id));
 
         #endregion
 

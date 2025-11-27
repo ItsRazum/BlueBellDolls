@@ -1,6 +1,7 @@
 ﻿using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
@@ -10,7 +11,9 @@ namespace BlueBellDolls.Bot.Providers
 {
     public class CallbackDataProvider : ICallbackDataProvider
     {
+
         private readonly CallbackCommandIdentifiers _settings;
+        
         private string Separator { get; }
 
         public CallbackDataProvider(
@@ -33,13 +36,13 @@ namespace BlueBellDolls.Bot.Providers
         public string GetConfirmDeleteEntityCallback<T>() where T : IDisplayableEntity
             => $"{_settings.ConfirmationSuffix}{_settings.DeleteEntity}{typeof(T).Name}";
 
-        public string GetConfirmDeletePhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity
+        public string GetConfirmDeletePhotoCallback<T>(PhotosType mode) where T : IDisplayableEntity
             => $"{_settings.ConfirmationSuffix}{_settings.DeletePhoto}{mode}For{typeof(T).Name}";
 
         public string GetDeleteEntityCallback<T>() where T : IDisplayableEntity
             => $"{_settings.DeleteEntity}{typeof(T).Name}";
 
-        public string GetDeletePhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity
+        public string GetDeletePhotoCallback<T>(PhotosType mode) where T : IDisplayableEntity
             => $"{_settings.DeletePhoto}{mode}For{typeof(T).Name}";
 
         public string GetDeleteMessagesCallback() => _settings.DeleteMessages;
@@ -50,7 +53,7 @@ namespace BlueBellDolls.Bot.Providers
         public string GetListEntityCallback<T>() where T : IDisplayableEntity
             => $"{_settings.ListEntity}{typeof(T).Name}";
 
-        public string GetManagePhotosCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity
+        public string GetManagePhotosCallback<T>(PhotosType mode) where T : IDisplayableEntity
             => $"{_settings.ManagePhotos}{mode}To{typeof(T).Name}";
 
         public string GetOpenEntityCallback<T>() where T : IDisplayableEntity
@@ -60,9 +63,9 @@ namespace BlueBellDolls.Bot.Providers
             => $"{_settings.SelectEntity}{typeof(T).Name}";
 
         public string GetSelectToLitterCallback()
-            => $"{_settings.SelectToLitter}";
+            => _settings.SelectToLitter;
 
-        public string GetSetDefaultPhotoCallback<T>(PhotosManagementMode mode) where T : IDisplayableEntity
+        public string GetSetDefaultPhotoCallback<T>(PhotosType mode) where T : IDisplayableEntity
             => $"{_settings.SetDefaultPhoto}{mode}For{typeof(T).Name}";
 
         public string GetTogglePhotoSelectionCallback<T>() where T : IDisplayableEntity
@@ -74,6 +77,17 @@ namespace BlueBellDolls.Bot.Providers
         public string GetToggleEntityVisibilityCallback<T>() where T : IDisplayableEntity
             => $"{_settings.ToggleEntityVisibility}{typeof(T).Name}";
 
+        public string GetOpenKittenStatus()
+            => _settings.OpenKittenStatus;
+
+        public string GetOpenKittenClass()
+            => _settings.OpenKittenClass;
+
+        public string GetSetKittenStatus()
+            => _settings.SetKittenStatus;
+
+        public string GetSetKittenClass()
+            => _settings.SetKittenClass;
 
         #endregion
 
@@ -105,29 +119,33 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
         {
-            string ownerCallbackData = string.Empty;
-            if (unitOwner != null)
+            var entityType = entity.GetType().Name;
+            if (unitOwner == null)
+            {
+                return $"{actionMode.ToString().ToLower()}{entityType}{Separator}{entity.Id}";
+            }
+            else
             {
                 if (actionMode != ListUnitActionMode.Select)
                     throw new ArgumentException("При указанном владельце сущности режим работы может быть только Select!");
-                ownerCallbackData = $"To{unitOwner.GetType().Name}{Separator}{unitOwner.Id}{Separator}";
+
+                return $"{_settings.SelectToLitter}{Separator}{unitOwner.Id}{Separator}{entityType}{Separator}{entity.Id}";
             }
-            return $"{actionMode.ToString().ToLower()}{ownerCallbackData}{entity.GetType().Name}{Separator}{entity.Id}";
         }
 
         public string CreateAddEntityCallback(string entityName)
             => $"{_settings.AddEntity}{entityName}";
 
-        public string CreateManagePhotosCallback(IDisplayableEntity entity, PhotosManagementMode photosManagementMode)
+        public string CreateManagePhotosCallback(IDisplayableEntity entity, PhotosType photosManagementMode)
             => $"{_settings.ManagePhotos}{photosManagementMode}To{entity.GetType().Name}{Separator}{entity.Id}";
 
-        public string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int number, bool select, PhotosManagementMode photosManagementMode) 
-            => $"{_settings.TogglePhotoSelection}{entity.GetType().Name}{Separator}{number}{Separator}{select}{Separator}{photosManagementMode}{Separator}{entity.Id}";
+        public string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int photoId, bool select, PhotosType photosManagementMode) 
+            => $"{_settings.TogglePhotoSelection}{entity.GetType().Name}{Separator}{photoId}{Separator}{select}{Separator}{photosManagementMode}{Separator}{entity.Id}";
 
-        public string CreateMakeDefaultPhotoForEntityCallback(IDisplayableEntity entity, int photoIndex, PhotosManagementMode photosManagementMode)
-            => $"{_settings.SetDefaultPhoto}{photosManagementMode}For{entity.GetType().Name}{Separator}{photoIndex}{Separator}{entity.Id}";
+        public string CreateMakeDefaultPhotoForEntityCallback(IDisplayableEntity entity, int photoId, PhotosType photosManagementMode)
+            => $"{_settings.SetDefaultPhoto}{photosManagementMode}For{entity.GetType().Name}{Separator}{photoId}{Separator}{entity.Id}";
 
-        public string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity, PhotosManagementMode photosManagementMode)
+        public string CreateDeletePhotosForEntityCallback(IDisplayableEntity entity, PhotosType photosManagementMode)
             => $"{_settings.DeletePhoto}{photosManagementMode}For{entity.GetType().Name}{Separator}{entity.Id}";
 
         public string CreateDeleteMessagesCallback(int[] messagesId)
@@ -146,6 +164,18 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateToggleEntityVisibilityCallback(IDisplayableEntity entity)
             => $"{_settings.ToggleEntityVisibility}{entity.GetType().Name}{Separator}{entity.Id}";
+
+        public string CreateOpenKittenClass(int kittenId)
+            => $"{_settings.OpenKittenClass}{Separator}{kittenId}";
+
+        public string CreateOpenKittenStatus(int kittenId)
+            => $"{_settings.OpenKittenStatus}{Separator}{kittenId}";
+
+        public string CreateSetKittenClass(int kittenId, KittenClass kittenClass)
+            => $"{_settings.SetKittenClass}{Separator}{kittenClass}{Separator}{kittenId}";
+
+        public string CreateSetKittenStatus(int kittenId, KittenStatus kittenStatus)
+            => $"{_settings.SetKittenStatus}{Separator}{kittenStatus}{Separator}{kittenId}";
 
         #endregion
     }

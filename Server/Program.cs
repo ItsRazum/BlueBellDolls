@@ -1,40 +1,66 @@
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Data.Contexts;
 using BlueBellDolls.Data.Interfaces;
-using BlueBellDolls.Data.Repositories.Generic;
-using BlueBellDolls.Data.Utilities;
+using BlueBellDolls.Server.Factory;
 using BlueBellDolls.Server.Interfaces;
 using BlueBellDolls.Server.Services;
-using BlueBellDolls.Service.Settings;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
+using BlueBellDolls.Server.Settings;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System.Net;
 
-namespace BlueBellDolls.Service;
-
-class Program
+internal class Program
 {
-    static void Main(string[] args)
+    private static void Main(string[] args)
     {
-        SQLitePCL.Batteries.Init();
-
         var builder = WebApplication.CreateBuilder(args);
 
-        #region Configure Application
         ConfigureLogging(builder);
         ConfigureServices(builder);
-        ConfigureKestrel(builder);
-        #endregion
 
         var app = builder.Build();
 
-        #region Configure Middleware and Database
-        ConfigureMiddleware(app);
+        ConfigureServer(app);
         InitializeDatabase(app);
-        #endregion
 
         app.Run();
+    }
+
+    private static void ConfigureServices(WebApplicationBuilder builder)
+    {
+        // Контроллеры и OpenAPI
+        builder.Services.AddControllers();
+        builder.Services.AddOpenApi();
+
+        // Конфигурация
+        builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection(nameof(FileStorageSettings)));
+
+        // Database
+        builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
+        {
+            options.UseNpgsql(
+                builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)),
+                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly));
+        });
+
+        // CORS
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowVueApp", policyBuilder =>
+            {
+                policyBuilder.WithOrigins("http://localhost:5173")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+            });
+        });
+
+        // Фабрики
+        builder.Services
+            .AddSingleton<IEntityFactory, EntityFactory>();
+
+        //Остальные сервисы
+        builder.Services
+            .AddScoped<ILitterService, LitterService>()
+            .AddScoped<IParentCatService, ParentCatService>()
+            .AddScoped<IKittenService, KittenService>();
     }
 
     private static void ConfigureLogging(WebApplicationBuilder builder)
@@ -47,64 +73,28 @@ class Program
         builder.Host.UseSerilog(Log.Logger);
     }
 
-    private static void ConfigureServices(WebApplicationBuilder builder)
+    private static void ConfigureServer(WebApplication app)
     {
-        // gRPC
-        builder.Services.AddGrpc();
+        app.UseDefaultFiles();
+        app.MapStaticAssets();
 
-        // Entity Framework
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        if (app.Environment.IsDevelopment())
         {
-            options.UseNpgsql(
-                builder.Configuration.GetConnectionString(nameof(ApplicationDbContext)),
-                x => x.MigrationsAssembly(typeof(ApplicationDbContext).Assembly));
-        });
+            app.MapOpenApi();
+        }
 
-        // Р РµРїРѕР·РёС‚РѕСЂРёРё
-        builder.Services.AddScoped(typeof(IEntityRepository<>), typeof(EntityRepository<>));
-
-        // РќР°СЃС‚СЂРѕР№РєРё gRPC
-        builder.Services.Configure<GrpcServerSettings>(builder.Configuration.GetSection(nameof(GrpcServerSettings)));
-
-        // Р®РЅРёС‚С‹
-        builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-        // РЎРµСЂРІРёСЃС‹
-        builder.Services.AddScoped<ICatService, CatService>();
-
-        // Р”РѕРї. РЅР°СЃС‚СЂРѕР№РєРё
-        builder.Host.UseDefaultServiceProvider(options =>
-        {
-            options.ValidateScopes = true;
-            options.ValidateOnBuild = true;
-        });
-    }
-
-    private static void ConfigureKestrel(WebApplicationBuilder builder)
-    {
-        builder.WebHost.ConfigureKestrel((context, options) =>
-        {
-            var grpcSettings = context.Configuration
-                .GetSection(nameof(GrpcServerSettings))
-                .Get<GrpcServerSettings>()
-                ?? throw new NullReferenceException(nameof(GrpcServerSettings));
-
-            options.Listen(IPAddress.Parse(grpcSettings.Host), grpcSettings.Port, listenOptions =>
-            {
-                listenOptions.Protocols = HttpProtocols.Http2;
-            });
-        });
-    }
-
-    private static void ConfigureMiddleware(WebApplication app)
-    {
-        app.MapGrpcService<BlueBellDollsService>().EnableGrpcWeb();
+        app.UseCors("AllowVueApp");
+        app.UseHttpsRedirection();
+        app.UseAuthorization();
+        app.MapControllers();
+        app.MapFallbackToFile("/index.html");
     }
 
     private static void InitializeDatabase(WebApplication app)
     {
         using var scope = app.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.EnsureCreated();
+        var database = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
+        database.Database.Migrate();
     }
+
 }

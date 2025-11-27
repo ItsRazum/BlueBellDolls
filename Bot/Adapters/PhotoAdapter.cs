@@ -2,18 +2,12 @@
 
 namespace BlueBellDolls.Bot.Adapters
 {
-    public class PhotoAdapter
+    public class PhotoAdapter(PhotoSize photoSize, int messageId)
     {
-        private PhotoSize _photoSize;
-
-        public PhotoAdapter(PhotoSize photoSize, int messageId)
-        {
-            _photoSize = photoSize;
-            MessageId = messageId;
-        }
+        private readonly PhotoSize _photoSize = photoSize;
 
         public string FileId => _photoSize.FileId;
 
-        public int MessageId { get; }
+        public int MessageId { get; } = messageId;
     }
 }

@@ -13,8 +13,7 @@ namespace BlueBellDolls.Bot.Callbacks
         private readonly Dictionary<string, Dictionary<string, string[]>> _catColors;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IEntityHelperService _entityHelperService;
-        private readonly IManagementService _managementService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public FindColorCallback(
             IBotService botService, 
@@ -23,15 +22,13 @@ namespace BlueBellDolls.Bot.Callbacks
             IOptions<EntitySettings> entitySettings, 
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
-            IEntityHelperService entityHelperService,
-            IManagementService managementService) 
+            IManagementServicesFactory managementServicesFactory) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _catColors = entitySettings.Value.CatColors;
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _entityHelperService = entityHelperService;
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
 
             AddCommandHandler("findColorParentCat", HandleCallbackAsync<ParentCat>);
             AddCommandHandler("findColorKitten", HandleCallbackAsync<Kitten>);
@@ -41,7 +38,8 @@ namespace BlueBellDolls.Bot.Callbacks
         {
             var args = c.CallbackData.Split(CallbackArgsSeparator, StringSplitOptions.RemoveEmptyEntries);
             var entityId = int.Parse(args.Last());
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
+            var managementService = _managementServicesFactory.GetCatManagementService<TEntity>();
+            var entity = await managementService.GetEntityAsync(entityId, token);
 
             if (entity == null)
             {
@@ -83,7 +81,8 @@ namespace BlueBellDolls.Bot.Callbacks
 
         private async Task<TEntity> UpdateEntityColor<TEntity>(int entityId, string color, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
         {
-            var result = await _managementService.UpdateEntityColorAsync<TEntity>(entityId, color, token);
+            var managementService = _managementServicesFactory.GetCatManagementService<TEntity>();
+            var result = await managementService.UpdateColorAsync(entityId, color, token);
             if (result.Success && result.Result != null)
             {
                 await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(color), token: token);
@@ -92,7 +91,7 @@ namespace BlueBellDolls.Bot.Callbacks
             else
             {
                 await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
-                return await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token) ?? throw new NullReferenceException("Не удалось найти сущность!");
+                return await managementService.GetEntityAsync(entityId, token) ?? throw new NullReferenceException("Не удалось найти сущность!");
             }
         }
 

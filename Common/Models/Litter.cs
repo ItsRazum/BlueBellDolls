@@ -3,42 +3,34 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
+    [Table("litters")]
     public class Litter : DisplayableEntityBase
     {
 
         #region Properties
 
+        [Column("letter")]
         public char Letter { get; set; }
-        public DateOnly BirthDay { get; set; }
-        public bool IsActive { get; set; }
 
+        [Column("birth_day")]
+        public DateOnly BirthDay { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+
+        [Column("mother_cat_id")]
         [ForeignKey(nameof(MotherCat))]
         public int? MotherCatId { get; set; }
         public ParentCat? MotherCat { get; set; }
 
+        [Column("father_cat_id")]
         [ForeignKey(nameof(FatherCat))]
         public int? FatherCatId { get; set; }
         public ParentCat? FatherCat { get; set; }
 
         public List<Kitten> Kittens { get; set; }
+
+        [Column("description")]
         public string Description { get; set; }
 
         #endregion
-
-        #region Constructor 
-
-        public Litter()
-        {
-            Letter = 'A';
-            BirthDay = DateOnly.FromDateTime(DateTime.Now);
-            IsActive = true;
-            Description = "Добавьте описание!";
-            Kittens = [];
-            Photos = [];
-        }
-
-        #endregion
-
 
         #region IDisplayableEntity implementation
 

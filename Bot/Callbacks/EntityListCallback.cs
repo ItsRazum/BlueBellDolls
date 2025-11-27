@@ -11,19 +11,21 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class EntityListCallback : CallbackHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
         private readonly IMessageParametersProvider _messageParametersProvider;
+        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly InlineKeyboardsSettings _inlineKeyboardsSettings;
 
         public EntityListCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IEntityHelperService entityHelperService,
+            IManagementServicesFactory managementServicesFactory,
             IMessageParametersProvider messageParametersProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _entityHelperService = entityHelperService;
+            _managementServicesFactory = managementServicesFactory;
             _messageParametersProvider = messageParametersProvider;
+            _inlineKeyboardsSettings = botSettings.Value.InlineKeyboardsSettings;
 
             AddCommandHandler(CallbackDataProvider.GetListEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetListEntityCallback<Litter>(), HandleCommandAsync<Litter>);
@@ -40,18 +42,31 @@ namespace BlueBellDolls.Bot.Callbacks
                 if (!Enum.TryParse<ListUnitActionMode>(listArgs[0], out var actionType))
                     actionType = ListUnitActionMode.Edit;
 
-                var ownerId = listArgs.Length == 4
-                    ? int.Parse(listArgs[4]) : 0;
+                // Проверяем, есть ли информация о владельце (например, список котят *для* помёта 5)
+                // Если длина 5, значит есть владелец (индекс 4)
+                var ownerId = listArgs.Length == 5
+                    ? int.Parse(listArgs[4]) : 0; // ID владельца или 0, если нет
 
-                var owner = await _entityHelperService.GetDisplayableEntityByIdAsync<Litter>(ownerId, token); //Могут быть проблемы, если владельцем в будущем сможет быть не только Litter
+                var owner = ownerId == 0 
+                    ? null 
+                    : await _managementServicesFactory
+                    .GetEntityManagementService<Litter>()
+                    .GetEntityAsync(ownerId, token); //Могут быть проблемы, если владельцем в будущем сможет быть не только Litter
 
-                var page = int.Parse(args.Last());
-                var (entityList, pagesCount, entitiesCount) = await _entityHelperService.GetEntityListAsync<TEntity>(page, token);
-                await BotService.EditOrSendNewMessageAsync(
-                    c.Chat,
-                    c.MessageId,
-                    _messageParametersProvider.GetEntityListParameters(entityList, actionType, (page, pagesCount, entitiesCount), owner),
-                    token);
+                var pageIndex = int.Parse(args.Last());
+                var result = await _managementServicesFactory
+                    .GetEntityManagementService<TEntity>()
+                    .GetByPageAsync(pageIndex, _inlineKeyboardsSettings.PageSize, token);
+
+                if (result.Success)
+                {
+                    var page = result.Result!;
+                    await BotService.EditOrSendNewMessageAsync(
+                        c.Chat,
+                        c.MessageId,
+                        _messageParametersProvider.GetEntityListParameters(page.Items, actionType, (pageIndex, page.TotalPages, page.TotalItems), owner),
+                        token);
+                }
             }
         }
     }

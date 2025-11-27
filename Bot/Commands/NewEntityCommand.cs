@@ -1,6 +1,5 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
@@ -10,24 +9,25 @@ namespace BlueBellDolls.Bot.Commands
     public class NewEntityCommand : CommandHandler
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementService _managementService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public NewEntityCommand(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IManagementService managementService)
+            IManagementServicesFactory managementServicesFactory)
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
 
             AddCommandHandler("/newcat", HandleCommandAsync<ParentCat>);
             AddCommandHandler("/newlitter", HandleCommandAsync<Litter>);
         }
 
-        private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity, new()
+        private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            var result = await _managementService.AddNewEntityAsync<TEntity>(token);
+            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var result = await managementService.AddNewEntityAsync(token);
 
             if (result.Result != null)
                 await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Result), token);

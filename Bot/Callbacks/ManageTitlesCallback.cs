@@ -1,7 +1,9 @@
 ﻿using BlueBellDolls.Bot.Adapters;
+using BlueBellDolls.Bot.Factories;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 
@@ -9,21 +11,21 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class ManageTitlesCallback : CallbackHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
         private readonly IMessagesHelperService _messagesHelperService;
 
         public ManageTitlesCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IEntityHelperService entityHelperService,
-            IMessagesHelperService messagesHelperService) 
+            IManagementServicesFactory managementServicesFactory,
+            IMessagesHelperService messagesHelperService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _entityHelperService = entityHelperService;
+            _managementServicesFactory = managementServicesFactory;
             _messagesHelperService = messagesHelperService;
 
-            AddCommandHandler(CallbackDataProvider.GetManagePhotosCallback<ParentCat>(Enums.PhotosManagementMode.Titles), HandleCallbackAsync);
+            AddCommandHandler(CallbackDataProvider.GetManagePhotosCallback<ParentCat>(PhotosType.Titles), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
@@ -31,9 +33,10 @@ namespace BlueBellDolls.Bot.Callbacks
             var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]EntityId
             var entityId = int.Parse(args.Last());
 
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<ParentCat>(entityId, token);
+            var managementService = _managementServicesFactory.GetEntityManagementService<ParentCat>();
+            var entity = await managementService.GetEntityAsync(entityId, token);
 
-            if (entity == null || entity.Titles.Count == 0) return;
+            if (entity == null || !entity.Photos.Where(p => p.Type == PhotosType.Titles).Any()) return;
             await BotService.DeleteMessageAsync(c.Chat, c.MessageId, token);
 
             await _messagesHelperService.SendTitlesManagementMessageAsync(c.Chat, entity, token);

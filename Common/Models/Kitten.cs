@@ -4,33 +4,22 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
+    [Table("kittens")]
     public class Kitten : Cat
     {
 
         #region Properties
 
+        [Column("class")]
         public KittenClass Class { get; set; }
+
+        [Column("status")]
         public KittenStatus Status { get; set; }
 
+        [Column("litter_id")]
         [ForeignKey(nameof(Litter))]
         public int LitterId { get; set; }
         public Litter Litter { get; set; }
-
-        #endregion
-
-        #region Constructor
-
-        public Kitten()
-        {
-            Name = "Новый котёнок";
-            BirthDay = DateOnly.FromDateTime(DateTime.Now);
-            IsMale = true;
-            Description = "Добавьте описание!";
-            Color = "Не указан";
-            Photos = [];
-            Class = KittenClass.Pet;
-            Status = KittenStatus.Available;
-        }
 
         #endregion
 

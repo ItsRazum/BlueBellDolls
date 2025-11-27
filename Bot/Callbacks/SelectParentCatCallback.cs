@@ -9,20 +9,22 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class SelectParentCatCallback : CallbackHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
+        private readonly InlineKeyboardsSettings _inlineKeyboardsSettings;
 
         public SelectParentCatCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IEntityHelperService entityHelperService,
+            IManagementServicesFactory managementServicesFactory,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
-            _entityHelperService = entityHelperService;
+            _inlineKeyboardsSettings = botSettings.Value.InlineKeyboardsSettings;
+            _managementServicesFactory = managementServicesFactory;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
@@ -34,10 +36,12 @@ namespace BlueBellDolls.Bot.Callbacks
             var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]IsMale, [2]Page, [3]LitterId
 
             var isMale = bool.Parse(args[1]);
-            var page = int.Parse(args[2]);
+            var pageIndex = int.Parse(args[2]);
             var litterId = int.Parse(args.Last());
 
-            var litter = await _entityHelperService.GetDisplayableEntityByIdAsync<Litter>(litterId, token);
+            var litter = await _managementServicesFactory
+                .GetEntityManagementService<Litter>()
+                .GetEntityAsync(litterId, token);
 
             if (litter == null)
             {
@@ -45,13 +49,20 @@ namespace BlueBellDolls.Bot.Callbacks
                 return;
             }
 
-            var (entityList, pagesCount, entitiesCount) = await _entityHelperService.GetEntityListAsync<ParentCat>(c => c.IsMale == isMale, page, token);
+            var result = await _managementServicesFactory
+                .GetParentCatManagementService()
+                .GetByPageAsync(isMale, pageIndex, _inlineKeyboardsSettings.PageSize, token);
 
-            await BotService.EditOrSendNewMessageAsync(
-                c.Chat,
-                c.MessageId,
-                _messageParametersProvider.GetEntityListParameters(entityList, Enums.ListUnitActionMode.Select, (page, pagesCount, entitiesCount), litter),
-                token);
+            if (result.Success)
+            {
+                var page = result.Result!;
+                await BotService.EditOrSendNewMessageAsync(
+                    c.Chat,
+                    c.MessageId,
+                    _messageParametersProvider.GetEntityListParameters(page.Items, Enums.ListUnitActionMode.Select, (pageIndex, page.TotalPages, page.TotalItems), litter),
+                    token);
+            }
+
         }
     }
 }

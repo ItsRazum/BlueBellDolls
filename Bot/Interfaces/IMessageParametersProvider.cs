@@ -1,6 +1,8 @@
 ﻿using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Interfaces
@@ -8,11 +10,13 @@ namespace BlueBellDolls.Bot.Interfaces
     public interface IMessageParametersProvider
     {
         MessageParameters GetEntityFormParameters(IDisplayableEntity entity);
+
         MessageParameters GetEntityPhotosParameters(
             IDisplayableEntity entity, 
-            PhotosManagementMode photosManagementMode, 
+            PhotosType photosType, 
             int[] selectedPhotoIndexes, 
             int[] photoMessageIds);
+
         MessageParameters GetDeleteEntityConfirmationParameters(
             IDisplayableEntity entity, 
             string callback, 
@@ -37,6 +41,12 @@ namespace BlueBellDolls.Bot.Interfaces
         MessageParameters GetEntityFromLitterParameters(IDisplayableEntity entity, int litterId);
 
         MessageParameters GetColorPickerParameters(Cat cat, string buildedColor, string[] findedColorParts);
+
         MessageParameters GetStartParameters();
+
+        MessageParameters GetKittenClassParameters(Kitten kitten);
+
+        MessageParameters GetKittenStatusParameters(Kitten kitten);
+
     }
 }

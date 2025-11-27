@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Records;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 
@@ -11,18 +12,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementService _managementService;
+        private readonly IManagementServicesFactory _managementServicesFactory;
 
         public AddPhotosCommand(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IMessagesProvider messagesProvider,
-            IManagementService managementService)
+            IManagementServicesFactory managementServicesFactory,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
-            _managementService = managementService;
+            _managementServicesFactory = managementServicesFactory;
 
             AddCommandHandler("фото", HandleCommandAsync);
         }
@@ -34,33 +35,55 @@ namespace BlueBellDolls.Bot.Commands
             var repliedMessageText = m.ReplyToMessage!.Text;
             if (repliedMessageText == null) return;
 
-            var messageArgs = repliedMessageText.Split('\n').First().Split(' ');
-            var entityId = int.Parse(messageArgs[1]);
-            var entityType = messageArgs.First();
 
-            Func<PhotoAdapter[], int, CancellationToken, Task<ManagementOperationResult<IDisplayableEntity>>> addPhotosTask = entityType switch
+            var messageArgs = repliedMessageText.Split('\n').First().Split(' ');
+            var entityType = messageArgs.First();
+            var entityId = int.Parse(messageArgs[1]);
+
+            switch (entityType)
             {
-                "ParentCat" => _managementService.AddPhotosToEntity<ParentCat>,
-                "Kitten" => _managementService.AddPhotosToEntity<Kitten>,
-                "Litter" => _managementService.AddPhotosToEntity<Litter>,
-                _ => throw new InvalidDataException(entityType)
-            };
+                case "ParentCat":
+                    await HandlePhotosAsync<ParentCat>(entityId, m, token);
+                    break;
+                case "Litter":
+                    await HandlePhotosAsync<Litter>(entityId, m, token);
+                    break;
+                case "Kitten":
+                    await HandlePhotosAsync<Kitten>(entityId, m, token);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported entity type: {entityType}");
+            }
+        }
+
+        private async Task HandlePhotosAsync<TEntity>(int entityId, MessageAdapter m, CancellationToken token = default) where TEntity : class, IDisplayableEntity
+        {
+            if (m.Photos == null) return;
+
+            var repliedMessageText = m.ReplyToMessage?.Text;
+            if (repliedMessageText == null) return;
 
             var loadingMessage = await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLoadingMessage(), token: token);
+            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
 
-            var result = await addPhotosTask(m.Photos, entityId, token);
-
+            var result = await managementService.AddPhotosToEntityAsync(entityId, m.Photos!, PhotosType.Photos, token);
             await BotService.DeleteMessageAsync(m.Chat, loadingMessage.Single().MessageId, token);
-            if (result.Result != null)
+
+            if (result.Success)
             {
-                if (!result.Success)
-                    await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
-                else
+                var entity = await managementService.GetEntityAsync(entityId, token);
+
+                if (entity == null)
                 {
-                    await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
-                    await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
+                    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                    return;
                 }
+
+                await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
+                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
             }
+            else
+                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
         }
     }
 }

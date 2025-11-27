@@ -18,10 +18,10 @@ namespace BlueBellDolls.Data.Configurations
                 .HasConversion<string>();
 
             builder
-                .Property(k => k.Photos)
-                .HasConversion(ValueConverters.DictionaryStringConverter)
-                .Metadata
-                .SetValueComparer(ValueComparers.DictionaryStringComparer);
+                .HasMany(k => k.Photos)
+                .WithOne(p => p.Kitten)
+                .HasForeignKey(p => p.KittenId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

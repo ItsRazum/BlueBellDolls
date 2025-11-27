@@ -4,6 +4,6 @@ namespace BlueBellDolls.Bot.Interfaces
 {
     public interface IPhotosDownloaderService
     {
-        Task<Dictionary<string, string>> DownloadAndConvertPhotosToBase64(PhotoAdapter[] photos, CancellationToken token);
+        Task<(Stream PhotoStream, string FileName, string fileId)?> DownloadPhotoAsync(PhotoAdapter photo, CancellationToken token);
     }
 }

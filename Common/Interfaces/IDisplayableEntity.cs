@@ -1,12 +1,13 @@
-﻿namespace BlueBellDolls.Common.Interfaces
+﻿using BlueBellDolls.Common.Models;
+
+namespace BlueBellDolls.Common.Interfaces
 {
     public interface IDisplayableEntity : IEntity
     {
         string DisplayName { get; }
 
-        Dictionary<string, string> Photos { get; set; }
+        List<EntityPhoto> Photos { get; set; }
 
-        string[] PhotoIds => [ ..Photos.Keys ];
-        string[] PhotoBase64Strings => [ ..Photos.Values ];
+        bool IsEnabled { get; set; }
     }
 }

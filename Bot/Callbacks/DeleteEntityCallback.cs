@@ -10,20 +10,20 @@ namespace BlueBellDolls.Bot.Callbacks
 {
     public class DeleteEntityCallback : CallbackHandler
     {
-        private readonly IEntityHelperService _entityHelperService;
+        private readonly IManagementServicesFactory _managementServiceFactory;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private  readonly IMessagesProvider _messagesProvider;
+        private readonly IMessagesProvider _messagesProvider;
 
         public DeleteEntityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
-            IEntityHelperService entityHelperService,
+            IManagementServicesFactory managementServicesFactory,
             IMessageParametersProvider messageParametersProvider,
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _entityHelperService = entityHelperService;
+            _managementServiceFactory = managementServicesFactory;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
@@ -36,7 +36,8 @@ namespace BlueBellDolls.Bot.Callbacks
         {
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var entityId = int.Parse(args.Last());
-            var entity = await _entityHelperService.GetDisplayableEntityByIdAsync<TEntity>(entityId, token);
+            var managementService = _managementServiceFactory.GetEntityManagementService<TEntity>();
+            var entity = await managementService.GetEntityAsync(entityId, token);
 
             if (entity == null)
             {

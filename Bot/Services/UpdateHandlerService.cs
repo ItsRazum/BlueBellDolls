@@ -22,15 +22,9 @@ namespace BlueBellDolls.Bot.Services
         private readonly ILogger<UpdateHandlerService> _logger;
         private readonly CallbackDataSettings _callbackDataSettings;
         private readonly IBotService _botService;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ConcurrentDictionary<string, List<PhotoAdapter>> _photoUploaders;
         private readonly long[] _authorizedUsers;
-
-        #endregion
-
-        #region Properties
-
-        private Dictionary<string, Func<MessageAdapter, CancellationToken, Task>> TextCommands { get; set; }
-        private Dictionary<string, Func<CallbackQueryAdapter, CancellationToken, Task>> CallbackCommands { get; set; }
 
         #endregion
 
@@ -40,26 +34,15 @@ namespace BlueBellDolls.Bot.Services
             ILogger<UpdateHandlerService> logger,
             IOptions<BotSettings> options,
             IBotService botService,
-            IEnumerable<CommandHandler> messageHandlers,
-            IEnumerable<CallbackHandler> callbackHandlers)
+            IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _callbackDataSettings = options.Value.CallbackDataSettings;
             _authorizedUsers = options.Value.AuthorizedUsers;
             _botService = botService;
+            _serviceScopeFactory = serviceScopeFactory;
 
             _photoUploaders = [];
-
-            TextCommands = [];
-            CallbackCommands = [];
-
-            foreach (var command in messageHandlers)
-                foreach (var commandHandler in command.Handlers)
-                    TextCommands.Add(commandHandler.Key, commandHandler.Value);
-
-            foreach (var callback in callbackHandlers)
-                foreach (var callbackHandler in callback.Handlers)
-                    CallbackCommands.Add(callbackHandler.Key, callbackHandler.Value);
         }
 
         #endregion
@@ -136,8 +119,19 @@ namespace BlueBellDolls.Bot.Services
 
                 var commandData = (containsArgs ? m.Text.Split(' ').First() : m.Text).ToLower();
 
-                if (TextCommands.TryGetValue(commandData, out var command))
-                    await command(m.ToAdaper(), token);
+                using var scope = _serviceScopeFactory.CreateScope();
+                var messageHandlers = scope.ServiceProvider
+                    .GetRequiredService<IEnumerable<CommandHandler>>();
+
+                var commandFunc = messageHandlers
+                    .SelectMany(h => h.Handlers)
+                    .FirstOrDefault(kvp => kvp.Key == commandData)
+                    .Value;
+
+                if (commandFunc != null)
+                {
+                    await commandFunc(m.ToAdaper(), token);
+                }
             }
         }
 
@@ -161,8 +155,19 @@ namespace BlueBellDolls.Bot.Services
 
                 var commandData = containsArgs ? callback.Split(_callbackDataSettings.ArgsSeparator).First() : callback;
 
-                if (CallbackCommands.TryGetValue(commandData, out var command))
-                    await command(c.ToAdaper(callback), token);
+                using var scope = _serviceScopeFactory.CreateScope();
+                var callbackHandlers = scope.ServiceProvider
+                    .GetRequiredService<IEnumerable<CallbackHandler>>();
+
+                var commandFunc = callbackHandlers
+                    .SelectMany(h => h.Handlers)
+                    .FirstOrDefault(kvp => kvp.Key == commandData)
+                    .Value;
+
+                if (commandFunc != null)
+                {
+                    await commandFunc(c.ToAdaper(callback), token);
+                }
             }
         }
 
@@ -224,11 +229,21 @@ namespace BlueBellDolls.Bot.Services
             {
                 var command = (m.Text ?? m.Caption ?? string.Empty).ToLower();
                 var replyData = (m.ReplyToMessage!.Text ?? m.ReplyToMessage.Caption ?? string.Empty).ToLower();
-                if (TextCommands.TryGetValue(command, out var commandHandler) 
-                    || TextCommands.TryGetValue(
-                    $"update_entity_by_reply_{replyData.Split(' ').First()}",
-                    out commandHandler))
-                    await commandHandler(m.ToAdaper(photos), token);
+
+
+                using var scope = _serviceScopeFactory.CreateScope();
+                var messageHandlers = scope.ServiceProvider
+                    .GetRequiredService<IEnumerable<CommandHandler>>();
+
+                var commandFunc = messageHandlers
+                    .SelectMany(h => h.Handlers)
+                    .FirstOrDefault(kvp => kvp.Key == command || kvp.Key == $"update_entity_by_reply_{replyData.Split(' ').First()}")
+                    .Value;
+
+                if (commandFunc != null)
+                {
+                    await commandFunc(m.ToAdaper(photos), token);
+                }
             }
         }
 
@@ -252,6 +267,7 @@ namespace BlueBellDolls.Bot.Services
                     ]
             }, 
             cancellationToken);
+            _logger.LogInformation("Бот запущен.");
             await Task.CompletedTask;
         }
 

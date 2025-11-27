@@ -1,7 +1,9 @@
 ﻿using BlueBellDolls.Bot.Enums;
 using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Telegram.Bot.Types;
 
@@ -24,31 +26,31 @@ namespace BlueBellDolls.Bot.Providers
             return new MessageParameters(
                 _messagesProvider.CreateEntityFormMessage(entity),
                 _keyboardsProvider.CreateEntityOptionsKeyboard(entity),
-                [..entity.Photos.Take(1).Select(p => new InputMediaPhoto(p.Key))]
+                [..entity.Photos.Where(p => p.Type == PhotosType.Photos).Take(1).Select(p => new InputMediaPhoto(p.TelegramPhoto?.FileId ?? string.Empty))]
                 );
         }
 
         public MessageParameters GetEntityPhotosParameters(
             IDisplayableEntity entity, 
-            PhotosManagementMode photosManagementMode, 
-            int[] selectedPhotoIndexes,
+            PhotosType photosType, 
+            int[] selectedPhotoIds,
             int[] photoMessageIds)
         {
             return new MessageParameters(
-                _messagesProvider.CreateEntityPhotosMessage(entity, selectedPhotoIndexes, photoMessageIds),
-                _keyboardsProvider.CreateEntityPhotosKeyboard(entity, photosManagementMode, photoMessageIds, selectedPhotoIndexes));
+                _messagesProvider.CreateEntityPhotosMessage(entity, selectedPhotoIds, photoMessageIds),
+                _keyboardsProvider.CreateEntityPhotosKeyboard(entity, photosType, photoMessageIds, selectedPhotoIds));
         }
 
         public MessageParameters GetDeleteEntityPhotosConfirmationParameters(
             IDisplayableEntity entity,
             string callback,
-            int[] selectedPhotoIndexes,
+            int[] selectedPhotoIds,
             int[] sendedPhotoMessageIds,
             string onDeletionCanceledCallback,
             params string[] callbacksAfterDeletion)
         {
             return new MessageParameters(
-                _messagesProvider.CreateDeletePhotosConfirmationMessage(entity, selectedPhotoIndexes, sendedPhotoMessageIds),
+                _messagesProvider.CreateDeletePhotosConfirmationMessage(entity, selectedPhotoIds, sendedPhotoMessageIds),
                 _keyboardsProvider.CreateYesNoKeyboard(callback, entity, onDeletionCanceledCallback, callbacksAfterDeletion));
         }
 
@@ -80,7 +82,7 @@ namespace BlueBellDolls.Bot.Providers
             return new MessageParameters(
                 _messagesProvider.CreateEntityFormMessage(entity, false),
                 _keyboardsProvider.CreateEntityFromLitterKeyboard(entity, litterId),
-                [.. entity.Photos.Take(1).Select(p => new InputMediaPhoto(p.Key))]);
+                [.. entity.Photos.Take(1).Select(p => new InputMediaPhoto(p.TelegramPhoto?.FileId ?? string.Empty))]);
         }
 
         public MessageParameters GetColorPickerParameters(Cat cat, string buildedColor, string[] findedColorParts)
@@ -88,6 +90,20 @@ namespace BlueBellDolls.Bot.Providers
             return new MessageParameters(
                 _messagesProvider.CreateColorPickerMessage(cat, buildedColor),
                 _keyboardsProvider.CreateColorPickerKeyboard(cat, buildedColor, findedColorParts));
+        }
+
+        public MessageParameters GetKittenClassParameters(Kitten kitten)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateKittenClassSelectionMenuMessage(kitten),
+                _keyboardsProvider.CreateKittenClassSelectionKeyboard(kitten));
+        }
+
+        public MessageParameters GetKittenStatusParameters(Kitten kitten)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateKittenStatusSelectionMenuMessage(kitten),
+                _keyboardsProvider.CreateKittenStatusSelectionKeyboard(kitten));
         }
     }
 }
