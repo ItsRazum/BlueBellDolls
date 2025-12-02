@@ -14,7 +14,6 @@ const apiBaseUrl = config.public.apiBase;
 
 const litterPageUrl = computed(() => `/litters/${props.kitten.litterId}`)
 const kittenPageUrl = computed(() => `/kittens/${props.kitten.id}`);
-const colorUrl = computed(() => `/colors/${props.kitten.color.replace(' ', '').toLowerCase()}`);
 
 const genderVariants = computed(() => props.variant == "default" ? ['Мужской', 'Женский'] : ['Мальчик', 'Девочка']);
 
@@ -52,15 +51,26 @@ const statusColor = computed(() => {
 
 const genderColor = computed(() => props.kitten.isMale ? 'var(--color-gender-male)' : 'var(--color-gender-female)');
 
+const isColorModalOpen = ref(false);
+const openColorModal = () => {
+  isColorModalOpen.value = true;
+}
+
+const closeColorModal = () => {
+  isColorModalOpen.value = false;
+}
+
 function getImageUrl(imagePath: string | null): string {
   return `${apiBaseUrl}/${imagePath}`;
 }
+
+
 </script>
 
 <template>
-  <CardWrapper v-if="variant === 'compact'" class="adv">
-    <div class="adv-info-container">
-      <img class="adv-photo" :src="kitten.mainPhotoUrl" :alt="kitten.name" />
+  <CardWrapper v-if="variant === 'compact'" class="card-compact">
+    <div class="card-compact-content">
+      <img class="card-compact-photo" :src="kitten.mainPhotoUrl" :alt="kitten.name" />
       <h2>{{ kitten.name }}</h2>
       <div class="subtitle">
         <span style="font-weight: 525">{{ kitten.birthDay }}</span>
@@ -79,31 +89,31 @@ function getImageUrl(imagePath: string | null): string {
     </div>
   </CardWrapper>
 
-  <div v-else class="cat-card-default">
-    <div class="photoCard">
-      <img class="cat-photo-default" :src="kitten.mainPhotoUrl" :alt="kitten.name" />
+  <div v-else class="card-expanded">
+    <div class="card-photo-container">
+      <img class="card-expanded-photo" :src="kitten.mainPhotoUrl" :alt="kitten.name" />
       <RouterLink :to="kittenPageUrl" class="link">Больше фото</RouterLink>
     </div>
-    <CardWrapper :enable-blur="true" class="cat-info-container">
-      <div class="cat-header">
+    <CardWrapper :enable-blur="true" class="card-info-container">
+      <div class="card-header">
         <h2 style="margin: 0">{{ kitten.name }}</h2>
         <span style="font-weight: 500; color: var(--color-text-caption);">{{ kitten.birthDay }}</span>
       </div>
-      <div class="cat-info-body">
-        <CardWrapper class="cat-info-unit">
-          <div class="cat-property">
+      <div class="card-info-body">
+        <CardWrapper class="card-info-props">
+          <div class="card-property">
             <span>Пол: </span>
             <span :style="{ color: genderColor }">{{ genderText }}</span>
           </div>
-          <div class="cat-property">
+          <div class="card-property">
             <span>Окрас: </span>
-            <RouterLink :to="colorUrl" class="link">{{ kitten.color }}</RouterLink>
+            <button class="link-btn" @click="openColorModal">{{ kitten.color }}</button>
           </div>
-          <div class="cat-property">
+          <div class="card-property">
             <span>Класс: </span>
             <span style="color: var(--color-kitten-class)">{{ kitten.class }}</span>
           </div>
-          <div class="cat-property">
+          <div class="card-property">
             <span>Статус: </span>
             <span :style="{ color: statusColor }">{{ status }}</span>
           </div>
@@ -118,121 +128,39 @@ function getImageUrl(imagePath: string | null): string {
 
     </CardWrapper>
   </div>
+
+  <BaseModal
+    :is-open="isColorModalOpen"
+    @close="closeColorModal">
+    <div>
+      <span>{{kitten.color}}</span>
+    </div>
+
+  </BaseModal>
 </template>
 
 <style scoped>
 
-/* Compact */
-.adv {
-  max-width: 294px;
-  text-align: left;
-  border-radius: var(--border-radius-main);
-  overflow: hidden;
-}
-
-.adv-info-container {
-  margin: var(--padding-medium);
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding-small);
-  flex-grow: 1;
-  height: 100%;
-  line-height: 1;
-}
-
-.adv-photo {
-  width: 100%;
-  height: 274px;
-  object-fit: cover;
-  border-radius: var(--border-radius-main);
-  box-shadow: var(--shadow-base);
-}
-
-.subtitle {
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: var(--color-text-caption);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.description {
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-/* default */
-.cat-card-default {
-  width: 1000px;
-  display: flex;
-  line-height: 1;
-}
-
-.cat-info-container {
-  margin-left: -20px;
-  height: min-content;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding-small);
+.card-info-props {
   padding: var(--padding-large);
 }
 
-.cat-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: var(--padding-small);
-}
+.link-btn {
+  all: unset;
 
-.cat-info-body {
-  display: flex;
-  flex-direction: row;
-  gap: var(--padding-large);
-  font-weight: 600;
-}
+  color: var(--color-link);
+  text-decoration: underline;
+  font-weight: 525;
 
-.cat-info-unit {
-  height: min-content;
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding-small);
-  padding: var(--padding-large);
-}
-
-.cat-property {
-  width: max-content;
-}
-
-.cat-property span,
-.cat-property .link {
+  cursor: pointer;
+  font-family: var(--font-family-base);
   font-size: 18px;
+  transition: color 0.2s;
 }
 
-.photoCard {
-  flex-grow: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 10px;
-  padding: 0;
-}
-
-.cat-photo-default {
-  height: 275px;
-  width: 275px;
-  object-fit: cover;
-  flex-grow: 0;
-  border-radius: var(--border-radius-main);
-  box-shadow: var(--shadow-base);
-}
-
-.buttons-container {
-  display: flex;
+.link-btn:hover {
+  color: var(--color-link-hover);
+  background-color: transparent;
 }
 
 </style>

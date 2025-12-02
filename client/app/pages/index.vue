@@ -4,19 +4,15 @@ import {KittenClass, KittenStatus, PhotosType} from "~~/enums/enums";
 import type {PhotoDto} from "~~/types/api";
 import Advertisement from "~/components/Advertisement.vue";
 
-const mockCatBoy = ref<KittenListDto>({
+const mockCatBoy = ref<ParentCatListDto>({
   id: 1,
   name: 'Boy BlueBellDolls',
   birthDay: '07.11.2025',
   isMale: true,
   isEnabled: true,
   color: 'Seal Bicolor',
-  description: 'Это описание котёнка. От себя рекомендую писать в описании хотя-бы 100 символов ;)',
-  mainPhotoUrl: 'photo.png',
-  class: KittenClass.Pet,
-  status: KittenStatus.Available,
-  litterId: 1,
-  litterLetter: 'A',
+  description: 'Это описание кота. От себя рекомендую писать в описании хотя-бы 100 символов ;)',
+  mainPhotoUrl: 'photo.png'
 });
 
 const mockCatGirl = ref<KittenListDto>({
@@ -69,6 +65,7 @@ const mockLitter = ref<LitterDetailDto>({
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; margin: 40px">
       <LitterListItem :litter="mockLitter"/>
       <Advertisement photo-url="photo.png" name="Статья" description="Это описание статьи. Лучше всего писать его на 3-4 строки, чтобы компонент не выглядел 'сплюснутым' сверху и снизу" redirect-url="/"/>
+      <ParentCatListItem :parent-cat="mockCatBoy"/>
     </div>
 
   </main>

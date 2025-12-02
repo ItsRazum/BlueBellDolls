@@ -29,7 +29,7 @@
   --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   --border-radius-main: 15px;
-  --blur-base: 15px;
+  --blur-base: 10px;
   --shadow-base: 0px 3px 10px var(--color-shadow-card);
 
   --color-primary-button: #2CA1FF;
@@ -42,21 +42,24 @@
   --padding-extra-large: 1.5rem;
 }
 
-a {
-  font-family: var(--font-family-base);
-  color: var(--color-link);
+a,
+.link {
+    font-family: var(--font-family-base);
+    color: var(--color-link);
+    font-weight: 525;
+    text-decoration: underline;
+    padding: 0;
+    cursor: pointer;
+}
+a,
+.link:hover {
+    color: var(--color-link-hover);
+    background-color: transparent;
 }
 
 span {
     font-family: var(--font-family-base);
     line-height: 1;
-}
-
-.link {
-    color: var(--color-link);
-    font-weight: 525;
-    text-decoration: underline;
-    padding: 0;
 }
 
 button,
@@ -101,4 +104,12 @@ h2 {
   font-family: var(--font-family-base);
   font-weight: bold;
   line-height: 1;
+}
+
+.separator {
+    width: 100%;
+    max-width: 700px;
+    height: 1px;
+
+    background-color: var(--color-text-context);
 }

@@ -10,9 +10,9 @@ defineProps<{
 </script>
 
 <template>
-  <CardWrapper class="adv">
+  <CardWrapper class="card-compact">
     <div class="adv-info-container">
-      <img class="adv-photo" :src="photoUrl" :alt="name" />
+      <img class="card-compact-photo" :src="photoUrl" :alt="name" />
       <CardWrapper class="adv-props-container">
         <h2>{{ name }}</h2>
         <span class="description">{{ description.slice(0, 150) }}</span>
@@ -25,20 +25,14 @@ defineProps<{
 </template>
 
 <style scoped>
-.adv {
+
+.card-compact {
   padding: var(--padding-large);
-  max-width: 294px;
-  text-align: left;
-  border-radius: var(--border-radius-main);
-  overflow: hidden;
 }
 
-.adv-photo {
+.card-compact-photo {
   width: 100%;
   height: 216px;
-  object-fit: cover;
-  border-radius: var(--border-radius-main);
-  box-shadow: var(--shadow-base);
 }
 
 .adv-info-container {

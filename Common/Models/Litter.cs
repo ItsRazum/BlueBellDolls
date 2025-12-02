@@ -1,10 +1,11 @@
-﻿using BlueBellDolls.Common.Types;
+﻿using BlueBellDolls.Common.Interfaces.Markers;
+using BlueBellDolls.Common.Types;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Models
 {
     [Table("litters")]
-    public class Litter : DisplayableEntityBase
+    public class Litter : DisplayableEntityBase, IHandCreatableEntity
     {
 
         #region Properties

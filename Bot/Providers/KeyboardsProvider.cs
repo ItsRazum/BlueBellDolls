@@ -3,6 +3,7 @@ using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Interfaces.Markers;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
@@ -62,7 +63,7 @@ namespace BlueBellDolls.Bot.Providers
             if (pageParameters != null)
                 result.AddNewRow(CreatePageControlsButtons<TEntity>(pageParameters.Value));
 
-            if (typeof(TEntity) != typeof(Kitten) && actionMode != ListUnitActionMode.Select)
+            if (typeof(IHandCreatableEntity).IsAssignableFrom(typeof(TEntity)) && actionMode != ListUnitActionMode.Select)
                 result.AddNewRow(CreateAddButton<TEntity>());
 
             return result;
@@ -270,7 +271,7 @@ namespace BlueBellDolls.Bot.Providers
             var pageCounterString = pageParameters.totalPagesCount == 0
                 ? "Список пуст!"
                 : $"{pageParameters.page}/{pageParameters.totalPagesCount}";
-
+            
             var buttons = new List<InlineKeyboardButton?>
             {
                 pageParameters.page > 1

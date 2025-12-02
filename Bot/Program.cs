@@ -94,6 +94,7 @@ internal class Program
             .AddScoped<IDisplayableEntityManagementService<Litter>>(s => s.GetRequiredService<LitterManagementService>());
 
         // Доп. настройки
+        builder.Services.AddMemoryCache();
         builder.Host.UseDefaultServiceProvider(options =>
         {
             options.ValidateScopes = true;

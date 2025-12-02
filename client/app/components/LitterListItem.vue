@@ -41,32 +41,32 @@ const availableKittensString = computed(() => props.litter.kittens.length === 1 
 
 <template>
 <CardWrapper class="litter-card">
-  <div class="litter-info-card">
-    <div class="photoCard">
-      <img class="litter-photo-default" :src="litter.photos[0].url" :alt="litterDisplayName" />
+  <div class="card-expanded">
+    <div class="card-photo-container">
+      <img class="card-expanded-photo" :src="litter.photos[0].url" :alt="litterDisplayName" />
       <RouterLink class="link">Больше фото</RouterLink>
     </div>
-    <CardWrapper :enable-blur="true" class="litter-info-container">
-      <div class="litter-header">
+    <CardWrapper :enable-blur="true" class="card-info-container">
+      <div class="card-header">
         <h2 style="font-size: 36px">{{ litterDisplayName }}</h2>
         <span style="font-weight: 505; color: var(--color-text-caption); font-size: 24px">{{ litter.birthDay }}</span>
       </div>
-        <CardWrapper class="litter-info-body">
-          <div class="litter-info-unit">
-            <div class="litter-property">
+        <CardWrapper class="card-info-body">
+          <div class="card-info-props">
+            <div class="card-property">
               <span>Папа: </span>
               <RouterLink>{{ litter.fatherCat.name }}</RouterLink>
             </div>
-            <div class="litter-property">
+            <div class="card-property">
               <span>Мама: </span>
               <RouterLink>{{ litter.motherCat.name }}</RouterLink>
             </div>
-            <div class="litter-property">
+            <div class="card-property">
               <span style="color: var(--color-context-blue);">{{ litter.kittens.length }}</span>
               <span>{{ kittensString }} всего</span>
             </div>
 
-            <div class="litter-property">
+            <div class="card-property">
               <span style="color: var(--color-context-blue);">{{ litter.kittens.length }}</span>
               <span>{{ availableKittensString }}</span>
             </div>
@@ -75,13 +75,12 @@ const availableKittensString = computed(() => props.litter.kittens.length === 1 
         </CardWrapper>
     </CardWrapper>
   </div>
-  <div class="litter-separator"/>
+  <div class="separator"/>
   <div class="kittens-grid">
     <KittenListItem
       v-for="kitten in litter.kittens"
       :key="kitten.id"
-      :kitten="kitten"
-      variant="default"/>
+      :kitten="kitten"/>
   </div>
 </CardWrapper>
 </template>
@@ -92,14 +91,6 @@ span {
   font-size: 18px;
 }
 
-a,
-.link {
-  color: var(--color-link);
-  font-weight: 525;
-  text-decoration: underline;
-  padding: 0;
-}
-
 .litter-card {
   padding: var(--padding-large);
   display: flex;
@@ -108,80 +99,22 @@ a,
   gap: var(--padding-extra-large);
 }
 
-.litter-info-container {
-  margin-left: -20px;
-  height: min-content;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+.card-info-container {
   gap: var(--padding-large);
+}
+
+.card-info-body {
   padding: var(--padding-large);
 }
 
-.litter-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: var(--padding-small);
-}
-
-.litter-info-body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding-large);
-  font-weight: 600;
-  padding: var(--padding-large);
-}
-
-.litter-info-unit {
-  height: min-content;
-  display: flex;
-  flex-direction: column;
-  gap: var(--padding-small);
-}
-
-.litter-property {
-  width: max-content;
-}
-
-.litter-property span,
-.litter-property a {
+.card-property span,
+.card-property a {
   font-size: 21px;
 }
 
-.photoCard {
-  flex-grow: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 10px;
-  padding: 0;
-}
-
-.litter-photo-default {
+.card-expanded-photo {
   height: 295px;
   width: 295px;
-  object-fit: cover;
-  flex-grow: 0;
-  border-radius: var(--border-radius-main);
-  box-shadow: var(--shadow-base);
-}
-
-.litter-info-card {
-  width: 1000px;
-  display: flex;
-  line-height: 1;
-}
-
-.litter-separator {
-  width: 100%;
-  max-width: 700px;
-  height: 1px;
-
-  background-color: var(--color-text-context);
 }
 
 .kittens-grid {

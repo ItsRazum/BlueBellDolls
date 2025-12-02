@@ -1,6 +1,6 @@
-﻿using BlueBellDolls.Common.Enums;
+﻿using BlueBellDolls.Common.Dtos;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Extensions;
-using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
 using BlueBellDolls.Server.Interfaces;
@@ -9,6 +9,7 @@ using BlueBellDolls.Server.Settings;
 using BlueBellDolls.Server.Types;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
 
 namespace BlueBellDolls.Server.Services
 {
@@ -16,10 +17,12 @@ namespace BlueBellDolls.Server.Services
         IApplicationDbContext applicationDbContext,
         IWebHostEnvironment env,
         ILogger<CatColorService> logger,
-        IOptions<FileStorageSettings> fileStorageSettings) 
+        IOptions<FileStorageSettings> fileStorageSettings,
+        IOptions<EntitiesSettings> entitiesSettings) 
         : DisplayableEntityServiceBase<CatColor>(env, applicationDbContext, logger), ICatColorService
     {
         private readonly ILogger<CatColorService> _logger;
+        private readonly CatColorTree _catColorTree = entitiesSettings.Value.CatColors;
         private readonly FileStorageSettings _fileStorageSettings = fileStorageSettings.Value;
 
         #region Methods
@@ -130,6 +133,13 @@ namespace BlueBellDolls.Server.Services
                 _logger.LogError(ex, "Не удалось обновить CatColor {id}!", id);
                 return new(StatusCodes.Status500InternalServerError, "Не удалось обновить CatColor!");
             }
+        }
+
+        public async Task<ServiceResult<CatColorTree>> GetColorTreeAsync(CancellationToken token = default)
+        {
+            return _catColorTree != null
+                ? new(StatusCodes.Status200OK, null, _catColorTree)
+                : new(StatusCodes.Status500InternalServerError, "Дерево цветов недоступно!");
         }
 
         #endregion

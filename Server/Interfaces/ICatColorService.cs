@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Common.Enums;
+﻿using BlueBellDolls.Common.Dtos;
+using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Server.Records;
 
@@ -11,5 +12,6 @@ namespace BlueBellDolls.Server.Interfaces
         Task<ServiceResult<CatColorDetailDto>> GetAsync(int id, CancellationToken token = default);
         Task<ServiceResult<PagedResult<CatColorListDto>>> GetListAsync(int pageNumber, int pageSize, CancellationToken token = default);
         Task<ServiceResult> UpdateAsync(int id, UpdateCatColorDto catColorDto, CancellationToken token = default);
+        Task<ServiceResult<CatColorTree>> GetColorTreeAsync(CancellationToken token = default);
     }
 }
