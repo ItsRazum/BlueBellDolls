@@ -1,13 +1,15 @@
 ﻿using BlueBellDolls.Bot.Enums;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Interfaces.Markers;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 using Telegram.Bot.Types.ReplyMarkups;
+using BlueBellDolls.Common.Types;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces.Markers;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
+using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -38,6 +40,7 @@ namespace BlueBellDolls.Bot.Providers
                 { typeof(ParentCat), entity => CreateParentCatOptions((ParentCat)entity) },
                 { typeof(Litter),    entity => CreateLitterOptionsKeyboard((Litter)entity) },
                 { typeof(Kitten),    entity => CreateKittenOptions((Kitten)entity) },
+                { typeof(CatColor),  entity => CreateCatColorOptions((CatColor)entity) }
             };
         }
 
@@ -147,7 +150,7 @@ namespace BlueBellDolls.Bot.Providers
                 result.AddNewRow(
                     InlineKeyboardButton.WithCallbackData(
                         kittenClass.ToString(),
-                        _callbackDataProvider.CreateSetKittenClass(kitten.Id, kittenClass)
+                        _callbackDataProvider.CreateSetKittenClassCallback(kitten.Id, kittenClass)
                     )
                 );
             }
@@ -166,7 +169,7 @@ namespace BlueBellDolls.Bot.Providers
                 result.AddNewRow(
                     InlineKeyboardButton.WithCallbackData(
                         _enumMapperService.GetMapping(kittenStatus, kitten.IsMale),
-                        _callbackDataProvider.CreateSetKittenStatus(kitten.Id, kittenStatus)
+                        _callbackDataProvider.CreateSetKittenStatusCallback(kitten.Id, kittenStatus)
                     )
                 );
             }
@@ -260,6 +263,16 @@ namespace BlueBellDolls.Bot.Providers
 
             if (kitten.Photos.Count > 0)
                 result.AddNewRow(CreateManagePhotosButton(kitten, PhotosType.Photos));
+
+            return result;
+        }
+
+        private InlineKeyboardMarkup CreateCatColorOptions(CatColor catColor)
+        {
+            var result = new InlineKeyboardMarkup();
+
+            if (catColor.Photos.Count > 0)
+                result.AddNewRow(CreateManagePhotosButton(catColor, PhotosType.Photos));
 
             return result;
         }
@@ -395,10 +408,10 @@ namespace BlueBellDolls.Bot.Providers
             => InlineKeyboardButton.WithCallbackData($"{(entity.IsEnabled ? "Скрыть с сайта" : "Вернуть на сайт")}", _callbackDataProvider.CreateToggleEntityVisibilityCallback(entity));
 
         private InlineKeyboardButton CreateChangeKittenClassButton(Kitten kitten)
-            => InlineKeyboardButton.WithCallbackData("Класс", _callbackDataProvider.CreateOpenKittenClass(kitten.Id));
+            => InlineKeyboardButton.WithCallbackData("Класс", _callbackDataProvider.CreateOpenKittenClassCallback(kitten.Id));
 
         private InlineKeyboardButton CreateChangeKittenStatusButton(Kitten kitten)
-            => InlineKeyboardButton.WithCallbackData("Статус", _callbackDataProvider.CreateOpenKittenStatus(kitten.Id));
+            => InlineKeyboardButton.WithCallbackData("Статус", _callbackDataProvider.CreateOpenKittenStatusCallback(kitten.Id));
 
         #endregion
 

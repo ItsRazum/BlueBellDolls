@@ -1,6 +1,6 @@
-﻿using BlueBellDolls.Common.Interfaces;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using BlueBellDolls.Common.Interfaces;
 
 namespace BlueBellDolls.Common.Types
 {

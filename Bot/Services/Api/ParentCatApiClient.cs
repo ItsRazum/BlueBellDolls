@@ -1,7 +1,7 @@
-﻿using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Models;
+﻿using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Records.Dtos;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
@@ -15,7 +15,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<ParentCatListDto>>($"api/parentcats", token);
+                return await _httpClient.GetFromJsonAsync<List<ParentCatListDto>>($"api/admin/parentcats", token);
             }
             catch (Exception ex)
             {
@@ -28,7 +28,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<List<ParentCatListDto>>($"api/parentcats?isMale={isMale}", token);
+                return await _httpClient.GetFromJsonAsync<List<ParentCatListDto>>($"api/admin/parentcats?isMale={isMale}", token);
             }
             catch (Exception ex)
             {
@@ -41,7 +41,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<ParentCatDetailDto>($"/api/parentcats/{id}", cancellationToken: token);
+                return await _httpClient.GetFromJsonAsync<ParentCatDetailDto>($"/api/admin/parentcats/{id}", cancellationToken: token);
             }
             catch (Exception ex)
             {
@@ -54,7 +54,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("/api/parentcats", dto, token);
+                var response = await _httpClient.PostAsJsonAsync("/api/admin/parentcats", dto, token);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<ParentCatDetailDto>(token);
             }
@@ -69,7 +69,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await _httpClient.PutAsJsonAsync($"/api/parentcats/{id}", dto, token);
+                var response = await _httpClient.PutAsJsonAsync($"/api/admin/parentcats/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -84,7 +84,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await _httpClient.DeleteAsync($"/api/parentcats/{id}", token);
+                var response = await _httpClient.DeleteAsync($"/api/admin/parentcats/{id}", token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -97,19 +97,19 @@ namespace BlueBellDolls.Bot.Services.Api
 
         public async Task<FileUploadResult[]?> UploadTitlesAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default)
         {
-            return await UploadFilesAsync($"/api/parentcats/{id}/titles", photos, token);
+            return await UploadFilesAsync($"/api/admin/parentcats/{id}/titles", photos, token);
         }
 
         public async Task<FileUploadResult[]?> UploadGenTestsAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default)
         {
-            return await UploadFilesAsync($"/api/parentcats/{id}/gentests", photos, token);
+            return await UploadFilesAsync($"/api/admin/parentcats/{id}/gentests", photos, token);
         }
 
         public async Task<PagedResult<ParentCatMinimalDto>?> GetByPageAsync(int pageNumber, int pageSize, CancellationToken token = default)
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<ParentCatMinimalDto>>($"/api/parentcats?page={pageNumber}&pageSize={pageSize}", token);
+                return await HttpClient.GetFromJsonAsync<PagedResult<ParentCatMinimalDto>>($"/api/admin/parentcats?page={pageNumber}&pageSize={pageSize}", token);
             }
             catch (Exception ex)
             {
@@ -122,7 +122,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<ParentCatMinimalDto>>($"/api/parentcats?isMale={isMale}&page={pageNumber}&pageSize={pageSize}", token);
+                return await HttpClient.GetFromJsonAsync<PagedResult<ParentCatMinimalDto>>($"/api/admin/parentcats?isMale={isMale}&page={pageNumber}&pageSize={pageSize}", token);
             }
             catch (Exception ex)
             {
@@ -133,7 +133,7 @@ namespace BlueBellDolls.Bot.Services.Api
 
         public async Task<bool> UpdateColorAsync(int entityId, string color, CancellationToken token)
         {
-            var requestUrl = $"/api/parentcats/{entityId}/color";
+            var requestUrl = $"/api/admin/parentcats/{entityId}/color";
             try
             {
                 var response = await HttpClient.PutAsJsonAsync(requestUrl, new { Color = color }, token);

@@ -1,7 +1,7 @@
-﻿using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Models;
+﻿using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Records.Dtos;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
@@ -14,7 +14,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<LitterDetailDto>($"/api/litters/{id}", token);
+                return await HttpClient.GetFromJsonAsync<LitterDetailDto>($"/api/admin/litters/{id}", token);
             }
             catch (Exception ex)
             {
@@ -27,7 +27,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<List<LitterDetailDto>>("/api/litters", token);
+                return await HttpClient.GetFromJsonAsync<List<LitterDetailDto>>("/api/admin/litters", token);
             }
             catch (Exception ex)
             {
@@ -40,7 +40,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync("/api/litters", dto, token);
+                var response = await HttpClient.PostAsJsonAsync("/api/admin/litters", dto, token);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<LitterDetailDto>(token);
             }
@@ -55,7 +55,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync($"/api/litters/{litterId}/kittens", newKitten, token);
+                var response = await HttpClient.PostAsJsonAsync($"/api/admin/litters/{litterId}/kittens", newKitten, token);
                 response.EnsureSuccessStatusCode();
 
                 return await response.Content.ReadFromJsonAsync<KittenDetailDto>(token);
@@ -72,7 +72,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PutAsync($"/api/litters/{litterId}/mother/{motherCatId}", null, token);
+                var response = await HttpClient.PutAsync($"/api/admin/litters/{litterId}/mother/{motherCatId}", null, token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -87,7 +87,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PutAsync($"/api/litters/{litterId}/father/{fatherCatId}", null, token);
+                var response = await HttpClient.PutAsync($"/api/admin/litters/{litterId}/father/{fatherCatId}", null, token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -102,7 +102,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PutAsJsonAsync($"/api/litters/{id}", dto, token);
+                var response = await HttpClient.PutAsJsonAsync($"/api/admin/litters/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -117,7 +117,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.DeleteAsync($"/api/litters/{id}", token);
+                var response = await HttpClient.DeleteAsync($"/api/admin/litters/{id}", token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -132,7 +132,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<LitterMinimalDto>>($"/api/litters?page={pageIndex}&pageSize={pageSize}", token);
+                return await HttpClient.GetFromJsonAsync<PagedResult<LitterMinimalDto>>($"/api/admin/litters?page={pageIndex}&pageSize={pageSize}", token);
             }
             catch (Exception ex)
             {

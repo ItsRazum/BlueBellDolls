@@ -1,6 +1,7 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Common.Interfaces;
 using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Services

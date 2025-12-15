@@ -1,10 +1,12 @@
-﻿using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Models;
+﻿using BlueBellDolls.Bot.Settings;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Reflection;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
+using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.ValueConverters;
 
 namespace BlueBellDolls.Bot.Services
 {
@@ -30,6 +32,7 @@ namespace BlueBellDolls.Bot.Services
             AddEntityProperties<Kitten>(_settings.KittenProperties);
             AddEntityProperties<ParentCat>(_settings.ParentCatProperties);
             AddEntityProperties<Litter>(_settings.LitterProperties);
+            AddEntityProperties<CatColor>(_settings.CatColorProperties);
         }
 
         private void AddEntityProperties<TEntity>(Dictionary<string, string> propertyMappings)

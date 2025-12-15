@@ -1,7 +1,10 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Interfaces.Factories;
+using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
 
 namespace BlueBellDolls.Bot.Commands
 {

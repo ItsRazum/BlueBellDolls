@@ -1,4 +1,4 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Interfaces.Services.Api.Base;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Records.Dtos;
 

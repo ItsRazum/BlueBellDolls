@@ -366,3 +366,5 @@ FodyWeavers.xsd
 /Bot/BlueBellDollsManagement.db-wal
 /Service/BlueBellDolls.db-shm
 /Service/BlueBellDolls.db-wal
+/Bot/appsettings.Secret.json
+/Server/appsettings.Secret.json

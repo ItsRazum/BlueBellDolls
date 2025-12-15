@@ -1,5 +1,5 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Common.Interfaces;
 
 namespace BlueBellDolls.Bot.Types
 {

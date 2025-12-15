@@ -1,11 +1,11 @@
 ﻿using BlueBellDolls.Bot.Enums;
-using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Types;
 using Telegram.Bot.Types;
+using BlueBellDolls.Common.Types;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Providers
 {

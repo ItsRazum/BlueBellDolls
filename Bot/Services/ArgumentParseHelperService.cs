@@ -1,4 +1,4 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Services
 {

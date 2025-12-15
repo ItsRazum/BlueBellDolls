@@ -1,6 +1,8 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace BlueBellDolls.Bot.Commands

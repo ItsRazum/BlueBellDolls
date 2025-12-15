@@ -1,8 +1,9 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Bot.Interfaces.Factories;
+using BlueBellDolls.Bot.Interfaces.Providers;
 
 namespace BlueBellDolls.Bot.Commands
 {

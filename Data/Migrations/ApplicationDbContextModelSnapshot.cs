@@ -22,6 +22,32 @@ namespace BlueBellDolls.Data.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BlueBellDolls.Common.Models.CatColor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_enabled");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CatColors", (string)null);
+                });
+
             modelBuilder.Entity("BlueBellDolls.Common.Models.EntityPhoto", b =>
                 {
                     b.Property<int>("Id")
@@ -30,6 +56,9 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("id");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CatColorId")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsMain")
                         .HasColumnType("boolean")
@@ -58,13 +87,15 @@ namespace BlueBellDolls.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CatColorId");
+
                     b.HasIndex("KittenId");
 
                     b.HasIndex("LitterId");
 
                     b.HasIndex("ParentCatId");
 
-                    b.ToTable("photos");
+                    b.ToTable("photos", (string)null);
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.Kitten", b =>
@@ -121,7 +152,7 @@ namespace BlueBellDolls.Data.Migrations
 
                     b.HasIndex("LitterId");
 
-                    b.ToTable("kittens");
+                    b.ToTable("kittens", (string)null);
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.Litter", b =>
@@ -164,7 +195,7 @@ namespace BlueBellDolls.Data.Migrations
 
                     b.HasIndex("MotherCatId");
 
-                    b.ToTable("litters");
+                    b.ToTable("litters", (string)null);
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.ParentCat", b =>
@@ -205,7 +236,7 @@ namespace BlueBellDolls.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("cats");
+                    b.ToTable("cats", (string)null);
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.TelegramPhoto", b =>
@@ -231,11 +262,15 @@ namespace BlueBellDolls.Data.Migrations
                     b.HasIndex("EntityPhotoId")
                         .IsUnique();
 
-                    b.ToTable("telegram_photos");
+                    b.ToTable("telegram_photos", (string)null);
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.EntityPhoto", b =>
                 {
+                    b.HasOne("BlueBellDolls.Common.Models.CatColor", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("CatColorId");
+
                     b.HasOne("BlueBellDolls.Common.Models.Kitten", "Kitten")
                         .WithMany("Photos")
                         .HasForeignKey("KittenId")
@@ -295,6 +330,11 @@ namespace BlueBellDolls.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("EntityPhoto");
+                });
+
+            modelBuilder.Entity("BlueBellDolls.Common.Models.CatColor", b =>
+                {
+                    b.Navigation("Photos");
                 });
 
             modelBuilder.Entity("BlueBellDolls.Common.Models.EntityPhoto", b =>

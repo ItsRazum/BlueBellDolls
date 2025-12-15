@@ -1,4 +1,4 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Interfaces.ValueConverters;
 using System.Globalization;
 
 namespace BlueBellDolls.Bot.ValueConverters

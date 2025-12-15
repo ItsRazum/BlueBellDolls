@@ -12,6 +12,7 @@ namespace BlueBellDolls.Data.Interfaces
         DbSet<EntityPhoto> Photos { get; }
         DbSet<TelegramPhoto> TelegramPhotos { get; }
         DbSet<CatColor> CatColors { get; }
+        DbSet<BookingRequest> BookingRequests { get; }
 
         int SaveChanges();
 

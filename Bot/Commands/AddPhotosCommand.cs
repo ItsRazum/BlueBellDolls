@@ -1,10 +1,11 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Records;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Bot.Interfaces.Factories;
+using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Commands
 {
@@ -50,6 +51,9 @@ namespace BlueBellDolls.Bot.Commands
                     break;
                 case "Kitten":
                     await HandlePhotosAsync<Kitten>(entityId, m, token);
+                    break;
+                case "CatColor":
+                    await HandlePhotosAsync<CatColor>(entityId, m, token);
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported entity type: {entityType}");

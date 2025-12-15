@@ -31,7 +31,7 @@ namespace BlueBellDolls.Server.Services
 
         #region CRUD
 
-        public async Task<ServiceResult<PagedResult<ParentCatListDto>>> GetListAsync(int pageNumber, int pageSize, bool? isMale, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<ParentCatListDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, bool? isMale, CancellationToken token = default)
         {
             try
             {
@@ -40,6 +40,7 @@ namespace BlueBellDolls.Server.Services
                     query = query.Where(c => c.IsMale == isMale.Value);
 
                 var items = await query
+                    .AsNoTracking()
                     .OrderBy(c => c.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
@@ -60,13 +61,14 @@ namespace BlueBellDolls.Server.Services
 
         }
 
-        public async Task<ServiceResult<ParentCatDetailDto>> GetAsync(int id, CancellationToken token = default)
+        public async Task<ServiceResult<ParentCatDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default)
         {
             try
             {
                 var result = await ApplicationDbContext.Cats
+                    .AsNoTracking()
                     .Include(p => p.Photos)
-                        .ThenInclude(p => p.TelegramPhoto)
+                    .ThenInclude(p => p.TelegramPhoto)
                     .FirstOrDefaultAsync(c => c.Id == id, token);
 
                 if (result == null)

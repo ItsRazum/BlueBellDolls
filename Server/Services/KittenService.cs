@@ -29,11 +29,16 @@ namespace BlueBellDolls.Server.Services
 
         #region CRUD
 
-        public async Task<ServiceResult<PagedResult<KittenListDto>>> GetListAsync(int pageNumber, int pageSize, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<KittenListDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default)
         {
             try
             {
-                var items = await ApplicationDbContext.Kittens
+                var query = ApplicationDbContext.Kittens.AsQueryable();
+                if (!admin)
+                    query = query.Where(k => k.IsEnabled);
+
+                var items = await query
+                    .AsNoTracking()
                     .OrderBy(c => c.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
@@ -53,11 +58,12 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<KittenDetailDto>> GetAsync(int id, CancellationToken token = default)
+        public async Task<ServiceResult<KittenDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default)
         {
             try
             {
                 var result = await ApplicationDbContext.Kittens
+                    .AsNoTracking()
                     .Include(k => k.Litter)
                     .Include(k => k.Photos)
                     .ThenInclude(p => p.TelegramPhoto)
@@ -65,6 +71,9 @@ namespace BlueBellDolls.Server.Services
 
                 if (result == null)
                     return new ServiceResult<KittenDetailDto>(StatusCodes.Status404NotFound, "Котёнок не найден");
+
+                if (!admin && !result.IsEnabled)
+                    return new ServiceResult<KittenDetailDto>(StatusCodes.Status401Unauthorized, "Доступ к котёнку запрещён!");
 
                 result.Photos = SortPhotosByDefault(result.Photos);
 

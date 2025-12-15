@@ -45,11 +45,15 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<PagedResult<CatColorListDto>>> GetListAsync(int pageNumber, int pageSize, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<CatColorListDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default)
         {
             try
             {
-                var items = await ApplicationDbContext.CatColors
+                var query = ApplicationDbContext.CatColors.AsQueryable();
+                if (!admin)
+                    query = query.Where(c => c.IsEnabled);
+
+                var items = await query
                     .OrderBy(c => c.Identifier)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
@@ -69,7 +73,7 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<CatColorDetailDto>> GetAsync(int id, CancellationToken token = default)
+        public async Task<ServiceResult<CatColorDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default)
         {
             try
             {
@@ -80,6 +84,9 @@ namespace BlueBellDolls.Server.Services
 
                 if (result == null)
                     return new(StatusCodes.Status404NotFound, "CatColor не найден!");
+
+                if (!result.IsEnabled && !admin)
+                    return new(StatusCodes.Status403Forbidden, "Доступ к CatColor запрещен!");
 
                 result.Photos = SortPhotosByDefault(result.Photos);
 

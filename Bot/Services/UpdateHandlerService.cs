@@ -1,8 +1,8 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Extensions;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Interfaces;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;

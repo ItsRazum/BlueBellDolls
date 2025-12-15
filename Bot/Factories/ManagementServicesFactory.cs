@@ -1,4 +1,6 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Interfaces.Factories;
+using BlueBellDolls.Bot.Interfaces.Management;
+using BlueBellDolls.Bot.Interfaces.Management.Base;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Types;
 

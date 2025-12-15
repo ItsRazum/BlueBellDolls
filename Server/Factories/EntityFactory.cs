@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Common.Models;
+﻿using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Models;
 using BlueBellDolls.Server.Interfaces;
 
 namespace BlueBellDolls.Server.Factory
@@ -34,8 +35,8 @@ namespace BlueBellDolls.Server.Factory
                 Description = description,
                 Color = color,
                 Photos = [],
-                Status = Common.Enums.KittenStatus.Available,
-                Class = Common.Enums.KittenClass.Pet
+                Status = KittenStatus.Available,
+                Class = KittenClass.Pet
             };
         }
 

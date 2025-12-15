@@ -1,11 +1,17 @@
+Ôªøusing BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Services;
 using BlueBellDolls.Data.Contexts;
 using BlueBellDolls.Data.Interfaces;
 using BlueBellDolls.Server.Factory;
 using BlueBellDolls.Server.Interfaces;
 using BlueBellDolls.Server.Services;
 using BlueBellDolls.Server.Settings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Diagnostics;
+using Telegram.Bot;
 
 internal class Program
 {
@@ -26,11 +32,28 @@ internal class Program
 
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
-        //  ÓÌÚÓÎÎÂ˚ Ë OpenAPI
+        // –ö–æ–Ω—Ñ–∏–≥—É—Ä–∞—Ü–∏—è
+        builder.Configuration.AddJsonFile("appsettings.Secret.json", optional: true, reloadOnChange: true);
+
+        // –ö–æ–Ω—Ç—Ä–æ–ª–ª–µ—Ä—ã –∏ OpenAPI
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
 
-        //  ÓÌÙË„Û‡ˆËˇ
+        // Rate limiting
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.AddFixedWindowLimiter("BookingPolicy", options =>
+            {
+                options.PermitLimit = 5;
+                options.Window = TimeSpan.FromMinutes(10);
+                options.QueueLimit = 0;
+                options.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+            });
+
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
+
+        // –ö–æ–Ω—Ñ–∏–≥—É—Ä–∞—Ü–∏—è
         builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection(nameof(FileStorageSettings)));
 
         // Database
@@ -46,18 +69,44 @@ internal class Program
         {
             options.AddPolicy("AllowVueApp", policyBuilder =>
             {
-                policyBuilder.WithOrigins("http://localhost:5173")
+                policyBuilder.WithOrigins("http://localhost:5137")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
             });
         });
 
-        // ‘‡·ËÍË
+        // –§–∞–±—Ä–∏–∫–∏
         builder.Services
             .AddSingleton<IEntityFactory, EntityFactory>();
 
-        //ŒÒÚ‡Î¸Ì˚Â ÒÂ‚ËÒ˚
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                    System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty))
+            };
+        });
+
+        // –û—Å—Ç–∞–ª—å–Ω—ã–µ —Å–µ—Ä–≤–∏—Å—ã
         builder.Services
+            .AddSingleton<ITelegramBotClient, TelegramBotClient>(sp =>
+            {
+                var botToken = builder.Configuration.GetSection("TelegramNotificationSettings")["BotToken"] ?? string.Empty;
+                return new TelegramBotClient(botToken);
+            })
+            .AddSingleton<IBotService, BotService>()
             .AddScoped<ILitterService, LitterService>()
             .AddScoped<IParentCatService, ParentCatService>()
             .AddScoped<IKittenService, KittenService>();
@@ -85,9 +134,9 @@ internal class Program
 
         app.UseCors("AllowVueApp");
         app.UseHttpsRedirection();
+        app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();
-        app.MapFallbackToFile("/index.html");
     }
 
     private static void InitializeDatabase(WebApplication app)
@@ -96,5 +145,4 @@ internal class Program
         var database = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
         database.Database.Migrate();
     }
-
 }

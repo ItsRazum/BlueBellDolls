@@ -1,17 +1,26 @@
 using BlueBellDolls.Bot;
 using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Bot.Factories;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Providers;
 using BlueBellDolls.Bot.Services;
 using BlueBellDolls.Bot.Services.Api;
 using BlueBellDolls.Bot.Services.Management;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.ValueConverters;
-using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
 using Serilog;
 using Telegram.Bot;
+using BlueBellDolls.Common.Services;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using BlueBellDolls.Bot.Interfaces.Factories;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Management;
+using BlueBellDolls.Bot.Interfaces.Management.Base;
+using BlueBellDolls.Bot.Interfaces.ValueConverters;
 
 internal class Program
 {
@@ -29,6 +38,7 @@ internal class Program
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
         // Конфигурация
+        builder.Configuration.AddJsonFile("appsettings.Secret.json", optional: true, reloadOnChange: true);
         builder.Services
             .Configure<BotSettings>(builder.Configuration.GetSection(nameof(BotSettings)))
             .Configure<EntityFormSettings>(builder.Configuration.GetSection(nameof(EntityFormSettings)))
@@ -51,6 +61,8 @@ internal class Program
         {
             var config = services.GetRequiredService<IOptions<ApiSettings>>().Value;
             client.BaseAddress = new Uri(config.BaseUrl);
+            client.DefaultRequestHeaders.Authorization = 
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", config.JwtToken);
             client.Timeout = TimeSpan.FromSeconds(config.TimeoutSeconds);
         });
 
@@ -63,6 +75,7 @@ internal class Program
 
         // Остальные сервисы
         builder.Services
+            .AddSingleton<ICatColorTreeService, CatColorTreeService>()
             .AddSingleton<IBotService, BotService>()
             .AddSingleton<IEntityFormService, EntityFormService>()
             .AddSingleton<IValueConverter, EntityValueConverter>()
@@ -76,6 +89,10 @@ internal class Program
             .AddScoped<IKittenApiClient, KittenApiClient>()
             .AddScoped<IParentCatApiClient, ParentCatApiClient>()
             .AddScoped<ILitterApiClient, LitterApiClient>()
+            .AddScoped<ICatColorApiClient, CatColorApiClient>()
+            .AddScoped<IBookingApiClient, BookingApiClient>()
+
+            .AddScoped<IBookingManagementService, BookingManagementService>()
 
             .AddScoped<KittenManagementService>()
             .AddScoped<ICatManagementService<Kitten>>(s => s.GetRequiredService<KittenManagementService>())
@@ -91,7 +108,9 @@ internal class Program
             .AddScoped<LitterManagementService>()
             .AddScoped<ILitterManagementService>(s => s.GetRequiredService<LitterManagementService>())
             .AddScoped<IEntityManagementService<Litter>>(s => s.GetRequiredService<LitterManagementService>())
-            .AddScoped<IDisplayableEntityManagementService<Litter>>(s => s.GetRequiredService<LitterManagementService>());
+            .AddScoped<IDisplayableEntityManagementService<Litter>>(s => s.GetRequiredService<LitterManagementService>())
+            
+            .AddScoped<CatColorManagementService>();
 
         // Доп. настройки
         builder.Services.AddMemoryCache();

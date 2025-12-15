@@ -1,9 +1,12 @@
-﻿using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Records;
+﻿using BlueBellDolls.Bot.Records;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Extensions;
-using BlueBellDolls.Common.Models;
+using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Common.Records.Dtos;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Extensions;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Interfaces.Management;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Services.Management
 {
@@ -17,7 +20,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catColorApiClient,
             messagesProvider,
             photosDownloaderService,
-            logger)
+            logger), ICatColorManagementService
     {
         private readonly ICatColorApiClient _catColorApiClient = catColorApiClient;
         private readonly IEntityFormService _entityFormService = entityFormService;
@@ -27,6 +30,12 @@ namespace BlueBellDolls.Bot.Services.Management
         public override async Task<CatColor?> GetEntityAsync(int entityId, CancellationToken token = default)
         {
             var dto = await _catColorApiClient.GetAsync(entityId, token);
+            return dto?.ToEFModel();
+        }
+
+        public async Task<CatColor?> GetEntityAsync(string colorIdentifier, CancellationToken token = default)
+        {
+            var dto = await _catColorApiClient.GetAsync(colorIdentifier, token);
             return dto?.ToEFModel();
         }
 

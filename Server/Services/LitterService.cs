@@ -30,11 +30,15 @@ namespace BlueBellDolls.Server.Services
 
         #region CRUD
 
-        public async Task<ServiceResult<PagedResult<LitterDetailDto>>> GetListAsync(int pageNumber, int pageSize, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<LitterDetailDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default)
         {
             try
             {
-                var items = await ApplicationDbContext.Litters
+                var query = ApplicationDbContext.Litters.AsQueryable();
+                if (!admin)
+                    query = query.Where(l => l.IsEnabled);
+
+                var items = await query
                     .AsNoTracking()
                     .OrderBy(c => c.Letter)
                     .Skip((pageNumber - 1) * pageSize)
@@ -55,13 +59,16 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<LitterDetailDto>> GetAsync(int id, CancellationToken token = default)
+        public async Task<ServiceResult<LitterDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default)
         {
             try
             {
                 var result = await GetEntity(id, token);
                 if (result == null)
-                    return new ServiceResult<LitterDetailDto>((int)HttpStatusCode.NotFound, $"Litter с id={id} не найден");
+                    return new ServiceResult<LitterDetailDto>(StatusCodes.Status404NotFound, $"Litter с id={id} не найден");
+
+                if (!admin && !result.IsEnabled)
+                    return new ServiceResult<LitterDetailDto>(StatusCodes.Status401Unauthorized, $"Доступ к помёту запрещён!");
 
                 result.Photos = SortPhotosByDefault(result.Photos);
 

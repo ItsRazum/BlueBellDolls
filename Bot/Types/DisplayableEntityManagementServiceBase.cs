@@ -1,9 +1,11 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Records;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Records.Dtos;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Bot.Interfaces.Services.Api.Base;
+using BlueBellDolls.Bot.Interfaces.Management.Base;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Types
 {

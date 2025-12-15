@@ -1,10 +1,12 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Models;
 using Microsoft.Extensions.Options;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
+using BlueBellDolls.Bot.Interfaces.Factories;
+using BlueBellDolls.Bot.Interfaces.Providers;
 
 namespace BlueBellDolls.Bot.Commands
 {
@@ -28,6 +30,7 @@ namespace BlueBellDolls.Bot.Commands
             AddCommandHandler("/catlist", HandleCommandAsync<ParentCat>);
             AddCommandHandler("/litterlist", HandleCommandAsync<Litter>);
             AddCommandHandler("/kittenlist", HandleCommandAsync<Kitten>);
+            AddCommandHandler("/catcolorlist", HandleCommandAsync<CatColor>);
         }
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity

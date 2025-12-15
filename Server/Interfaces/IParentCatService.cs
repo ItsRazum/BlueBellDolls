@@ -8,8 +8,8 @@ namespace BlueBellDolls.Server.Interfaces
 
         Task<ServiceResult<ParentCatDetailDto>> AddAsync(CreateParentCatDto parentCatDto, CancellationToken token = default);
         Task<ServiceResult> DeleteAsync(int id, CancellationToken token = default);
-        Task<ServiceResult<ParentCatDetailDto>> GetAsync(int id, CancellationToken token = default);
-        Task<ServiceResult<PagedResult<ParentCatListDto>>> GetListAsync(int pageNumber, int pageSize, bool? isMale, CancellationToken token = default);
+        Task<ServiceResult<ParentCatDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default);
+        Task<ServiceResult<PagedResult<ParentCatListDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, bool? isMale, CancellationToken token = default);
         Task<ServiceResult> UpdateAsync(int id, UpdateParentCatDto parentCatDto, CancellationToken token = default);
 
         Task<ServiceResult> UpdateColorAsync(int id, string color, CancellationToken token = default);

@@ -16,6 +16,7 @@ namespace BlueBellDolls.Data.Contexts
         public DbSet<EntityPhoto> Photos => Set<EntityPhoto>();
         public DbSet<TelegramPhoto> TelegramPhotos => Set<TelegramPhoto>();
         public DbSet<CatColor> CatColors => Set<CatColor>();
+        public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
 
         #endregion
 

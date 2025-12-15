@@ -1,4 +1,4 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Common.Enums;
 
 namespace BlueBellDolls.Bot.Services

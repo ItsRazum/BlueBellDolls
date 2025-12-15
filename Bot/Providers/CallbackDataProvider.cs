@@ -1,11 +1,11 @@
 ﻿using BlueBellDolls.Bot.Enums;
-using BlueBellDolls.Bot.Interfaces;
 using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
+using BlueBellDolls.Common.Types;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Bot.Interfaces.Providers;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -77,16 +77,16 @@ namespace BlueBellDolls.Bot.Providers
         public string GetToggleEntityVisibilityCallback<T>() where T : IDisplayableEntity
             => $"{_settings.ToggleEntityVisibility}{typeof(T).Name}";
 
-        public string GetOpenKittenStatus()
+        public string GetOpenKittenStatusCallback()
             => _settings.OpenKittenStatus;
 
-        public string GetOpenKittenClass()
+        public string GetOpenKittenClassCallback()
             => _settings.OpenKittenClass;
 
-        public string GetSetKittenStatus()
+        public string GetSetKittenStatusCallback()
             => _settings.SetKittenStatus;
 
-        public string GetSetKittenClass()
+        public string GetSetKittenClassCallback()
             => _settings.SetKittenClass;
 
         #endregion
@@ -165,17 +165,27 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateToggleEntityVisibilityCallback(IDisplayableEntity entity)
             => $"{_settings.ToggleEntityVisibility}{entity.GetType().Name}{Separator}{entity.Id}";
 
-        public string CreateOpenKittenClass(int kittenId)
+        public string CreateOpenKittenClassCallback(int kittenId)
             => $"{_settings.OpenKittenClass}{Separator}{kittenId}";
 
-        public string CreateOpenKittenStatus(int kittenId)
+        public string CreateOpenKittenStatusCallback(int kittenId)
             => $"{_settings.OpenKittenStatus}{Separator}{kittenId}";
 
-        public string CreateSetKittenClass(int kittenId, KittenClass kittenClass)
+        public string CreateSetKittenClassCallback(int kittenId, KittenClass kittenClass)
             => $"{_settings.SetKittenClass}{Separator}{kittenClass}{Separator}{kittenId}";
 
-        public string CreateSetKittenStatus(int kittenId, KittenStatus kittenStatus)
+        public string CreateSetKittenStatusCallback(int kittenId, KittenStatus kittenStatus)
             => $"{_settings.SetKittenStatus}{Separator}{kittenStatus}{Separator}{kittenId}";
+
+        public string GetProcessBookingCallback()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetCloseBookingCallback()
+        {
+            throw new NotImplementedException();
+        }
 
         #endregion
     }

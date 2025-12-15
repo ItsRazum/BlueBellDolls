@@ -1,5 +1,5 @@
 ﻿using BlueBellDolls.Bot.Extensions;
-using BlueBellDolls.Bot.Interfaces;
+using BlueBellDolls.Bot.Interfaces.Types;
 using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Adapters

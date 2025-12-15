@@ -1,5 +1,6 @@
-﻿using BlueBellDolls.Bot.Interfaces;
+﻿using BlueBellDolls.Bot.Interfaces.Services.Api;
 using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Dtos;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 
@@ -14,7 +15,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<CatColorDetailDto>($"/api/catcolors/{id}", token);
+                return await HttpClient.GetFromJsonAsync<CatColorDetailDto>($"/api/admin/catcolors/{id}", token);
             }
             catch (Exception ex)
             {
@@ -23,11 +24,24 @@ namespace BlueBellDolls.Bot.Services.Api
             }
         }
 
+        public async Task<CatColorDetailDto?> GetAsync(string colorIdentifier, CancellationToken token)
+        {
+            try
+            {
+                return await HttpClient.GetFromJsonAsync<CatColorDetailDto>($"/api/admin/catcolors/identifier/{colorIdentifier}", token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь CatColor {identifier} с сервера!", nameof(CatColorApiClient), nameof(GetAsync), colorIdentifier);
+                return null;
+            }
+        }
+
         public async Task<List<CatColorDetailDto>?> GetListAsync(CancellationToken token = default)
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<List<CatColorDetailDto>>("/api/catcolors", token);
+                return await HttpClient.GetFromJsonAsync<List<CatColorDetailDto>>("/api/admin/catcolors", token);
             }
             catch (Exception ex)
             {
@@ -40,7 +54,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync("/api/catcolors", dto, token);
+                var response = await HttpClient.PostAsJsonAsync("/api/admin/catcolors", dto, token);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<CatColorDetailDto>(token);
             }
@@ -55,7 +69,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PutAsJsonAsync($"/api/catcolors/{id}", dto, token);
+                var response = await HttpClient.PutAsJsonAsync($"/api/admin/catcolors/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -70,7 +84,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.DeleteAsync($"/api/catcolors/{id}", token);
+                var response = await HttpClient.DeleteAsync($"/api/admin/catcolors/{id}", token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -85,11 +99,24 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<CatColorListDto>>($"/api/catcolors?page={pageIndex}&pageSize={pageSize}", token);
+                return await HttpClient.GetFromJsonAsync<PagedResult<CatColorListDto>>($"/api/admin/catcolors?page={pageIndex}&pageSize={pageSize}", token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось получить страницу {p} списка CatColor!", nameof(CatColorApiClient), nameof(GetByPageAsync), pageIndex);
+                return null;
+            }
+        }
+
+        public async Task<CatColorTree?> GetCatColorTreeAsync(CancellationToken token)
+        {
+            try
+            {
+                return await HttpClient.GetFromJsonAsync<CatColorTree>("/api/admin/catcolors/tree", token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "{service}.{method}(): Не удалось получить дерево CatColor!", nameof(CatColorApiClient), nameof(GetCatColorTreeAsync));
                 return null;
             }
         }

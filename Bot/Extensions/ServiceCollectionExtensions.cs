@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Bot.Types;
+﻿using BlueBellDolls.Bot.Extensions;
+using BlueBellDolls.Bot.Types;
 
 namespace BlueBellDolls.Bot.Extensions
 {

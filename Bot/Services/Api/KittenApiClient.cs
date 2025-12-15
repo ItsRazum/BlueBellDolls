@@ -1,8 +1,8 @@
-﻿using BlueBellDolls.Bot.Interfaces;
-using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Models;
+﻿using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Records.Dtos;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
@@ -13,7 +13,7 @@ namespace BlueBellDolls.Bot.Services.Api
 
         public async Task<List<KittenListDto>?> GetListAsync(KittenStatus? status = null, CancellationToken token = default)
         {
-            var url = "/api/kittens";
+            var url = "/api/admin/kittens";
             if (status.HasValue)
                 url += $"?status={status.Value}";
 
@@ -32,7 +32,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<KittenDetailDto>($"/api/kittens/{id}", token);
+                return await HttpClient.GetFromJsonAsync<KittenDetailDto>($"/api/admin/kittens/{id}", token);
             }
             catch (Exception ex)
             {
@@ -45,7 +45,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync("/api/kittens", dto, token);
+                var response = await HttpClient.PostAsJsonAsync("/api/admin/kittens", dto, token);
                 response.EnsureSuccessStatusCode();
                 return await response.Content.ReadFromJsonAsync<KittenDetailDto>(token);
             }
@@ -60,7 +60,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.PutAsJsonAsync($"/api/kittens/{id}", dto, token);
+                var response = await HttpClient.PutAsJsonAsync($"/api/admin/kittens/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -75,7 +75,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                var response = await HttpClient.DeleteAsync($"/api/kittens/{id}", token);
+                var response = await HttpClient.DeleteAsync($"/api/admin/kittens/{id}", token);
                 response.EnsureSuccessStatusCode();
                 return true;
             }
@@ -90,7 +90,7 @@ namespace BlueBellDolls.Bot.Services.Api
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<KittenMinimalDto>>($"/api/kittens?page={pageIndex}&pageSize={pageSize}", token);
+                return await HttpClient.GetFromJsonAsync<PagedResult<KittenMinimalDto>>($"/api/admin/kittens?page={pageIndex}&pageSize={pageSize}", token);
             }
             catch (Exception ex)
             {
@@ -101,7 +101,7 @@ namespace BlueBellDolls.Bot.Services.Api
 
         public async Task<bool> UpdateColorAsync(int entityId, string color, CancellationToken token)
         {
-            var requestUrl = $"/api/kittens/{entityId}/color";
+            var requestUrl = $"/api/admin/kittens/{entityId}/color";
             try
             {
                 var response = await HttpClient.PutAsJsonAsync(requestUrl, new { Color = color }, token);
