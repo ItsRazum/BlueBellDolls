@@ -108,15 +108,11 @@ namespace BlueBellDolls.Bot.Services.Management
             try
             {
                 var updateDto = entity.ToUpdateDto();
-                var success = await _litterApiClient.UpdateAsync(entity.Id, updateDto, token);
-                if (!success)
+                var result = await _litterApiClient.UpdateAsync(entity.Id, updateDto, token);
+                if (result == null)
                     return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
 
-                var finalDto = await _litterApiClient.GetAsync(entity.Id, token);
-                if (finalDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage());
-
-                return new(true, null, finalDto.ToEFModel());
+                return new(true, null, result.ToEFModel());
             }
             catch (Exception ex)
             {
@@ -171,7 +167,7 @@ namespace BlueBellDolls.Bot.Services.Management
             }
         }
 
-        public async Task<ManagementOperationResult> SetParentCatForLitterAsync(int litterId, int parentCatId, CancellationToken token)
+        public async Task<ManagementOperationResult<Litter>> SetParentCatForLitterAsync(int litterId, int parentCatId, CancellationToken token)
         {
             try
             {
@@ -182,7 +178,10 @@ namespace BlueBellDolls.Bot.Services.Management
                         ? await _litterApiClient.SetFatherCatAsync(litterId, parentCatId, token)
                         : await _litterApiClient.SetMotherCatAsync(litterId, parentCatId, token);
 
-                    return new(true);
+                    if (result == null)
+                        return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
+
+                    return new(true, Result: result.ToEFModel());
                 }
 
                 return new(false, _messagesProvider.CreateEntityNotFoundMessage(typeof(ParentCat), parentCatId));

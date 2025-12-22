@@ -63,7 +63,7 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var result = await GetEntity(id, token);
+                var result = await GetEntityAsync(id, token);
                 if (result == null)
                     return new ServiceResult<LitterDetailDto>(StatusCodes.Status404NotFound, $"Litter с id={id} не найден");
 
@@ -151,54 +151,54 @@ namespace BlueBellDolls.Server.Services
             return new ServiceResult<KittenDetailDto>((int)HttpStatusCode.OK, null, kitten.ToDetailDto());
         }
 
-        public async Task<ServiceResult> SetFatherCatAsync(int litterId, int parentCatId, CancellationToken token = default)
+        public async Task<ServiceResult<LitterDetailDto>> SetFatherCatAsync(int litterId, int parentCatId, CancellationToken token = default)
         {
-            var litter = await GetEntity(litterId, token);
+            var litter = await GetEntityAsync(litterId, token);
             if (litter == null)
-                return new ServiceResult((int)HttpStatusCode.NotFound, $"Litter с id={litterId} не найден");
+                return new(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
 
             var parentCat = await ApplicationDbContext.Cats.FindAsync([parentCatId], token);
 
             if (parentCat == null || !parentCat.IsMale)
-                return new ServiceResult((int)HttpStatusCode.BadRequest, "Неверный родительский кот");
+                return new(StatusCodes.Status400BadRequest, "Неверный родительский кот");
 
             litter.FatherCat = parentCat;
             await ApplicationDbContext.SaveChangesAsync(token);
-            return new ServiceResult((int)HttpStatusCode.OK, null);
+            return new (StatusCodes.Status200OK, Value: litter.ToDetailDto());
         }
 
-        public async Task<ServiceResult> SetMotherCatAsync(int litterId, int parentCatId, CancellationToken token = default)
+        public async Task<ServiceResult<LitterDetailDto>> SetMotherCatAsync(int litterId, int parentCatId, CancellationToken token = default)
         {
-            var litter = await GetEntity(litterId, token);
+            var litter = await GetEntityAsync(litterId, token);
             if (litter == null)
-                return new ServiceResult((int)HttpStatusCode.NotFound, $"Litter с id={litterId} не найден");
+                return new(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
 
             var parentCat = await ApplicationDbContext.Cats.FindAsync([parentCatId], token);
 
             if (parentCat == null || parentCat.IsMale)
-                return new ServiceResult((int)HttpStatusCode.BadRequest, "Неверный родительский кот");
+                return new(StatusCodes.Status400BadRequest, "Неверный родительский кот");
 
             litter.MotherCat = parentCat;
             await ApplicationDbContext.SaveChangesAsync(token);
-            return new ServiceResult((int)HttpStatusCode.OK, null);
+            return new(StatusCodes.Status200OK, Value: litter.ToDetailDto());
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, UpdateLitterDto litterDto, CancellationToken token = default)
+        public async Task<ServiceResult<LitterDetailDto>> UpdateAsync(int id, UpdateLitterDto litterDto, CancellationToken token = default)
         {
             try
             {
-                var entity = await ApplicationDbContext.Litters.FindAsync([id], token);
+                var entity = await GetEntityAsync(id, token);
                 if (entity == null)
-                    return new ServiceResult((int)HttpStatusCode.NotFound, $"Litter с id={id} не найден");
+                    return new(StatusCodes.Status404NotFound, $"Litter с id={id} не найден");
 
                 entity.ApplyUpdate(litterDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
-                return new ServiceResult((int)HttpStatusCode.OK, null);
+                return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось обновить Litter {id}!", id);
-                return new ServiceResult((int)HttpStatusCode.InternalServerError, "Не удалось обновить Litter");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось обновить Litter");
             }
         }
 
@@ -229,7 +229,7 @@ namespace BlueBellDolls.Server.Services
 
         #region Private methods
 
-        private async Task<Litter?> GetEntity(int id, CancellationToken token = default)
+        private async Task<Litter?> GetEntityAsync(int id, CancellationToken token = default)
         {
             return await ApplicationDbContext.Litters
                 .Include(l => l.FatherCat)

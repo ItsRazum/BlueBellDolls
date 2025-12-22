@@ -10,8 +10,8 @@ namespace BlueBellDolls.Bot.Interfaces.Services.Api
         Task<bool> DeleteAsync(int id, CancellationToken token = default);
         Task<KittenDetailDto?> GetAsync(int id, CancellationToken token = default);
         Task<List<KittenListDto>?> GetListAsync(KittenStatus? status = null, CancellationToken token = default);
-        Task<bool> UpdateAsync(int id, UpdateKittenDto dto, CancellationToken token = default);
+        Task<KittenDetailDto?> UpdateAsync(int id, UpdateKittenDto dto, CancellationToken token = default);
         Task<PagedResult<KittenMinimalDto>?> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default);
-        Task<bool> UpdateColorAsync(int entityId, string color, CancellationToken token);
+        Task<KittenDetailDto?> UpdateColorAsync(int entityId, string color, CancellationToken token);
     }
 }

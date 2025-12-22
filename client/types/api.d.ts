@@ -15,5 +15,11 @@ declare global {
         type: PhotosType;
         isMain: boolean;
     }
+
+    export interface BookingDto {
+        id: number;
+        name: string;
+        phoneNumber: string;
+    }
 }
 

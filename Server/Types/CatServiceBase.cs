@@ -10,15 +10,5 @@ namespace BlueBellDolls.Server.Types
         ILogger logger) : DisplayableEntityServiceBase<TEntity>(env, applicationDbContext, logger) where TEntity : Cat
     {
 
-        public async Task<ServiceResult> UpdateColorAsync(int id, string color, CancellationToken token = default)
-        {
-            var entity = await ApplicationDbContext.Set<TEntity>().FindAsync([id], token);
-            if (entity == null) 
-                return new(StatusCodes.Status404NotFound);
-
-            entity.Color = color;
-            await ApplicationDbContext.SaveChangesAsync(token);
-            return new(StatusCodes.Status200OK);
-        }
     }
 }

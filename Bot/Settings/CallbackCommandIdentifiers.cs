@@ -21,6 +21,8 @@
         public string OpenKittenStatus { get; set; }
         public string SetKittenClass { get; set; }
         public string SetKittenStatus { get; set; }
+        public string ProcessBookingRequest { get; set; }
+        public string CloseBookingRequest { get; set; }
         public string ConfirmationSuffix { get; set; }
     }
 }

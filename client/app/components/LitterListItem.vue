@@ -14,14 +14,6 @@ const catLink = 'api/parentcats/'
 const fatherCatLink = computed(() => catLink + props.litter.fatherCatId)
 const motherCatLink = computed(() => catLink + props.litter.motherCatId)
 
-const freeKittensCount = computed(() => {
-  let count = 0;
-  for (let i = 0; i < 5; i++) {
-    if (props.litter.kittens[i].status == KittenStatus.Available) {
-      count++;
-    }
-  }
-});
 
 const kittensString = computed(() => {
   switch (props.litter.kittens.length) {
@@ -36,21 +28,36 @@ const kittensString = computed(() => {
   }
 });
 
-const availableKittensString = computed(() => props.litter.kittens.length === 1 ? ` свободен` : ` свободных`);
+const freeKittensCount = computed(() => {
+  return props.litter.kittens.filter(k => k.status === KittenStatus.Available).length;
+});
+
+const availableKittensString = freeKittensCount.value == 1 ? ` свободен` : ` свободных`;
+
+const isLitterModalOpen = ref(false);
+const openLitterModal = () => {
+  isLitterModalOpen.value = true;
+}
+
+const closeLitterModal = () => {
+  isLitterModalOpen.value = false;
+}
+
+
 </script>
 
 <template>
-<CardWrapper class="litter-card">
-  <div class="card-expanded">
-    <div class="card-photo-container">
-      <img class="card-expanded-photo" :src="litter.photos[0].url" :alt="litterDisplayName" />
-      <RouterLink class="link">Больше фото</RouterLink>
-    </div>
-    <CardWrapper :enable-blur="true" class="card-info-container">
-      <div class="card-header">
-        <h2 style="font-size: 36px">{{ litterDisplayName }}</h2>
-        <span style="font-weight: 505; color: var(--color-text-caption); font-size: 24px">{{ litter.birthDay }}</span>
+  <CardWrapper class="litter-card">
+    <div class="card-expanded">
+      <div class="card-photo-container">
+        <img class="card-expanded-photo" :src="litter.photos[0].url" :alt="litterDisplayName" />
+        <button class="link-btn" @click="openLitterModal">Больше фото</button>
       </div>
+      <CardWrapper :enable-blur="true" class="card-info-container">
+        <div class="card-header">
+          <h2 style="font-size: 36px">{{ litterDisplayName }}</h2>
+          <span style="font-weight: 505; color: var(--color-text-caption); font-size: 24px">{{ litter.birthDay }}</span>
+        </div>
         <CardWrapper class="card-info-body">
           <div class="card-info-props">
             <div class="card-property">
@@ -73,22 +80,23 @@ const availableKittensString = computed(() => props.litter.kittens.length === 1 
           </div>
           <span> {{ litter.description }}</span>
         </CardWrapper>
-    </CardWrapper>
-  </div>
-  <div class="separator"/>
-  <div class="kittens-grid">
-    <KittenListItem
-      v-for="kitten in litter.kittens"
-      :key="kitten.id"
-      :kitten="kitten"/>
-  </div>
-</CardWrapper>
+      </CardWrapper>
+    </div>
+    <div class="separator"/>
+    <div class="kittens-grid">
+      <KittenListItem
+          v-for="kitten in litter.kittens"
+          :key="kitten.id"
+          :kitten="kitten" />
+    </div>
+  </CardWrapper>
+  <LitterModal :is-open="isLitterModalOpen" :litter="props.litter" @close="closeLitterModal" />
 </template>
 
 <style scoped>
 
 span {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .litter-card {
@@ -109,7 +117,7 @@ span {
 
 .card-property span,
 .card-property a {
-  font-size: 21px;
+  font-size: 1.25rem;
 }
 
 .card-expanded-photo {

@@ -4,6 +4,7 @@ using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
+using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Interfaces.Services
 {
@@ -98,9 +99,19 @@ namespace BlueBellDolls.Bot.Interfaces.Services
         string CreateDefaultPhotoSetErrorMessage();
 
         string CreateToggleEntityVisibilityErrorMessage();
+
         string CreateKittenClassSelectionMenuMessage(Kitten kitten);
+
         string CreateKittenClassSetSuccessMessage(Kitten kitten);
+
         string CreateKittenStatusSelectionMenuMessage(Kitten kitten);
+
         string CreateKittenStatusSetSuccessMessage(Kitten kitten);
+
+        string CreateNewBookingRequestMessage(BookingRequest bookingRequest);
+
+        string CreateBookingProcessingMessage(BookingRequest bookingRequest, User curator);
+
+        string CreateBookingCloseMessage(BookingRequest bookingRequest, User curator);
     }
 }

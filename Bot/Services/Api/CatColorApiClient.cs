@@ -3,6 +3,7 @@ using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Dtos;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
+using System.Net.Http.Json;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
@@ -65,18 +66,18 @@ namespace BlueBellDolls.Bot.Services.Api
             }
         }
 
-        public async Task<bool> UpdateAsync(int id, UpdateCatColorDto dto, CancellationToken token = default)
+        public async Task<CatColorDetailDto?> UpdateAsync(int id, UpdateCatColorDto dto, CancellationToken token = default)
         {
             try
             {
                 var response = await HttpClient.PutAsJsonAsync($"/api/admin/catcolors/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return await response.Content.ReadFromJsonAsync<CatColorDetailDto>(token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить CatColor {id}!", nameof(CatColorApiClient), nameof(UpdateAsync), id);
-                return false;
+                return null;
             }
         }
 

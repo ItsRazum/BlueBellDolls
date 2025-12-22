@@ -24,9 +24,19 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
         InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion);
 
         InlineKeyboardMarkup CreateEntityFromLitterKeyboard(IDisplayableEntity entity, int litterId);
+
         InlineKeyboardMarkup CreateColorPickerKeyboard(Cat entity, string buildedColor, string[] findedColorParts);
+
         ReplyKeyboardMarkup CreateStartKeyboard();
+
         InlineKeyboardMarkup CreateKittenClassSelectionKeyboard(Kitten kitten);
+
         InlineKeyboardMarkup CreateKittenStatusSelectionKeyboard(Kitten kitten);
+
+        InlineKeyboardMarkup CreateBookingRequestTakeCuratorshipKeyboard(BookingRequest bookingRequest);
+
+        InlineKeyboardMarkup CreateBookingRequestCloseKeyboard(BookingRequest bookingRequest);
+
+        InlineKeyboardMarkup CreateChangeKittenStatusKeyboard(int kittenId);
     }
 }

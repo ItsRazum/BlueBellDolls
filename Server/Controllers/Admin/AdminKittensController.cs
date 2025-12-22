@@ -45,7 +45,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateKitten(
+        public async Task<ActionResult<KittenDetailDto>> UpdateKitten(
             [FromRoute] int id,
             [FromBody] UpdateKittenDto kittenDto,
             CancellationToken token = default)
@@ -64,7 +64,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         }
 
         [HttpPut("{id}/color")]
-        public async Task<IActionResult> UpdateColor(int id, [FromBody] UpdateColorRequest updateColorRequest, CancellationToken token = default)
+        public async Task<ActionResult<KittenDetailDto?>> UpdateColor(int id, [FromBody] UpdateColorRequest updateColorRequest, CancellationToken token = default)
         {
             var result = await _kittenService.UpdateColorAsync(id, updateColorRequest.Color, token);
 

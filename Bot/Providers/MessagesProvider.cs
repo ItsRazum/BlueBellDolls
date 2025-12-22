@@ -9,6 +9,7 @@ using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Bot.Interfaces.Services;
+using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -21,6 +22,7 @@ namespace BlueBellDolls.Bot.Providers
         private readonly EntitySettings _entitySettings;
         private readonly Dictionary<Type, Func<IEntity, bool, string>> _entityFormMessages;
         private readonly IEnumMapperService _enumMapperService;
+        private readonly ICommonMessagesProvider _commonMessagesProvider;
 
         #endregion
 
@@ -29,11 +31,13 @@ namespace BlueBellDolls.Bot.Providers
         public MessagesProvider(
             IOptions<EntityFormSettings> entityFormSettings, 
             IOptions<EntitySettings> entityOptions,
-            IEnumMapperService enumMapperService)
+            IEnumMapperService enumMapperService,
+            ICommonMessagesProvider commonMessagesProvider)
         {
             _entityFormSettings = entityFormSettings.Value;
             _entitySettings = entityOptions.Value;
             _enumMapperService = enumMapperService;
+            _commonMessagesProvider = commonMessagesProvider;
             _entityFormMessages = new()
             {
                 { typeof(ParentCat), (entity, enableEdit) => CreateParentCatFormMessage((ParentCat)entity, enableEdit) },
@@ -321,6 +325,17 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateKittenStatusSetSuccessMessage(Kitten kitten)
             => $"✅ Котёнок {kitten.DisplayName} успешно получил статус «{_enumMapperService.GetMapping(kitten.Status, kitten.IsMale)}»!";
+
+        public string CreateNewBookingRequestMessage(BookingRequest bookingRequest)
+            => _commonMessagesProvider.CreateNewBookingRequestMessage(bookingRequest);
+
+        public string CreateBookingProcessingMessage(BookingRequest bookingRequest, User curator)
+            => _commonMessagesProvider.CreateBookingRequestTemplateMessage(bookingRequest) +
+            $"({DateTime.UtcNow.AddHours(3):t}) Назначен куратор: {curator.FirstName} (@{curator.Username})";
+
+        public string CreateBookingCloseMessage(BookingRequest bookingRequest, User curator)
+            => _commonMessagesProvider.CreateBookingRequestTemplateMessage(bookingRequest) +
+            $"({DateTime.UtcNow.AddHours(3):t}) Заявка обработана (Куратор {curator.FirstName} (@{curator.Username}))";
 
         #endregion
 

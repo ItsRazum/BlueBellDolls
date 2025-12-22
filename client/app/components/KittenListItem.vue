@@ -1,16 +1,38 @@
 ﻿<script setup lang="ts">
 
-import {KittenStatus} from "~~/enums/enums";
+import {KittenStatus, PhotosType} from "~~/enums/enums";
+import KittenProps from "~/components/KittenProps.vue";
 
 const props = withDefaults(defineProps<{
   kitten: KittenListDto;
   variant?: 'default' | 'compact';
+  readOnly: boolean;
 }>(), {
   variant: 'default',
+  readOnly: false,
 });
 
 const config = useRuntimeConfig();
 const apiBaseUrl = config.public.apiBase;
+
+const isBookingModalOpen = ref(false);
+
+const openBookingModal = () => {
+  isBookingModalOpen.value = true;
+}
+
+const closeBookingModal = () => {
+  isBookingModalOpen.value = false;
+}
+
+const isKittenModalOpen = ref(false);
+const openKittenModal = () => {
+  isKittenModalOpen.value = true;
+}
+
+const closeKittenModal = () => {
+  isKittenModalOpen.value = false;
+}
 
 const litterPageUrl = computed(() => `/litters/${props.kitten.litterId}`)
 const kittenPageUrl = computed(() => `/kittens/${props.kitten.id}`);
@@ -51,19 +73,36 @@ const statusColor = computed(() => {
 
 const genderColor = computed(() => props.kitten.isMale ? 'var(--color-gender-male)' : 'var(--color-gender-female)');
 
-const isColorModalOpen = ref(false);
-const openColorModal = () => {
-  isColorModalOpen.value = true;
-}
-
-const closeColorModal = () => {
-  isColorModalOpen.value = false;
-}
-
 function getImageUrl(imagePath: string | null): string {
   return `${apiBaseUrl}/${imagePath}`;
 }
 
+const mainPhoto = ref<PhotoDto>({
+  id: 1,
+  url: 'photo.png',
+  type: PhotosType.Photos,
+  isMain: true
+});
+
+const photo = ref<PhotoDto>({
+  id: 2,
+  url: 'photo.png',
+  type: PhotosType.Photos,
+  isMain: false
+});
+
+const kittenDetail = ref<KittenDetailDto>({
+  id: props.kitten.id,
+  name: props.kitten.name,
+  description: props.kitten.description,
+  class: props.kitten.class,
+  status: props.kitten.status,
+  litterId: props.kitten.id,
+  litterLetter: props.kitten.id,
+  color: props.kitten.color,
+  birthDay: props.kitten.birthDay,
+  photos: [mainPhoto.value, photo.value, photo.value, photo.value, photo.value],
+});
 
 </script>
 
@@ -83,8 +122,8 @@ function getImageUrl(imagePath: string | null): string {
         <span class="description">{{ kitten.description.slice(0, 70) }}</span>
       </CardWrapper>
       <div class="buttons-container" style="justify-content: space-between;">
-        <RouterLink :to="kittenPageUrl" class="btn" style="text-decoration: none">Подробнее</RouterLink>
-        <RouterLink :to="kittenPageUrl" class="btn" style="text-decoration: none; padding: 10px 15px">Забронировать</RouterLink>
+        <RouterLink :to="kittenPageUrl" class="btn">Подробнее</RouterLink>
+        <RouterLink :to="kittenPageUrl" class="btn">Забронировать</RouterLink>
       </div>
     </div>
   </CardWrapper>
@@ -92,75 +131,36 @@ function getImageUrl(imagePath: string | null): string {
   <div v-else class="card-expanded">
     <div class="card-photo-container">
       <img class="card-expanded-photo" :src="kitten.mainPhotoUrl" :alt="kitten.name" />
-      <RouterLink :to="kittenPageUrl" class="link">Больше фото</RouterLink>
+      <button v-if="!props.readOnly" @click="openKittenModal" class="link-btn">Больше фото</button>
     </div>
-    <CardWrapper :enable-blur="true" class="card-info-container">
+    <CardWrapper :enable-blur="true" class="card-info-container" style="width: 100%;">
       <div class="card-header">
-        <h2 style="margin: 0">{{ kitten.name }}</h2>
+        <h2>{{ kitten.name }}</h2>
         <span style="font-weight: 500; color: var(--color-text-caption);">{{ kitten.birthDay }}</span>
       </div>
       <div class="card-info-body">
         <CardWrapper class="card-info-props">
-          <div class="card-property">
-            <span>Пол: </span>
-            <span :style="{ color: genderColor }">{{ genderText }}</span>
-          </div>
-          <div class="card-property">
-            <span>Окрас: </span>
-            <button class="link-btn" @click="openColorModal">{{ kitten.color }}</button>
-          </div>
-          <div class="card-property">
-            <span>Класс: </span>
-            <span style="color: var(--color-kitten-class)">{{ kitten.class }}</span>
-          </div>
-          <div class="card-property">
-            <span>Статус: </span>
-            <span :style="{ color: statusColor }">{{ status }}</span>
-          </div>
-          <span style="margin-top: 14px;"> {{ kitten.description }}</span>
+          <kitten-props :kitten="props.kitten" />
+          <span style="margin-top: 0.875rem;"> {{ kitten.description }}</span>
         </CardWrapper>
       </div>
 
-      <div class="buttons-container" style="gap: var(--padding-small)">
-        <RouterLink :to="kittenPageUrl" class="btn" style="text-decoration: none">Подробнее</RouterLink>
-        <RouterLink :to="kittenPageUrl" class="btn" style="text-decoration: none">Забронировать</RouterLink>
+      <div  v-if="!props.readOnly" class="buttons-container" style="gap: var(--padding-small)">
+        <button @click="openKittenModal">Подробнее</button>
+        <button @click="openBookingModal">Забронировать</button>
       </div>
 
     </CardWrapper>
   </div>
 
-  <BaseModal
-    :is-open="isColorModalOpen"
-    @close="closeColorModal">
-    <div>
-      <span>{{kitten.color}}</span>
-    </div>
-
-  </BaseModal>
+  <KittenModal :kitten="kittenDetail" :is-open="isKittenModalOpen" @close="closeKittenModal" />
+  <KittenBookingModal :kitten="props.kitten" :is-open="isBookingModalOpen" @close="closeBookingModal" />
 </template>
 
 <style scoped>
 
 .card-info-props {
   padding: var(--padding-large);
-}
-
-.link-btn {
-  all: unset;
-
-  color: var(--color-link);
-  text-decoration: underline;
-  font-weight: 525;
-
-  cursor: pointer;
-  font-family: var(--font-family-base);
-  font-size: 18px;
-  transition: color 0.2s;
-}
-
-.link-btn:hover {
-  color: var(--color-link-hover);
-  background-color: transparent;
 }
 
 </style>

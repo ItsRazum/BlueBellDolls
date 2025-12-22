@@ -46,7 +46,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateLitter(int id, [FromBody] UpdateLitterDto dto, CancellationToken token = default)
+        public async Task<ActionResult<LitterDetailDto>> UpdateLitter(int id, [FromBody] UpdateLitterDto dto, CancellationToken token = default)
         {
             var result = await _litterService.UpdateAsync(id, dto, token);
 
@@ -110,7 +110,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         }
 
         [HttpPut("{litterId}/mother/{parentCatId}")]
-        public async Task<IActionResult> SetMother(int litterId, int parentCatId, CancellationToken token = default)
+        public async Task<ActionResult<LitterDetailDto>> SetMother(int litterId, int parentCatId, CancellationToken token = default)
         {
             var result = await _litterService.SetMotherCatAsync(litterId, parentCatId, token);
 
@@ -118,7 +118,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         }
 
         [HttpPut("{litterId}/father/{parentCatId}")]
-        public async Task<IActionResult> SetFather(int litterId, int parentCatId, CancellationToken token = default)
+        public async Task<ActionResult<LitterDetailDto>> SetFather(int litterId, int parentCatId, CancellationToken token = default)
         {
             var result = await _litterService.SetFatherCatAsync(litterId, parentCatId, token);
 

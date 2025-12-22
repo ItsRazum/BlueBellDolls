@@ -54,5 +54,7 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
         string CreateOpenKittenStatusCallback(int kittenId);
         string CreateSetKittenClassCallback(int kittenId, KittenClass kittenClass);
         string CreateSetKittenStatusCallback(int kittenId, KittenStatus kittenStatus);
+        string CreateProcessBookingCallback(int bookingRequestId);
+        string CreateCloseBookingCallback(int bookingRequestId);
     }
 }

@@ -92,15 +92,11 @@ namespace BlueBellDolls.Bot.Services.Management
             try
             {
                 var updateDto = entity.ToUpdateDto();
-                var success = await _parentCatApiClient.UpdateAsync(entity.Id, updateDto, token);
-                if (!success)
+                var result = await _parentCatApiClient.UpdateAsync(entity.Id, updateDto, token);
+                if (result == null)
                     return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
 
-                var finalDto = await _parentCatApiClient.GetAsync(entity.Id, token);
-                if (finalDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage());
-
-                return new(true, null, finalDto.ToEFModel());
+                return new(true, null, result.ToEFModel());
             }
             catch (Exception ex)
             {
@@ -118,7 +114,7 @@ namespace BlueBellDolls.Bot.Services.Management
                 if (result != null)
                 {
                     return new(true, null, new PagedResult<ParentCat>(
-                        [.. result.Items.Select(dto => dto.ToEFModel())], // Ручной маппинг
+                        [.. result.Items.Select(dto => dto.ToEFModel())],
                         result.PageNumber,
                         result.PageSize,
                         result.TotalItems,
@@ -142,7 +138,7 @@ namespace BlueBellDolls.Bot.Services.Management
                 if (result != null)
                 {
                     return new(true, null, new PagedResult<ParentCat>(
-                        [.. result.Items.Select(dto => dto.ToEFModel())], // Ручной маппинг
+                        [.. result.Items.Select(dto => dto.ToEFModel())],
                         result.PageNumber,
                         result.PageSize,
                         result.TotalItems,
@@ -161,15 +157,11 @@ namespace BlueBellDolls.Bot.Services.Management
         {
             try
             {
-                var success = await _parentCatApiClient.UpdateColorAsync(entityId, color, token);
-                if (!success)
+                var result = await _parentCatApiClient.UpdateColorAsync(entityId, color, token);
+                if (result == null)
                     return new(false, _messagesProvider.CreateColorUpdateErrorMessage());
 
-                var finalDto = await _parentCatApiClient.GetAsync(entityId, token);
-                if (finalDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage());
-
-                return new(true, null, finalDto.ToEFModel());
+                return new(true, null, result.ToEFModel());
             }
             catch (Exception ex)
             {

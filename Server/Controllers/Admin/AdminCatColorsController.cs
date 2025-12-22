@@ -52,6 +52,16 @@ namespace BlueBellDolls.Server.Controllers.Admin
             return FromResult(result);
         }
 
+        public async Task<ActionResult<CatColorDetailDto>> UpdateCatColor(
+            int id,
+            [FromBody] UpdateCatColorDto dto,
+            CancellationToken token = default)
+        {
+            var result = await _catColorService.UpdateAsync(id, dto, token);
+
+            return FromResult(result);
+        }
+
         [HttpPost("{id}/photos/set-default")]
         public async Task<IActionResult> SetDefaultPhoto(
             [FromRoute] int id,

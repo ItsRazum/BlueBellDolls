@@ -9,7 +9,7 @@ const emit = defineEmits(['close']);
 const year = new Date().getFullYear();
 
 const lockScroll = () => {
-  if (typeof document !== 'undefined') { // Проверка для SSR (Nuxt), чтобы не упало на сервере
+  if (typeof document !== 'undefined') {
     document.body.style.overflow = 'hidden';
   }
 };
@@ -18,6 +18,26 @@ const unlockScroll = () => {
   if (typeof document !== 'undefined') {
     document.body.style.overflow = '';
   }
+};
+
+const isMouseDownOnBackdrop = ref(false);
+
+const handleMouseDown = (event: MouseEvent) => {
+  if (event.target === event.currentTarget) {
+    isMouseDownOnBackdrop.value = true;
+  } else {
+    isMouseDownOnBackdrop.value = false;
+  }
+};
+
+const handleMouseUp = (event: MouseEvent) => {
+  if (!isMouseDownOnBackdrop.value) return;
+
+  if (event.target === event.currentTarget) {
+    emit('close');
+  }
+
+  isMouseDownOnBackdrop.value = false;
 };
 
 watch(() => props.isOpen, (newValue) => {
@@ -38,23 +58,26 @@ const close = () => {
 </script>
 
 <template>
-<Teleport to="body">
-  <Transition name="modal-fade" @click="close">
-    <div v-if="isOpen" class="modal-backdrop">
-      <CardWrapper :enable-blur="true" class="modal-container">
-        <div class="modal-toolbar">
-          <button class="close-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18 6L6 18" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M6 6L18 18" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-        <slot />
-        <span class="copyright">©{{ year }} BlueBellDolls Cattery.</span>
-      </CardWrapper>
-    </div>
-  </Transition>
+  <Teleport to="body">
+    <Transition name="modal-fade"
+                class="modal-backdrop"
+                @mousedown="handleMouseDown"
+                @mouseup="handleMouseUp">
+      <div v-if="isOpen" class="modal-backdrop">
+        <CardWrapper :enable-blur="true" class="modal-container">
+          <div class="modal-toolbar">
+            <button class="close-btn" @click="close">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 6L18 18" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <slot />
+          <span class="copyright">©{{ year }} BlueBellDolls Cattery.</span>
+        </CardWrapper>
+      </div>
+    </Transition>
 </Teleport>
 </template>
 
@@ -100,6 +123,7 @@ const close = () => {
 .copyright {
   color: var(--color-text-caption);
   font-weight: 500;
+  text-align: center;
 }
 
 .modal-fade-enter-from,

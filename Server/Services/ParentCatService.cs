@@ -143,11 +143,11 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, UpdateParentCatDto parentCatDto, CancellationToken token = default)
+        public async Task<ServiceResult<ParentCatDetailDto>> UpdateAsync(int id, UpdateParentCatDto parentCatDto, CancellationToken token = default)
         {
             try
             {
-                var entity = await ApplicationDbContext.Cats.FindAsync(new object[] { id }, token);
+                var entity = await ApplicationDbContext.Cats.FindAsync([id], token);
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "Производитель не найден");
 
@@ -168,13 +168,24 @@ namespace BlueBellDolls.Server.Services
 
                 entity.ApplyUpdate(parentCatDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
-                return new(StatusCodes.Status200OK);
+                return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось обновить ParentCat {id}!", id);
                 return new(StatusCodes.Status500InternalServerError, "Не удалось обновить производителя");
             }
+        }
+
+        public async Task<ServiceResult<ParentCatDetailDto>> UpdateColorAsync(int id, string color, CancellationToken token = default)
+        {
+            var entity = await ApplicationDbContext.Set<ParentCat>().FindAsync([id], token);
+            if (entity == null)
+                return new(StatusCodes.Status404NotFound);
+
+            entity.Color = color;
+            await ApplicationDbContext.SaveChangesAsync(token);
+            return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Extensions;
+using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
@@ -110,23 +111,34 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, UpdateKittenDto kittenDto, CancellationToken token = default)
+        public async Task<ServiceResult<KittenDetailDto>> UpdateAsync(int id, UpdateKittenDto kittenDto, CancellationToken token = default)
         {
             try
             {
                 var entity = await ApplicationDbContext.Kittens.FindAsync([id], token);
                 if (entity == null)
-                    return new ServiceResult(StatusCodes.Status404NotFound, "Котёнок не найден");
+                    return new(StatusCodes.Status404NotFound, "Котёнок не найден");
 
                 entity.ApplyUpdate(kittenDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
-                return new ServiceResult(StatusCodes.Status200OK);
+                return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось обновить Kitten {id}!", id);
-                return new ServiceResult(StatusCodes.Status500InternalServerError, "Не удалось обновить котёнка");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось обновить котёнка");
             }
+        }
+
+        public async Task<ServiceResult<KittenDetailDto>> UpdateColorAsync(int id, string color, CancellationToken token = default)
+        {
+            var entity = await ApplicationDbContext.Set<Kitten>().FindAsync([id], token);
+            if (entity == null)
+                return new(StatusCodes.Status404NotFound);
+
+            entity.Color = color;
+            await ApplicationDbContext.SaveChangesAsync(token);
+            return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
         }
 
         #endregion

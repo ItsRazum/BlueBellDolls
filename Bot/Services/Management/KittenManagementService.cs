@@ -86,15 +86,11 @@ namespace BlueBellDolls.Bot.Services.Management
             try
             {
                 var updateDto = entity.ToUpdateDto();
-                var success = await _kittenApiClient.UpdateAsync(entity.Id, updateDto, token);
-                if (!success)
+                var result = await _kittenApiClient.UpdateAsync(entity.Id, updateDto, token);
+                if (result == null)
                     return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
 
-                var finalDto = await _kittenApiClient.GetAsync(entity.Id, token);
-                if (finalDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage());
-
-                return new(true, null, finalDto.ToEFModel());
+                return new(true, null, result.ToEFModel());
             }
             catch (Exception ex)
             {
@@ -131,15 +127,11 @@ namespace BlueBellDolls.Bot.Services.Management
         {
             try
             {
-                var success = await _kittenApiClient.UpdateColorAsync(entityId, color, token);
-                if (!success)
+                var result = await _kittenApiClient.UpdateColorAsync(entityId, color, token);
+                if (result == null)
                     return new(false, _messagesProvider.CreateColorUpdateErrorMessage());
 
-                var finalDto = await _kittenApiClient.GetAsync(entityId, token);
-                if (finalDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage());
-
-                return new(true, null, finalDto.ToEFModel());
+                return new(true, null, result.ToEFModel());
             }
             catch (Exception ex)
             {

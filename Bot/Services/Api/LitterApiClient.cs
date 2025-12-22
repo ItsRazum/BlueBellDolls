@@ -1,7 +1,8 @@
-﻿using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Common.Records.Dtos;
+﻿using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
-using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Common.Records.Dtos;
+using System.Net.Http.Json;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
@@ -68,48 +69,48 @@ namespace BlueBellDolls.Bot.Services.Api
             }
         }
 
-        public async Task<bool> SetMotherCatAsync(int litterId, int motherCatId, CancellationToken token = default)
+        public async Task<LitterDetailDto?> SetMotherCatAsync(int litterId, int motherCatId, CancellationToken token = default)
         {
             try
             {
                 var response = await HttpClient.PutAsync($"/api/admin/litters/{litterId}/mother/{motherCatId}", null, token);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return await response.Content.ReadFromJsonAsync<LitterDetailDto>(token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось установить маму ParentCat {parentCatId} для помёта {litterId}!", nameof(LitterApiClient), nameof(UpdateAsync), motherCatId, litterId);
-                return false;
+                return null;
             }
         }
 
-        public async Task<bool> SetFatherCatAsync(int litterId, int fatherCatId, CancellationToken token = default)
+        public async Task<LitterDetailDto?> SetFatherCatAsync(int litterId, int fatherCatId, CancellationToken token = default)
         {
             try
             {
                 var response = await HttpClient.PutAsync($"/api/admin/litters/{litterId}/father/{fatherCatId}", null, token);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return await response.Content.ReadFromJsonAsync<LitterDetailDto>(token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось установить папу ParentCat {parentCatId} для помёта {litterId}!", nameof(LitterApiClient), nameof(UpdateAsync), fatherCatId, litterId);
-                return false;
+                return null;
             }
         }
 
-        public async Task<bool> UpdateAsync(int id, UpdateLitterDto dto, CancellationToken token = default)
+        public async Task<LitterDetailDto?> UpdateAsync(int id, UpdateLitterDto dto, CancellationToken token = default)
         {
             try
             {
                 var response = await HttpClient.PutAsJsonAsync($"/api/admin/litters/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return await response.Content.ReadFromJsonAsync<LitterDetailDto>(token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить Litter {id}!", nameof(LitterApiClient), nameof(UpdateAsync), id);
-                return false;
+                return null;
             }
         }
 

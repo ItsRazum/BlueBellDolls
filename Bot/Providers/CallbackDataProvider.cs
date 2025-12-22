@@ -89,6 +89,12 @@ namespace BlueBellDolls.Bot.Providers
         public string GetSetKittenClassCallback()
             => _settings.SetKittenClass;
 
+        public string GetProcessBookingCallback()
+            => _settings.ProcessBookingRequest;
+
+        public string GetCloseBookingCallback()
+            => _settings.CloseBookingRequest;
+
         #endregion
 
         #region Create methods
@@ -177,15 +183,11 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateSetKittenStatusCallback(int kittenId, KittenStatus kittenStatus)
             => $"{_settings.SetKittenStatus}{Separator}{kittenStatus}{Separator}{kittenId}";
 
-        public string GetProcessBookingCallback()
-        {
-            throw new NotImplementedException();
-        }
+        public string CreateProcessBookingCallback(int bookingRequestId)
+            => $"{_settings.ProcessBookingRequest}{Separator}{bookingRequestId}";
 
-        public string GetCloseBookingCallback()
-        {
-            throw new NotImplementedException();
-        }
+        public string CreateCloseBookingCallback(int bookingRequestId)
+            => $"{_settings.CloseBookingRequest}{Separator}{bookingRequestId}";
 
         #endregion
     }

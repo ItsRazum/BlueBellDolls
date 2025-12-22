@@ -123,7 +123,7 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult> UpdateAsync(int id, UpdateCatColorDto catColorDto, CancellationToken token = default)
+        public async Task<ServiceResult<CatColorDetailDto>> UpdateAsync(int id, UpdateCatColorDto catColorDto, CancellationToken token = default)
         {
             try
             {
@@ -133,7 +133,7 @@ namespace BlueBellDolls.Server.Services
 
                 entity.ApplyUpdate(catColorDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
-                return new(StatusCodes.Status200OK, null);
+                return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }
             catch (Exception ex)
             {

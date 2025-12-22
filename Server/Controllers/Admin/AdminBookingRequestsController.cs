@@ -1,4 +1,5 @@
-﻿using BlueBellDolls.Server.Interfaces;
+﻿using BlueBellDolls.Common.Models;
+using BlueBellDolls.Server.Interfaces;
 using BlueBellDolls.Server.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         private readonly IBookingService _bookingService = bookingService;
 
         [HttpPost("{id}/process")]
-        public async Task<IActionResult> ProcessBookingRequest(
+        public async Task<ActionResult<BookingRequest>> ProcessBookingRequest(
             int id,
             [FromQuery] long telegramUserId,
             CancellationToken token = default)
@@ -23,7 +24,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
         }
 
         [HttpPost("{id}/close")]
-        public async Task<IActionResult> CloseBookingRequest(
+        public async Task<ActionResult<BookingRequest>> CloseBookingRequest(
             int id,
             [FromQuery] long telegramUserId,
             CancellationToken token = default)

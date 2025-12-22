@@ -82,15 +82,11 @@ namespace BlueBellDolls.Bot.Services.Management
             try
             {
                 var updateDto = entity.ToUpdateDto();
-                var success = await _catColorApiClient.UpdateAsync(entity.Id, updateDto, token);
-                if (!success)
+                var result = await _catColorApiClient.UpdateAsync(entity.Id, updateDto, token);
+                if (result == null)
                     return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
 
-                var finalDto = await _catColorApiClient.GetAsync(entity.Id, token);
-                if (finalDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage());
-
-                return new(true, null, finalDto.ToEFModel());
+                return new(true, null, result.ToEFModel());
             }
             catch (Exception ex)
             {

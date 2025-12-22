@@ -1,15 +1,15 @@
 ﻿using BlueBellDolls.Bot.Enums;
-using BlueBellDolls.Bot.Settings;
-using Microsoft.Extensions.Options;
-using Telegram.Bot.Types.ReplyMarkups;
-using BlueBellDolls.Common.Types;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces.Markers;
-using CatColor = BlueBellDolls.Common.Models.CatColor;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Interfaces.Markers;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Types;
+using Microsoft.Extensions.Options;
+using Telegram.Bot.Types.ReplyMarkups;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -183,9 +183,52 @@ namespace BlueBellDolls.Bot.Providers
             result.AddNewRow(new KeyboardButton("/litterlist"));
             result.AddNewRow(new KeyboardButton("/catlist"));
             result.AddNewRow(new KeyboardButton("/kittenlist"));
+            result.AddNewRow(new KeyboardButton("/catcolorlist"));
             result.ResizeKeyboard = true;
 
             return result;
+        }
+
+        public InlineKeyboardMarkup CreateBookingRequestTakeCuratorshipKeyboard(BookingRequest bookingRequest)
+        {
+            var result = new InlineKeyboardMarkup();
+            result.AddNewRow(
+                InlineKeyboardButton.WithCallbackData(
+                    "Взять кураторство",
+                    _callbackDataProvider.CreateProcessBookingCallback(bookingRequest.Id)
+                )
+            );
+
+            return result;
+        }
+
+        public InlineKeyboardMarkup CreateBookingRequestCloseKeyboard(BookingRequest bookingRequest)
+        {
+            var result = new InlineKeyboardMarkup();
+            result.AddNewRow(
+                InlineKeyboardButton.WithCallbackData(
+                    "Закрыть заявку",
+                    _callbackDataProvider.CreateCloseBookingCallback(bookingRequest.Id)
+                )
+            );
+            return result;
+        }
+
+        public InlineKeyboardMarkup CreateChangeKittenStatusKeyboard(int kittenId)
+        {
+            var result = new InlineKeyboardMarkup();
+            result.AddNewRow(
+                InlineKeyboardButton.WithCallbackData(
+                    "Оставить без изменений",
+                    _callbackDataProvider.CreateOpenKittenStatusCallback(kittenId)
+                )
+            );
+            result.AddNewRow(
+                InlineKeyboardButton.WithCallbackData(
+                    _enumMapperService.GetMapping(KittenStatus.Reserved),
+                    _callbackDataProvider.CreateSetKittenStatusCallback(kittenId, KittenStatus.Available)
+                )
+            );
         }
 
         #endregion

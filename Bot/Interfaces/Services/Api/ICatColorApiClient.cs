@@ -14,6 +14,6 @@ namespace BlueBellDolls.Bot.Interfaces.Services.Api
         Task<PagedResult<CatColorListDto>?> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default);
         Task<CatColorTree?> GetCatColorTreeAsync(CancellationToken token);
         Task<List<CatColorDetailDto>?> GetListAsync(CancellationToken token = default);
-        Task<bool> UpdateAsync(int id, UpdateCatColorDto dto, CancellationToken token = default);
+        Task<CatColorDetailDto?> UpdateAsync(int id, UpdateCatColorDto dto, CancellationToken token = default);
     }
 }

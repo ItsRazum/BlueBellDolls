@@ -3,6 +3,7 @@ using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
+using Telegram.Bot.Types;
 
 namespace BlueBellDolls.Bot.Interfaces.Providers
 {
@@ -46,6 +47,12 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
         MessageParameters GetKittenClassParameters(Kitten kitten);
 
         MessageParameters GetKittenStatusParameters(Kitten kitten);
+
+        MessageParameters GetNewBookingRequestParameters(BookingRequest bookingRequest);
+
+        MessageParameters GetBookingProcessingParameters(BookingRequest bookingRequest, User curator);
+
+        MessageParameters GetBookingCloseParameters(BookingRequest bookingRequest, User curator);
 
     }
 }

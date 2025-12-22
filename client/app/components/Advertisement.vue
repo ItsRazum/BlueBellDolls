@@ -32,7 +32,7 @@ defineProps<{
 
 .card-compact-photo {
   width: 100%;
-  height: 216px;
+  height: 13.5rem;
 }
 
 .adv-info-container {

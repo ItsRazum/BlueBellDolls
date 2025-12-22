@@ -65,18 +65,18 @@ namespace BlueBellDolls.Bot.Services.Api
             }
         }
 
-        public async Task<bool> UpdateAsync(int id, UpdateParentCatDto dto, CancellationToken token = default)
+        public async Task<ParentCatDetailDto?> UpdateAsync(int id, UpdateParentCatDto dto, CancellationToken token = default)
         {
             try
             {
                 var response = await _httpClient.PutAsJsonAsync($"/api/admin/parentcats/{id}", dto, token);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return await response.Content.ReadFromJsonAsync<ParentCatDetailDto>(token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить ParentCat {id}!", nameof(ParentCatApiClient), nameof(UpdateAsync), id);
-                return false;
+                return null;
             }
         }
 
@@ -131,20 +131,20 @@ namespace BlueBellDolls.Bot.Services.Api
             }
         }
 
-        public async Task<bool> UpdateColorAsync(int entityId, string color, CancellationToken token)
+        public async Task<ParentCatDetailDto?> UpdateColorAsync(int entityId, string color, CancellationToken token)
         {
             var requestUrl = $"/api/admin/parentcats/{entityId}/color";
             try
             {
                 var response = await HttpClient.PutAsJsonAsync(requestUrl, new { Color = color }, token);
                 response.EnsureSuccessStatusCode();
-                return true;
+                return await response.Content.ReadFromJsonAsync<ParentCatDetailDto>(token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить цвет для ParentCat {id}!",
                     nameof(KittenApiClient), nameof(UpdateColorAsync), entityId);
-                return false;
+                return null;
             }
         }
     }

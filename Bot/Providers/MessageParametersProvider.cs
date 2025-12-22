@@ -105,5 +105,26 @@ namespace BlueBellDolls.Bot.Providers
                 _messagesProvider.CreateKittenStatusSelectionMenuMessage(kitten),
                 _keyboardsProvider.CreateKittenStatusSelectionKeyboard(kitten));
         }
+
+        public MessageParameters GetNewBookingRequestParameters(BookingRequest bookingRequest)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateNewBookingRequestMessage(bookingRequest),
+                _keyboardsProvider.CreateBookingRequestTakeCuratorshipKeyboard(bookingRequest));
+        }
+
+        public MessageParameters GetBookingProcessingParameters(BookingRequest bookingRequest, User curator)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateBookingProcessingMessage(bookingRequest, curator),
+                _keyboardsProvider.CreateBookingRequestCloseKeyboard(bookingRequest));
+        }
+
+        public MessageParameters GetBookingCloseParameters(BookingRequest bookingRequest, User curator)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateBookingCloseMessage(bookingRequest, curator),
+                _keyboardsProvider.CreateChangeKittenStatusKeyboard(bookingRequest.KittenId));
+        }
     }
 }

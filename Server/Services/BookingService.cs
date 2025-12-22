@@ -39,7 +39,7 @@ namespace BlueBellDolls.Server.Services
             return new(StatusCodes.Status201Created, "Бронь успешно оформлена!", bookingRequest);
         }
 
-        public async Task<ServiceResult> CloseBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
+        public async Task<ServiceResult<BookingRequest>> CloseBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
         {
             var bookingRequest = await _applicationDbContext.BookingRequests.FindAsync([bookingId], token);
             if (bookingRequest == null)
@@ -54,10 +54,10 @@ namespace BlueBellDolls.Server.Services
             bookingRequest.IsProcessed = true;
             await _applicationDbContext.SaveChangesAsync(token);
 
-            return new(StatusCodes.Status200OK);
+            return new(StatusCodes.Status200OK, Value: bookingRequest);
         }
 
-        public async Task<ServiceResult> ProcessBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
+        public async Task<ServiceResult<BookingRequest>> ProcessBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
         {
             var bookingRequest = await _applicationDbContext.BookingRequests.FindAsync([bookingId], token);
             if (bookingRequest == null)
@@ -69,7 +69,7 @@ namespace BlueBellDolls.Server.Services
             bookingRequest.CuratorTelegramId = telegramUserId;
             await _applicationDbContext.SaveChangesAsync(token);
 
-            return new(StatusCodes.Status200OK);
+            return new(StatusCodes.Status200OK, Value: bookingRequest);
         }
 
         #endregion
