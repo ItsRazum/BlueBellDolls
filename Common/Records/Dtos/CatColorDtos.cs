@@ -8,7 +8,7 @@
         int Id,
         string Identifier,
         string Description,
-        bool Enabled,
+        bool IsEnabled,
         PhotoDto[] Photos);
 
     public record CreateCatColorDto(
@@ -24,5 +24,6 @@
         int Id,
         string Identifier,
         string Description,
+        bool IsEnabled,
         string? MainPhotoUrl);
 }

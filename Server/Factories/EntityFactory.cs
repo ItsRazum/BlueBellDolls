@@ -49,5 +49,17 @@ namespace BlueBellDolls.Server.Factory
                 Photos = [],
             };
         }
+
+        public CatColor CreateNewCatColor(
+            string identifier, 
+            string description = "Добавьте описание!")
+        {
+            return new CatColor
+            {
+                Identifier = identifier,
+                Description = description,
+                Photos = [],
+            };
+        }
     }
 }

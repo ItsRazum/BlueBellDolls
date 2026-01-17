@@ -30,7 +30,7 @@ namespace BlueBellDolls.Common.Services
             _botClient.StartReceiving(updateHandler, receiverOptions, cancellationToken: token);
         }
 
-        public async Task<Message[]> SendMessageAsync(Chat chat, string messageText, IReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default)
+        public async Task<Message[]> SendMessageAsync(ChatId chat, string messageText, IReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default)
         {
             if (inputFiles?.Length > 0)
             {
@@ -52,7 +52,7 @@ namespace BlueBellDolls.Common.Services
             await _botClient.AnswerCallbackQuery(callbackQueryId, text, showAlert, cancellationToken: token);
         }
 
-        public async Task<bool> EditMessageAsync(Chat chat, int messageId, string messageText, InlineKeyboardMarkup? inlineMarkup = null, InputMediaPhoto? inputMediaPhoto = null, CancellationToken token = default)
+        public async Task<bool> EditMessageAsync(ChatId chat, int messageId, string messageText, InlineKeyboardMarkup? inlineMarkup = null, InputMediaPhoto? inputMediaPhoto = null, CancellationToken token = default)
         {
             try
             {
@@ -73,7 +73,7 @@ namespace BlueBellDolls.Common.Services
             }
         }
 
-        public async Task<bool> EditInlineKeyboardAsync(Chat chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default)
+        public async Task<bool> EditInlineKeyboardAsync(ChatId chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default)
         {
             try
             {
@@ -88,7 +88,7 @@ namespace BlueBellDolls.Common.Services
         }
 
         public async Task EditOrSendNewMessageAsync(
-            Chat chat,
+            ChatId chat,
             int messageId,
             string messageText,
             InlineKeyboardMarkup? inlineMarkup = null,
@@ -112,7 +112,7 @@ namespace BlueBellDolls.Common.Services
             await SendMessageAsync(chat, messageText, inlineMarkup, hasFiles ? inputFiles : null, token);
         }
 
-        public async Task<bool> DeleteMessageAsync(Chat chat, int messageId, CancellationToken token = default)
+        public async Task<bool> DeleteMessageAsync(ChatId chat, int messageId, CancellationToken token = default)
         {
             try
             {
@@ -126,7 +126,7 @@ namespace BlueBellDolls.Common.Services
             }
         }
 
-        public async Task<bool> DeleteMessagesAsync(Chat chat, IEnumerable<int> messageIds, CancellationToken token = default)
+        public async Task<bool> DeleteMessagesAsync(ChatId chat, IEnumerable<int> messageIds, CancellationToken token = default)
         {
             try
             {

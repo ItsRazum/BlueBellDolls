@@ -13,17 +13,31 @@ using CatColor = BlueBellDolls.Common.Models.CatColor;
 
 namespace BlueBellDolls.Server.Services
 {
-    public class CatColorService(
-        IApplicationDbContext applicationDbContext,
-        IWebHostEnvironment env,
-        ILogger<CatColorService> logger,
-        IOptions<FileStorageSettings> fileStorageSettings,
-        IOptions<EntitiesSettings> entitiesSettings) 
-        : DisplayableEntityServiceBase<CatColor>(env, applicationDbContext, logger), ICatColorService
+    public class CatColorService : DisplayableEntityServiceBase<CatColor, CatColorDetailDto>, ICatColorService
     {
+
+        #region Fields
+
+        private readonly IEntityFactory _entityFactory;
         private readonly ILogger<CatColorService> _logger;
-        private readonly CatColorTree _catColorTree = entitiesSettings.Value.CatColors;
-        private readonly FileStorageSettings _fileStorageSettings = fileStorageSettings.Value;
+        private readonly CatColorTree _catColorTree;
+        private readonly string[] _catColorTreeMap;
+
+        public CatColorService(
+            IApplicationDbContext applicationDbContext,
+            IWebHostEnvironment env,
+            IEntityFactory entityFactory,
+            ILogger<CatColorService> logger,
+            IOptions<FileStorageSettings> fileStorageSettings,
+            IOptions<EntitiesSettings> entitiesSettings) : base(env, applicationDbContext, fileStorageSettings, logger)
+        {
+            _logger = logger;
+            _entityFactory = entityFactory;
+            _catColorTree = entitiesSettings.Value.CatColors;
+            _catColorTreeMap = _catColorTree.ToTreeMap();
+        }
+
+        #endregion
 
         #region Methods
 
@@ -33,10 +47,18 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
+                if (!_catColorTreeMap.Contains(dto.Identifier))
+                    return new(StatusCodes.Status400BadRequest, "Недопустимый идентификатор CatColor!");
+
                 var entity = dto.ToEFModel();
                 ApplicationDbContext.CatColors.Add(entity);
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status201Created, null, entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(CatColorService), nameof(AddAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -49,22 +71,39 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var query = ApplicationDbContext.CatColors.AsQueryable();
-                if (!admin)
-                    query = query.Where(c => c.IsEnabled);
+                var query = ApplicationDbContext.CatColors
+                    .AsNoTracking()
+                    .Where(c => admin || c.IsEnabled);
+
+                var treeMapItems = _catColorTreeMap
+                    .OrderBy(s => s)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize);
 
                 var items = await query
-                    .OrderBy(c => c.Identifier)
-                    .Skip((pageNumber - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(k => k.ToListDto())
+                    .Include(c => c.Photos)
+                    .ThenInclude(p => p.TelegramPhoto)
+                    .Where(c => treeMapItems.Contains(c.Identifier))
                     .ToListAsync(token);
 
-                var totalItems = await ApplicationDbContext.CatColors.CountAsync(token);
+                var zippedItems = treeMapItems.Select(identifier =>
+                {
+                    var entity = items.FirstOrDefault(c => c.Identifier == identifier);
+                    entity ??= _entityFactory.CreateNewCatColor(identifier);
+
+                    return entity.ToListDto();
+                }).ToList();
+
+                var totalItems = await query.CountAsync(token);
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-                var result = new PagedResult<CatColorListDto>(items, pageNumber, pageSize, totalItems, totalPages);
+                var result = new PagedResult<CatColorListDto>(zippedItems, pageNumber, pageSize, totalItems, totalPages);
                 return new(StatusCodes.Status200OK, null, result);
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(CatColorService), nameof(GetListAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -77,10 +116,7 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var result = await ApplicationDbContext.CatColors
-                    .Include(k => k.Photos)
-                    .ThenInclude(p => p.TelegramPhoto)
-                    .FirstOrDefaultAsync(k => k.Id == id, token);
+                var result = await GetDetailEntityAsync(id, token);
 
                 if (result == null)
                     return new(StatusCodes.Status404NotFound, "CatColor не найден!");
@@ -92,9 +128,54 @@ namespace BlueBellDolls.Server.Services
 
                 return new(StatusCodes.Status200OK, null, result.ToDetailDto());
             }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(CatColorService), nameof(GetAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить CatColor {id}!", id);
+                return new(StatusCodes.Status500InternalServerError, "Не удалось получить CatColor!");
+            }
+        }
+
+        public async Task<ServiceResult<CatColorDetailDto>> GetAsync(bool admin, string identifier, CancellationToken token = default)
+        {
+            try
+            {
+                var result = await ApplicationDbContext.CatColors
+                    .Where(c => admin || c.IsEnabled)
+                    .Include(c => c.Photos)
+                    .ThenInclude(p => p.TelegramPhoto)
+                    .FirstOrDefaultAsync(c => c.Identifier == identifier, token);
+
+                if (result == null)
+                {
+                    if (!_catColorTreeMap.Contains(identifier))
+                        return new(StatusCodes.Status400BadRequest, "Недопустимый идентификатор CatColor!");
+
+                    result = _entityFactory.CreateNewCatColor(identifier);
+
+                    await ApplicationDbContext.CatColors.AddAsync(result, token);
+                    await ApplicationDbContext.SaveChangesAsync(token);
+                }
+
+                if (result.IsEnabled && !admin)
+                    return new(StatusCodes.Status403Forbidden, "Доступ к CatColor запрещен!");
+
+                result.Photos = SortPhotosByDefault(result.Photos);
+
+                return new(StatusCodes.Status200OK, null, result.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(CatColorService), nameof(GetAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось получить CatColor {id}!", identifier);
                 return new(StatusCodes.Status500InternalServerError, "Не удалось получить CatColor!");
             }
         }
@@ -116,6 +197,11 @@ namespace BlueBellDolls.Server.Services
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, null);
             }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(CatColorService), nameof(DeleteAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось удалить CatColor {id}!", id);
@@ -133,7 +219,12 @@ namespace BlueBellDolls.Server.Services
 
                 entity.ApplyUpdate(catColorDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
-                return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
+                return new(StatusCodes.Status200OK, null, entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(CatColorService), nameof(UpdateAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -155,6 +246,8 @@ namespace BlueBellDolls.Server.Services
 
         #region DisplayableEntityServiceBase overrides
 
+        protected override Func<CatColor, CatColorDetailDto> ModelToDtoFunc => (model) => model.ToDetailDto();
+
         protected override bool ValidatePhotosStoragePath(string storagePath, out PhotosType photosType)
         {
             photosType = PhotosType.None;
@@ -163,11 +256,6 @@ namespace BlueBellDolls.Server.Services
 
             photosType = PhotosType.Photos;
             return true;
-        }
-
-        protected override int GetPhotosLimit(PhotosType photosType)
-        {
-            return photosType == PhotosType.Photos ? _fileStorageSettings.MaxPhotosPerCatColor : 0;
         }
 
         #endregion

@@ -30,7 +30,8 @@
         bool IsMale,
         string Color,
         string Description,
-        string? MainPhotoUrl
+        string? MainPhotoUrl,
+        bool IsEnabled
     );
 
     public record ParentCatDetailDto(
@@ -40,6 +41,7 @@
         bool IsMale,
         string Color,
         string Description,
+        bool IsEnabled,
         List<PhotoDto> Photos
     );
 }

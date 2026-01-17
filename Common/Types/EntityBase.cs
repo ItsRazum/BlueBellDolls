@@ -12,6 +12,6 @@ namespace BlueBellDolls.Common.Types
         public int Id { get; set; }
 
         [Column("created_at")]
-        public DateTime CreatedAt { get; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.Now.ToUniversalTime();
     }
 }

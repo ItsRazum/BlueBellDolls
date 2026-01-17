@@ -9,7 +9,6 @@ using BlueBellDolls.Server.Settings;
 using BlueBellDolls.Server.Types;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Net;
 
 namespace BlueBellDolls.Server.Services
 {
@@ -18,7 +17,7 @@ namespace BlueBellDolls.Server.Services
         IWebHostEnvironment env,
         ILogger<LitterService> logger,
         IOptions<FileStorageSettings> fileStorageSettings) 
-        : DisplayableEntityServiceBase<Litter>(env, applicationDbContext, logger), ILitterService
+        : DisplayableEntityServiceBase<Litter, LitterDetailDto>(env, applicationDbContext, fileStorageSettings, logger), ILitterService
     {
 
         #region Fields
@@ -30,32 +29,73 @@ namespace BlueBellDolls.Server.Services
 
         #region CRUD
 
-        public async Task<ServiceResult<PagedResult<LitterDetailDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<LitterDetailDto>>> GetDetailListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default)
         {
             try
             {
-                var query = ApplicationDbContext.Litters.AsQueryable();
-                if (!admin)
-                    query = query.Where(l => l.IsEnabled);
+                var query = ApplicationDbContext.Litters
+                    .AsNoTracking()
+                    .Where(l => admin || l.IsEnabled);
 
                 var items = await query
-                    .AsNoTracking()
+                    .Include(l => l.Kittens.Where(k => admin || k.IsEnabled))
+                    .ThenInclude(k => k.Photos)
+                    .Include(l => l.MotherCat)
+                    .Include(l => l.FatherCat)
+                    .Include(l => l.Photos)
+                    .ThenInclude(l => l.TelegramPhoto)
+                    .AsSplitQuery()
+                    .Where(l => l.Kittens.Count != 0)
                     .OrderBy(c => c.Letter)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .Select(l => l.ToDetailDto())
                     .ToListAsync(token);
 
-                var totalItems = await ApplicationDbContext.Litters.CountAsync(token);
+                var totalItems = await query.CountAsync(token);
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-                var paged = new PagedResult<LitterDetailDto>(items, pageNumber, pageSize, totalItems, totalPages);
-                return new ServiceResult<PagedResult<LitterDetailDto>>((int)HttpStatusCode.OK, null, paged);
+                return new(StatusCodes.Status200OK, null, new([.. items.Select(l => l.ToDetailDto())], pageNumber, pageSize, totalItems, totalPages));
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(GetDetailListAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу Litter!");
-                return new ServiceResult<PagedResult<LitterDetailDto>>((int)HttpStatusCode.InternalServerError, "Не удалось получить страницу Litter");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось получить страницу Litter");
+            }
+        }
+
+        public async Task<ServiceResult<PagedResult<LitterMinimalDto>>> GetMinimalListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default)
+        {
+            try
+            {
+                var query = ApplicationDbContext.Litters
+                    .Where(l => admin || l.IsEnabled);
+
+                var items = await query
+                    .OrderBy(c => c.Letter)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync(token);
+
+                var totalItems = await query.CountAsync(token);
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                return new(StatusCodes.Status200OK, null, new([.. items.Select(l => l.ToMinimalDto())], pageNumber, pageSize, totalItems, totalPages));
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(GetMinimalListAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось получить страницу Litter!");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось получить страницу Litter");
+
             }
         }
 
@@ -63,21 +103,26 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var result = await GetEntityAsync(id, token);
+                var result = await GetDetailEntityAsync(id, token);
                 if (result == null)
                     return new ServiceResult<LitterDetailDto>(StatusCodes.Status404NotFound, $"Litter с id={id} не найден");
 
-                if (!admin && !result.IsEnabled)
+                if (!admin && result.IsEnabled)
                     return new ServiceResult<LitterDetailDto>(StatusCodes.Status401Unauthorized, $"Доступ к помёту запрещён!");
 
                 result.Photos = SortPhotosByDefault(result.Photos);
 
-                return new ServiceResult<LitterDetailDto>((int)HttpStatusCode.OK, null, result.ToDetailDto());
+                return new ServiceResult<LitterDetailDto>(StatusCodes.Status200OK, null, result.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(GetAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить Litter {id}!", id);
-                return new ServiceResult<LitterDetailDto>((int)HttpStatusCode.InternalServerError, "Не удалось получить Litter");
+                return new ServiceResult<LitterDetailDto>(StatusCodes.Status500InternalServerError, "Не удалось получить Litter");
             }
         }
 
@@ -87,7 +132,7 @@ namespace BlueBellDolls.Server.Services
             {
                 var entity = await ApplicationDbContext.Litters.Include(l => l.Photos).FirstOrDefaultAsync(l => l.Id == id, token);
                 if (entity == null)
-                    return new ServiceResult((int)HttpStatusCode.NotFound, $"Litter с id={id} не найден");
+                    return new ServiceResult(StatusCodes.Status404NotFound, $"Litter с id={id} не найден");
 
                 foreach (var photo in entity.Photos)
                 {
@@ -96,12 +141,17 @@ namespace BlueBellDolls.Server.Services
 
                 ApplicationDbContext.Litters.Remove(entity);
                 await ApplicationDbContext.SaveChangesAsync(token);
-                return new ServiceResult((int)HttpStatusCode.OK, null);
+                return new ServiceResult(StatusCodes.Status200OK, null);
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(DeleteAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось удалить Litter {id}!", id);
-                return new ServiceResult((int)HttpStatusCode.InternalServerError, "Не удалось удалить Litter");
+                return new ServiceResult(StatusCodes.Status500InternalServerError, "Не удалось удалить Litter");
             }
 
         }
@@ -128,72 +178,123 @@ namespace BlueBellDolls.Server.Services
                 await ApplicationDbContext.Litters.AddAsync(entity, token);
                 await ApplicationDbContext.SaveChangesAsync(token);
 
-                return new ServiceResult<LitterDetailDto>((int)HttpStatusCode.OK, null, entity.ToDetailDto());
+                return new ServiceResult<LitterDetailDto>(StatusCodes.Status200OK, null, entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(AddAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось добавить Litter!");
-                return new ServiceResult<LitterDetailDto>((int)HttpStatusCode.InternalServerError, "Не удалось добавить Litter");
+                return new ServiceResult<LitterDetailDto>(StatusCodes.Status500InternalServerError, "Не удалось добавить Litter");
             }
         }
 
         public async Task<ServiceResult<KittenDetailDto>> AddKittenToLitter(int litterId, CreateKittenDto kittenDto, CancellationToken token = default)
         {
-            var litter = await ApplicationDbContext.Litters.Include(l => l.Kittens).FirstOrDefaultAsync(l => l.Id == litterId, token);
-            if (litter == null)
-                return new ServiceResult<KittenDetailDto>((int)HttpStatusCode.NotFound, $"Litter с id={litterId} не найден");
+            try
+            {
+                var litter = await ApplicationDbContext.Litters.Include(l => l.Kittens).FirstOrDefaultAsync(l => l.Id == litterId, token);
+                if (litter == null)
+                    return new ServiceResult<KittenDetailDto>(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
 
-            var kitten = kittenDto.ToEFModel(litter.BirthDay);
-            kitten.Photos = [];
-            litter.Kittens.Add(kitten);
+                var kitten = kittenDto.ToEFModel(litter.BirthDay);
+                kitten.Photos = [];
+                litter.Kittens.Add(kitten);
 
-            await ApplicationDbContext.SaveChangesAsync(token);
-            return new ServiceResult<KittenDetailDto>((int)HttpStatusCode.OK, null, kitten.ToDetailDto());
+                await ApplicationDbContext.SaveChangesAsync(token);
+                return new ServiceResult<KittenDetailDto>(StatusCodes.Status200OK, null, kitten.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(AddKittenToLitter));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось добавить котёнка в Litter!");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось добавить котёнка в Litter");
+            }
+
         }
 
         public async Task<ServiceResult<LitterDetailDto>> SetFatherCatAsync(int litterId, int parentCatId, CancellationToken token = default)
         {
-            var litter = await GetEntityAsync(litterId, token);
-            if (litter == null)
-                return new(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
+            try
+            {
+                var litter = await GetDetailEntityAsync(litterId, token);
+                if (litter == null)
+                    return new(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
 
-            var parentCat = await ApplicationDbContext.Cats.FindAsync([parentCatId], token);
+                var parentCat = await ApplicationDbContext.Cats.FindAsync([parentCatId], token);
 
-            if (parentCat == null || !parentCat.IsMale)
-                return new(StatusCodes.Status400BadRequest, "Неверный родительский кот");
+                if (parentCat == null || !parentCat.IsMale)
+                    return new(StatusCodes.Status400BadRequest, "Неверный родительский кот");
 
-            litter.FatherCat = parentCat;
-            await ApplicationDbContext.SaveChangesAsync(token);
-            return new (StatusCodes.Status200OK, Value: litter.ToDetailDto());
+                litter.FatherCat = parentCat;
+                await ApplicationDbContext.SaveChangesAsync(token);
+                return new(StatusCodes.Status200OK, Value: litter.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(SetFatherCatAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось установить отца в Litter!");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось установить отца в Litter");
+            }
         }
 
         public async Task<ServiceResult<LitterDetailDto>> SetMotherCatAsync(int litterId, int parentCatId, CancellationToken token = default)
         {
-            var litter = await GetEntityAsync(litterId, token);
-            if (litter == null)
-                return new(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
+            try
+            {
+                var litter = await GetDetailEntityAsync(litterId, token);
+                if (litter == null)
+                    return new(StatusCodes.Status404NotFound, $"Litter с id={litterId} не найден");
 
-            var parentCat = await ApplicationDbContext.Cats.FindAsync([parentCatId], token);
+                var parentCat = await ApplicationDbContext.Cats.FindAsync([parentCatId], token);
 
-            if (parentCat == null || parentCat.IsMale)
-                return new(StatusCodes.Status400BadRequest, "Неверный родительский кот");
+                if (parentCat == null || parentCat.IsMale)
+                    return new(StatusCodes.Status400BadRequest, "Неверный родительский кот");
 
-            litter.MotherCat = parentCat;
-            await ApplicationDbContext.SaveChangesAsync(token);
-            return new(StatusCodes.Status200OK, Value: litter.ToDetailDto());
+                litter.MotherCat = parentCat;
+                await ApplicationDbContext.SaveChangesAsync(token);
+                return new(StatusCodes.Status200OK, Value: litter.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(SetMotherCatAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось установить мать в Litter!");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось установить мать в Litter");
+            }
+
         }
 
         public async Task<ServiceResult<LitterDetailDto>> UpdateAsync(int id, UpdateLitterDto litterDto, CancellationToken token = default)
         {
             try
             {
-                var entity = await GetEntityAsync(id, token);
+                var entity = await GetDetailEntityAsync(id, token);
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, $"Litter с id={id} не найден");
 
                 entity.ApplyUpdate(litterDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(LitterService), nameof(UpdateAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -206,6 +307,8 @@ namespace BlueBellDolls.Server.Services
 
         #region DisplayableEntityServiceBase overrides
 
+        protected override Func<Litter, LitterDetailDto> ModelToDtoFunc => (model) => model.ToDetailDto();
+
         protected override bool ValidatePhotosStoragePath(string storagePath, out PhotosType photosType)
         {
             photosType = PhotosType.None;
@@ -216,22 +319,9 @@ namespace BlueBellDolls.Server.Services
             return true;
         }
 
-        protected override int GetPhotosLimit(PhotosType photosType)
+        protected override async Task<Litter?> GetDetailEntityAsync(int id, CancellationToken token = default)
         {
-            return photosType switch
-            {
-                PhotosType.Photos => _fileStorageSettings.MaxPhotosPerLitter,
-                _ => 0
-            };
-        }
-
-        #endregion
-
-        #region Private methods
-
-        private async Task<Litter?> GetEntityAsync(int id, CancellationToken token = default)
-        {
-            return await ApplicationDbContext.Litters
+            var result = await ApplicationDbContext.Set<Litter>()
                 .Include(l => l.FatherCat)
                 .Include(l => l.MotherCat)
                 .Include(l => l.Kittens)
@@ -239,6 +329,11 @@ namespace BlueBellDolls.Server.Services
                 .ThenInclude(p => p.TelegramPhoto)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(l => l.Id == id, token);
+
+            if (result != null)
+                SortPhotosByDefault(result.Photos);
+
+            return result;
         }
 
         #endregion

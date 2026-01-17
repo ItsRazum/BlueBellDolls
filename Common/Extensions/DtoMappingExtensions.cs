@@ -59,7 +59,7 @@ namespace BlueBellDolls.Common.Extensions
                 Id: entity.Id,
                 Identifier: entity.Identifier,
                 Description: entity.Description,
-                Enabled: entity.IsEnabled,
+                IsEnabled: entity.IsEnabled,
                 Photos: [.. entity.Photos.Select(p => p.ToDto())]
             );
         }
@@ -70,6 +70,7 @@ namespace BlueBellDolls.Common.Extensions
                 Id: entity.Id,
                 Identifier: entity.Identifier,
                 Description: entity.Description,
+                IsEnabled: entity.IsEnabled,
                 MainPhotoUrl: entity.Photos?
                     .Where(p => p.Type == PhotosType.Photos)
                     .OrderByDescending(p => p.IsMain)
@@ -86,7 +87,7 @@ namespace BlueBellDolls.Common.Extensions
                 Id = dto.Id,
                 Identifier = dto.Identifier,
                 Description = dto.Description,
-                IsEnabled = dto.Enabled,
+                IsEnabled = dto.IsEnabled,
                 Photos = [.. dto.Photos.Select(p => p.ToEFModel())]
             };
         }
@@ -115,7 +116,8 @@ namespace BlueBellDolls.Common.Extensions
             {
                 Id = dto.Id,
                 Identifier = dto.Identifier,
-                Description = dto.Description
+                Description = dto.Description,
+                IsEnabled = dto.IsEnabled
             };
         }
 
@@ -148,6 +150,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale: entity.IsMale,
                 Color: entity.Color,
                 Description: entity.Description,
+                IsEnabled: entity.IsEnabled,
                 Photos: [.. entity.Photos.Select(p => p.ToDto())]
             );
         }
@@ -161,6 +164,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale: entity.IsMale,
                 Color: entity.Color,
                 Description: entity.Description,
+                IsEnabled: entity.IsEnabled,
                 MainPhotoUrl: entity.Photos?
                     .Where(p => p.Type == PhotosType.Photos)
                     .OrderByDescending(p => p.IsMain)
@@ -189,7 +193,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale = dto.IsMale,
                 Description = dto.Description,
                 Color = dto.Color,
-                IsEnabled = true
+                IsEnabled = false
             };
         }
 
@@ -203,6 +207,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale = dto.IsMale,
                 Description = dto.Description,
                 Color = dto.Color,
+                IsEnabled = dto.IsEnabled,
                 Photos = [.. dto.Photos.Select(p => p.ToEFModel())]
             };
         }
@@ -255,7 +260,7 @@ namespace BlueBellDolls.Common.Extensions
                 Class: entity.Class,
                 Status: entity.Status,
                 Photos: [.. entity.Photos.Select(p => p.ToDto())],
-                Litter: entity.Litter.ToSimpleDto()
+                Litter: entity.Litter.ToMinimalDto()
             );
         }
 
@@ -275,6 +280,7 @@ namespace BlueBellDolls.Common.Extensions
                 Status: entity.Status,
                 Color: entity.Color,
                 IsMale: entity.IsMale,
+                IsEnabled: entity.IsEnabled,
                 LitterLetter: entity.Litter?.Letter ?? '?',
                 LitterId: entity.LitterId
             );
@@ -324,6 +330,7 @@ namespace BlueBellDolls.Common.Extensions
                 Color = dto.Color,
                 Status = dto.Status,
                 LitterId = dto.LitterId,
+                IsEnabled = dto.IsEnabled,
                 Description = dto.Description
             };
         }
@@ -356,7 +363,8 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale: model.IsMale,
                 Color: model.Color,
                 Class: model.Class,
-                Status: model.Status
+                Status: model.Status,
+                IsEnabled: model.IsEnabled
             );
         }
 
@@ -474,6 +482,44 @@ namespace BlueBellDolls.Common.Extensions
                 MotherCatId: model.MotherCatId,
                 FatherCatId: model.FatherCatId
             );
+        }
+
+        #endregion
+
+        #region BookingRequests
+
+        public static BookingRequestDetailDto ToDetailDto(this BookingRequest model)
+        {
+            return new BookingRequestDetailDto(
+                Id: model.Id,
+                CustomerName: model.CustomerName,
+                CustomerPhone: model.CustomerPhone,
+                IsProcessed: model.IsProcessed,
+                CuratorId: model.CuratorTelegramId,
+                KittenId: model.KittenId);
+        }
+
+        public static BookingRequest ToEFModel(this CreateBookingRequestDto dto)
+        {
+            return new BookingRequest
+            {
+                CustomerName = dto.CustomerName,
+                CustomerPhone = dto.CustomerPhone,
+                KittenId = dto.KittenId
+            };
+        }
+
+        public static BookingRequest ToEFModel(this BookingRequestDetailDto dto)
+        {
+            return new BookingRequest
+            {
+                Id = dto.Id,
+                CustomerName = dto.CustomerName,
+                CustomerPhone = dto.CustomerPhone,
+                KittenId = dto.KittenId,
+                CuratorTelegramId = dto.CuratorId,
+                IsProcessed = dto.IsProcessed,
+            };
         }
 
         #endregion

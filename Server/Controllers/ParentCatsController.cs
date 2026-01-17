@@ -7,18 +7,19 @@ namespace BlueBellDolls.Server.Controllers
 {
     [ApiController]
     [Route("/api/[controller]")]
-    public class ParentCatsController(IParentCatService parentCatService) : BlueBellDollsControllerBase
+    public class ParentCatsController(IParentCatService parentCatService, ILogger<ParentCatsController> logger) : BlueBellDollsControllerBase
     {
         private readonly IParentCatService _parentCatService = parentCatService;
+        private readonly ILogger<ParentCatsController> _logger = logger;
 
         [HttpGet]
         public async Task<ActionResult<PagedResult<ParentCatListDto>>> GetParentCats(
             [FromQuery] int page,
-            [FromQuery] int pageSize,
             [FromQuery] bool? isMale,
             CancellationToken token = default)
         {
-            var result = await _parentCatService.GetListAsync(false, page, pageSize, isMale, token);
+            _logger.LogInformation("{controller}.{method}(): Идёт обработка запроса", nameof(ParentCatsController), nameof(GetParentCats));
+            var result = await _parentCatService.GetListAsync(false, page, 5, isMale, token);
             
             return FromResult(result);
         }
@@ -28,6 +29,7 @@ namespace BlueBellDolls.Server.Controllers
             [FromRoute] int id, 
             CancellationToken token = default)
         {
+            _logger.LogInformation("{controller}.{method}(): Идёт обработка запроса для id = {id}", nameof(ParentCatsController), nameof(GetParentCat), id);
             var result = await _parentCatService.GetAsync(false, id, token);
             
             return FromResult(result);

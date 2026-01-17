@@ -1,4 +1,5 @@
 ﻿using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Providers;
 using BlueBellDolls.Common.Services;
 using BlueBellDolls.Data.Contexts;
 using BlueBellDolls.Data.Interfaces;
@@ -10,7 +11,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System.Diagnostics;
 using Telegram.Bot;
 
 internal class Program
@@ -34,6 +34,9 @@ internal class Program
     {
         // Конфигурация
         builder.Configuration.AddJsonFile("appsettings.Secret.json", optional: true, reloadOnChange: true);
+        builder.Services.Configure<TelegramNotificationSettings>(builder.Configuration.GetSection(nameof(TelegramNotificationSettings)));
+        builder.Services.Configure<EntitiesSettings>(builder.Configuration.GetSection(nameof(EntitiesSettings)));
+        builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection(nameof(FileStorageSettings)));
 
         // Контроллеры и OpenAPI
         builder.Services.AddControllers();
@@ -53,9 +56,6 @@ internal class Program
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
-        // Конфигурация
-        builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection(nameof(FileStorageSettings)));
-
         // Database
         builder.Services.AddDbContext<IApplicationDbContext, ApplicationDbContext>(options =>
         {
@@ -67,9 +67,9 @@ internal class Program
         // CORS
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowVueApp", policyBuilder =>
+            options.AddPolicy("AllowNuxtApp", policyBuilder =>
             {
-                policyBuilder.WithOrigins("http://localhost:5137")
+                policyBuilder.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
             });
@@ -99,17 +99,25 @@ internal class Program
             };
         });
 
+        //Вспомогательное
+        builder.Services.AddHttpContextAccessor();
+
         // Остальные сервисы
         builder.Services
             .AddSingleton<ITelegramBotClient, TelegramBotClient>(sp =>
             {
-                var botToken = builder.Configuration.GetSection("TelegramNotificationSettings")["BotToken"] ?? string.Empty;
+                var botToken = builder.Configuration["TelegramNotificationSettings:BotToken"] ?? string.Empty;
                 return new TelegramBotClient(botToken);
             })
+            .AddSingleton<ICommonMessageParametersProvider, CommonMessageParametersProvider>()
+            .AddSingleton<ICommonMessagesProvider, CommonMessagesProvider>()
+            .AddSingleton<ICommonKeyboardsProvider, CommonKeyboardsProvider>()
             .AddSingleton<IBotService, BotService>()
+            .AddScoped<IBookingService, BookingService>()
             .AddScoped<ILitterService, LitterService>()
             .AddScoped<IParentCatService, ParentCatService>()
-            .AddScoped<IKittenService, KittenService>();
+            .AddScoped<IKittenService, KittenService>()
+            .AddScoped<ICatColorService, CatColorService>();
     }
 
     private static void ConfigureLogging(WebApplicationBuilder builder)
@@ -125,6 +133,7 @@ internal class Program
     private static void ConfigureServer(WebApplication app)
     {
         app.UseDefaultFiles();
+        app.UseStaticFiles();
         app.MapStaticAssets();
 
         if (app.Environment.IsDevelopment())
@@ -132,8 +141,8 @@ internal class Program
             app.MapOpenApi();
         }
 
-        app.UseCors("AllowVueApp");
-        app.UseHttpsRedirection();
+        app.UseCors("AllowNuxtApp");
+        //app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapControllers();

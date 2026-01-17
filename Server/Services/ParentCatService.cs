@@ -18,14 +18,13 @@ namespace BlueBellDolls.Server.Services
         IEntityFactory entityFactory,
         ILogger<ParentCatService> logger,
         IOptions<FileStorageSettings> fileStorageSettings) 
-        : CatServiceBase<ParentCat>(env, applicationDbContext, logger), IParentCatService
+        : CatServiceBase<ParentCat, ParentCatDetailDto>(env, applicationDbContext, fileStorageSettings, logger), IParentCatService
     {
 
         #region Fields
 
         private readonly ILogger<ParentCatService> _logger = logger;
         private readonly IEntityFactory _entityFactory = entityFactory;
-        private readonly FileStorageSettings _fileStorageSettings = fileStorageSettings.Value;
 
         #endregion
 
@@ -35,50 +34,59 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var query = ApplicationDbContext.Cats.AsQueryable();
+                var query = ApplicationDbContext.Cats
+                    .AsNoTracking()
+                    .Where(c => admin || c.IsEnabled);
+
                 if (isMale.HasValue)
                     query = query.Where(c => c.IsMale == isMale.Value);
 
                 var items = await query
-                    .AsNoTracking()
+                    .Include(c => c.Photos)
+                    .ThenInclude(p => p.TelegramPhoto)
                     .OrderBy(c => c.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .Select(p => p.ToListDto())
                     .ToListAsync(token);
 
                 var totalItems = await query.CountAsync(token);
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-                var paged = new PagedResult<ParentCatListDto>(items, pageNumber, pageSize, totalItems, totalPages);
+                var paged = new PagedResult<ParentCatListDto>([.. items.Select(p => p.ToListDto())], pageNumber, pageSize, totalItems, totalPages);
                 return new ServiceResult<PagedResult<ParentCatListDto>>(StatusCodes.Status200OK, null, paged);
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(ParentCatService), nameof(GetListAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу ParentCat!");
                 return new ServiceResult<PagedResult<ParentCatListDto>>(StatusCodes.Status500InternalServerError, "Не удалось получить страницу ParentCat!");
             }
-
         }
 
         public async Task<ServiceResult<ParentCatDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default)
         {
             try
             {
-                var result = await ApplicationDbContext.Cats
-                    .AsNoTracking()
-                    .Include(p => p.Photos)
-                    .ThenInclude(p => p.TelegramPhoto)
-                    .FirstOrDefaultAsync(c => c.Id == id, token);
+                var result = await GetDetailEntityAsync(id, token);
 
                 if (result == null)
                 {
                     _logger.LogWarning("ParentCat {id} не найден.", id);
                     return new ServiceResult<ParentCatDetailDto>(StatusCodes.Status404NotFound, "Производитель не найден");
                 }
+                if (!admin && result.IsEnabled)
+                    return new(StatusCodes.Status403Forbidden, "Доступ к коту запрещён");
 
-                result.Photos = SortPhotosByDefault(result.Photos);
-                return new ServiceResult<ParentCatDetailDto>(StatusCodes.Status200OK, null, result.ToDetailDto());
+                return new(StatusCodes.Status200OK, null, result.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(ParentCatService), nameof(GetAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -91,7 +99,7 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var entity = await ApplicationDbContext.Cats.Include(c => c.Photos).FirstOrDefaultAsync(c => c.Id == id, token);
+                var entity = await GetDetailEntityAsync(id, token);
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "Производитель не найден");
 
@@ -115,6 +123,11 @@ namespace BlueBellDolls.Server.Services
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new (StatusCodes.Status200OK);
             }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(ParentCatService), nameof(DeleteAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось удалить ParentCat {id}!", id);
@@ -134,7 +147,12 @@ namespace BlueBellDolls.Server.Services
                 await ApplicationDbContext.Cats.AddAsync(entity, token);
                 await ApplicationDbContext.SaveChangesAsync(token);
 
-                return new(StatusCodes.Status200OK, null, entity.ToDetailDto());
+                return new(StatusCodes.Status201Created, null, entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(ParentCatService), nameof(AddAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -170,6 +188,11 @@ namespace BlueBellDolls.Server.Services
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(ParentCatService), nameof(UpdateAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось обновить ParentCat {id}!", id);
@@ -177,20 +200,11 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<ParentCatDetailDto>> UpdateColorAsync(int id, string color, CancellationToken token = default)
-        {
-            var entity = await ApplicationDbContext.Set<ParentCat>().FindAsync([id], token);
-            if (entity == null)
-                return new(StatusCodes.Status404NotFound);
-
-            entity.Color = color;
-            await ApplicationDbContext.SaveChangesAsync(token);
-            return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
-        }
-
         #endregion
 
         #region DisplayableEntityServiceBase overrides
+
+        protected override Func<ParentCat, ParentCatDetailDto> ModelToDtoFunc => (model) => model.ToDetailDto();
 
         protected override bool ValidatePhotosStoragePath(string storagePath, out PhotosType photosType)
         {
@@ -206,17 +220,6 @@ namespace BlueBellDolls.Server.Services
                 _ => throw new InvalidOperationException(nameof(storagePath))
             };
             return true;
-        }
-
-        protected override int GetPhotosLimit(PhotosType photosType)
-        {
-            return photosType switch
-            {
-                PhotosType.Photos => _fileStorageSettings.MaxPhotosPerParentCat,
-                PhotosType.Titles => _fileStorageSettings.MaxTitlesPerParentCat,
-                PhotosType.GenTests => _fileStorageSettings.MaxGenTestsPerParentCat,
-                _ => 0
-            };
         }
 
         #endregion

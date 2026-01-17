@@ -22,6 +22,7 @@ namespace BlueBellDolls.Common.Records.Dtos
         string Description,
         bool IsMale,
         string Color,
+        bool IsEnabled,
         KittenClass Class,
         KittenStatus Status
     );
@@ -36,7 +37,8 @@ namespace BlueBellDolls.Common.Records.Dtos
         string Color,
         bool IsMale,
         char LitterLetter,
-        int LitterId
+        int LitterId,
+        bool IsEnabled
     );
 
     public record KittenDetailDto(
@@ -50,6 +52,10 @@ namespace BlueBellDolls.Common.Records.Dtos
         KittenClass Class,
         KittenStatus Status,
         List<PhotoDto> Photos,
-        LitterSimpleDto Litter
+        LitterMinimalDto Litter
     );
+
+    public record UpdateKittenClassRequest(KittenClass Class);
+
+    public record UpdateKittenStatusRequest(KittenStatus Status);
 }

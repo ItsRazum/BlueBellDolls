@@ -21,14 +21,14 @@ namespace BlueBellDolls.Common.Interfaces
         /// </summary>
         /// <param name="inputFiles"></param>
         /// <returns></returns>
-        Task<Message[]> SendMessageAsync(Chat chat, string messageText, IReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default);
+        Task<Message[]> SendMessageAsync(ChatId chat, string messageText, IReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default);
 
         /// <summary>
         /// Формирует и отправляет сообщение из <paramref name="messageParameters"/>.
         /// </summary>
         /// <param name="messageParameters"></param>
         /// <returns></returns>
-        async Task<Message[]> SendMessageAsync(Chat chat, MessageParameters messageParameters, CancellationToken token = default)
+        async Task<Message[]> SendMessageAsync(ChatId chat, MessageParameters messageParameters, CancellationToken token = default)
             => await SendMessageAsync(chat, messageParameters.Text, messageParameters.ReplyMarkup, messageParameters.InputFiles, token);
 
         /// <summary>
@@ -40,14 +40,14 @@ namespace BlueBellDolls.Common.Interfaces
         /// Редактирует текст и клавиатуру сообщения.
         /// </summary>
         /// <returns>true, если сообщение успешно отредактировано, false, если сообщение не удалось отредактировать.</returns>
-        Task<bool> EditMessageAsync(Chat chat, int messageId, string messageText, InlineKeyboardMarkup? inlineMarkup = null, InputMediaPhoto? inputMediaPhoto = null, CancellationToken token = default);
+        Task<bool> EditMessageAsync(ChatId chat, int messageId, string messageText, InlineKeyboardMarkup? inlineMarkup = null, InputMediaPhoto? inputMediaPhoto = null, CancellationToken token = default);
 
         /// <summary>
         /// Редактирует текст и клавиатуру сообщения через данные из <paramref name="messageParameters"/>.
         /// </summary>
         /// <param name="messageParameters"></param>
         /// <returns>true, если сообщение успешно отредактировано, false, если сообщение не удалось отредактировать.</returns>
-        async Task<bool> EditMessageAsync(Chat chat, int messageId, MessageParameters messageParameters, CancellationToken token = default)
+        async Task<bool> EditMessageAsync(ChatId chat, int messageId, MessageParameters messageParameters, CancellationToken token = default)
             => await EditMessageAsync(
                 chat,
                 messageId, 
@@ -56,17 +56,17 @@ namespace BlueBellDolls.Common.Interfaces
                 messageParameters.InputFiles?.FirstOrDefault(),
                 token);
 
-        Task<bool> EditInlineKeyboardAsync(Chat chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default);
+        Task<bool> EditInlineKeyboardAsync(ChatId chat, int messageId, InlineKeyboardMarkup inlineKeyboard, CancellationToken token = default);
 
         /// <summary>
         /// Пытается отредактировать сообщение, упираясь в ограничения Telegram API. Если отредактировать сообщение не удаётся, то оно удаляется, и отправляется новое сообщение с теми-же параметрами 
         /// </summary>
-        Task EditOrSendNewMessageAsync(Chat chat, int messageId, string messageText, InlineKeyboardMarkup? inlineMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default);
+        Task EditOrSendNewMessageAsync(ChatId chat, int messageId, string messageText, InlineKeyboardMarkup? inlineMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default);
 
         /// <summary>
         /// Пытается отредактировать сообщение, упираясь в ограничения Telegram API. Если отредактировать сообщение не удаётся, то оно удаляется, и отправляется новое сообщение с теми-же параметрами 
         /// </summary>
-        async Task EditOrSendNewMessageAsync(Chat chat, int messageId, MessageParameters messageParameters, CancellationToken token = default)
+        async Task EditOrSendNewMessageAsync(ChatId chat, int messageId, MessageParameters messageParameters, CancellationToken token = default)
             => await EditOrSendNewMessageAsync(
                 chat,
                 messageId,
@@ -79,12 +79,12 @@ namespace BlueBellDolls.Common.Interfaces
         /// Удаляет сообщение.
         /// </summary>
         /// <returns>true, если сообщение успешно удалилось, false, если сообщение не удалилось.</returns>
-        Task<bool> DeleteMessageAsync(Chat chat, int messageId, CancellationToken token = default);
+        Task<bool> DeleteMessageAsync(ChatId chat, int messageId, CancellationToken token = default);
 
         /// <summary>
         /// Удаляет несколько сообщений одновременно.
         /// </summary>
-        Task<bool> DeleteMessagesAsync(Chat chat, IEnumerable<int> messageIds, CancellationToken token = default);
+        Task<bool> DeleteMessagesAsync(ChatId chat, IEnumerable<int> messageIds, CancellationToken token = default);
 
         /// <summary>
         /// Получает информацию о файле, хранящемся на сервере Telegram, по его fileId

@@ -18,13 +18,12 @@ namespace BlueBellDolls.Server.Services
         IWebHostEnvironment env,
         ILogger<KittenService> logger,
         IOptions<FileStorageSettings> fileStorageSettings) 
-        : CatServiceBase<Kitten>(env, applicationDbContext, logger), IKittenService
+        : CatServiceBase<Kitten, KittenDetailDto>(env, applicationDbContext, fileStorageSettings, logger), IKittenService
     {
 
         #region Fields
 
         private readonly ILogger<KittenService> _logger = logger;
-        private readonly FileStorageSettings _fileStorageSettings = fileStorageSettings.Value;
 
         #endregion
 
@@ -34,28 +33,58 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var query = ApplicationDbContext.Kittens.AsQueryable();
-                if (!admin)
-                    query = query.Where(k => k.IsEnabled);
+                var query = ApplicationDbContext.Kittens
+                    .AsNoTracking()
+                    .Where(k => admin || k.IsEnabled);
 
                 var items = await query
-                    .AsNoTracking()
+                    .Include(p => p.Photos)
                     .OrderBy(c => c.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
-                    .Select(k => k.ToListDto())
                     .ToListAsync(token);
 
-                var totalItems = await ApplicationDbContext.Kittens.CountAsync(token);
+                var totalItems = await query.CountAsync(token);
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-                var result = new PagedResult<KittenListDto>(items, pageNumber, pageSize, totalItems, totalPages);
-                return new ServiceResult<PagedResult<KittenListDto>>(StatusCodes.Status200OK, null, result);
+                var result = new PagedResult<KittenListDto>([.. items.Select(k => k.ToListDto())], pageNumber, pageSize, totalItems, totalPages);
+                return new(StatusCodes.Status200OK, null, result);
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(GetListAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу Kitten!");
-                return new ServiceResult<PagedResult<KittenListDto>>(StatusCodes.Status500InternalServerError, "Не удалось получить список котят");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось получить список котят");
+            }
+        }
+
+        public async Task<ServiceResult<KittenListDto[]>> GetFreeKittensAsync(CancellationToken token = default)
+        {
+            try
+            {
+                var items = await ApplicationDbContext.Kittens
+                    .AsNoTracking()
+                    .Include(k => k.Litter)
+                    .Include(p => p.Photos)
+                    .Where(k => k.IsEnabled && k.Status == KittenStatus.Available)
+                    .Take(25)
+                    .ToListAsync(token);
+
+                return new(StatusCodes.Status200OK, null, [.. items.Select(k => k.ToListDto())]);
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(GetFreeKittensAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось получить список доступных котят!");
+                return new(StatusCodes.Status500InternalServerError, "Не удалось получить список доступных котят");
             }
         }
 
@@ -63,22 +92,22 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var result = await ApplicationDbContext.Kittens
-                    .AsNoTracking()
-                    .Include(k => k.Litter)
-                    .Include(k => k.Photos)
-                    .ThenInclude(p => p.TelegramPhoto)
-                    .FirstOrDefaultAsync(k => k.Id == id, token);
+                var result = await GetDetailEntityAsync(id, token);
 
                 if (result == null)
                     return new ServiceResult<KittenDetailDto>(StatusCodes.Status404NotFound, "Котёнок не найден");
 
-                if (!admin && !result.IsEnabled)
+                if (!admin && result.IsEnabled)
                     return new ServiceResult<KittenDetailDto>(StatusCodes.Status401Unauthorized, "Доступ к котёнку запрещён!");
 
                 result.Photos = SortPhotosByDefault(result.Photos);
 
                 return new ServiceResult<KittenDetailDto>(StatusCodes.Status200OK, null, result.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(GetAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -91,7 +120,11 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var entity = await ApplicationDbContext.Kittens.Include(k => k.Photos).FirstOrDefaultAsync(k => k.Id == id, token);
+                var entity = await ApplicationDbContext.Kittens
+                    .Include(k => k.Photos)
+                    .ThenInclude(p => p.TelegramPhoto)
+                    .FirstOrDefaultAsync(k => k.Id == id, token);
+
                 if (entity == null)
                     return new ServiceResult(StatusCodes.Status404NotFound, "Котёнок не найден");
 
@@ -104,6 +137,11 @@ namespace BlueBellDolls.Server.Services
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new ServiceResult(StatusCodes.Status200OK);
             }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(DeleteAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось удалить Kitten {id}!", id);
@@ -115,13 +153,19 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var entity = await ApplicationDbContext.Kittens.FindAsync([id], token);
+                var entity = await GetDetailEntityAsync(id, token);
+
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "Котёнок не найден");
 
                 entity.ApplyUpdate(kittenDto);
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(UpdateAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
             {
@@ -130,20 +174,64 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<KittenDetailDto>> UpdateColorAsync(int id, string color, CancellationToken token = default)
+        public async Task<ServiceResult<KittenDetailDto>> UpdateKittenClassAsync(int id, UpdateKittenClassRequest request, CancellationToken token = default)
         {
-            var entity = await ApplicationDbContext.Set<Kitten>().FindAsync([id], token);
-            if (entity == null)
-                return new(StatusCodes.Status404NotFound);
+            try
+            {
+                var entity = await GetDetailEntityAsync(id, token);
 
-            entity.Color = color;
-            await ApplicationDbContext.SaveChangesAsync(token);
-            return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
+                if (entity == null)
+                    return new(StatusCodes.Status404NotFound);
+
+                entity.Class = request.Class;
+                await ApplicationDbContext.SaveChangesAsync(token);
+                return new(StatusCodes.Status200OK, null, entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(UpdateKittenClassAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось установить класс Kitten {id}!", id);
+                return new(StatusCodes.Status500InternalServerError, "Не удалось установить класс для котёнка");
+            }
+
+        }
+
+        public async Task<ServiceResult<KittenDetailDto>> UpdateKittenStatusAsync(int id, UpdateKittenStatusRequest request, CancellationToken token = default)
+        {
+            try
+            {
+                var entity = await GetDetailEntityAsync(id, token);
+
+                if (entity == null)
+                    return new(StatusCodes.Status404NotFound);
+
+                entity.Status = request.Status;
+                await ApplicationDbContext.SaveChangesAsync(token);
+                return new(StatusCodes.Status200OK, null, entity.ToDetailDto());
+            }
+            catch (TaskCanceledException)
+            {
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(UpdateKittenStatusAsync));
+                return new(StatusCodes.Status403Forbidden, "Операция отменена");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось установить статус Kitten {id}!", id);
+                return new(StatusCodes.Status500InternalServerError, "Не удалось установить статус для котёнка");
+
+            }
+
         }
 
         #endregion
 
         #region DisplayableEntityServiceBase overrides
+
+        protected override Func<Kitten, KittenDetailDto> ModelToDtoFunc => (model) => model.ToDetailDto();
 
         protected override bool ValidatePhotosStoragePath(string storagePath, out PhotosType photosType)
         {
@@ -155,13 +243,19 @@ namespace BlueBellDolls.Server.Services
             return true;
         }
 
-        protected override int GetPhotosLimit(PhotosType photosType)
+        protected override async Task<Kitten?> GetDetailEntityAsync(int id, CancellationToken token = default)
         {
-            return photosType switch
-            {
-                PhotosType.Photos => _fileStorageSettings.MaxPhotosPerKitten,
-                _ => 0
-            };
+            var result = await ApplicationDbContext.Set<Kitten>()
+                    .Include(k => k.Litter)
+                    .Include(k => k.Photos)
+                    .ThenInclude(p => p.TelegramPhoto)
+                    .AsSplitQuery()
+                    .FirstOrDefaultAsync(k => k.Id == id, token);
+
+            if (result != null)
+                SortPhotosByDefault(result.Photos);
+
+            return result;
         }
 
         #endregion

@@ -18,7 +18,7 @@ namespace BlueBellDolls.Common.Models
         public Kitten Kitten { get; set; }
 
         [Column("curator_telegram_id")]
-        public long? CuratorTelegramId { get; set; }
+        public long CuratorTelegramId { get; set; }
 
         [Column("is_processed")]
         public bool IsProcessed { get; set; }
