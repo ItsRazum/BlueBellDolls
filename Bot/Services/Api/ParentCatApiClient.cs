@@ -6,7 +6,7 @@ using BlueBellDolls.Bot.Interfaces.Services.Api;
 namespace BlueBellDolls.Bot.Services.Api
 {
     public class ParentCatApiClient(IHttpClientFactory httpClientFactory, ILogger<ParentCatApiClient> logger) 
-        : DisplayableEntityApiClientBase<ParentCat>(httpClientFactory, logger), IParentCatApiClient
+        : DisplayableEntityApiClientBase<ParentCat, ParentCatDetailDto>(httpClientFactory, logger), IParentCatApiClient
     {
         private readonly HttpClient _httpClient = httpClientFactory.CreateClient(Constants.BlueBellDollsHttpClientName);
         private readonly ILogger<ParentCatApiClient> _logger = logger;
@@ -33,19 +33,6 @@ namespace BlueBellDolls.Bot.Services.Api
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь списот ParentCat с сервера! (isMale={isMale})", nameof(ParentCatApiClient), nameof(GetListAsync), isMale);
-                return null;
-            }
-        }
-
-        public async Task<ParentCatDetailDto?> GetAsync(int id, CancellationToken token = default)
-        {
-            try
-            {
-                return await _httpClient.GetFromJsonAsync<ParentCatDetailDto>($"/api/admin/parentcats/{id}", cancellationToken: token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь ParentCat {id} с сервера!", nameof(ParentCatApiClient), nameof(GetAsync), id);
                 return null;
             }
         }
@@ -80,27 +67,12 @@ namespace BlueBellDolls.Bot.Services.Api
             }
         }
 
-        public async Task<bool> DeleteAsync(int id, CancellationToken token = default)
-        {
-            try
-            {
-                var response = await _httpClient.DeleteAsync($"/api/admin/parentcats/{id}", token);
-                response.EnsureSuccessStatusCode();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{service}.{method}(): Не удалось удалить ParentCat {id}!", nameof(ParentCatApiClient), nameof(DeleteAsync), id);
-                return false;
-            }
-        }
-
-        public async Task<FileUploadResult[]?> UploadTitlesAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default)
+        public async Task<EntityFilesUploadResult<ParentCatDetailDto>?> UploadTitlesAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default)
         {
             return await UploadFilesAsync($"/api/admin/parentcats/{id}/titles", photos, token);
         }
 
-        public async Task<FileUploadResult[]?> UploadGenTestsAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default)
+        public async Task<EntityFilesUploadResult<ParentCatDetailDto>?> UploadGenTestsAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default)
         {
             return await UploadFilesAsync($"/api/admin/parentcats/{id}/gentests", photos, token);
         }

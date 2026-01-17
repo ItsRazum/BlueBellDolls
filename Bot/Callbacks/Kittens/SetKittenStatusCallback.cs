@@ -39,34 +39,23 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var kittenId = int.Parse(args.Last());
 
-            var kittenManagementService = _managementServicesFactory.GetEntityManagementService<Kitten>();
-            var kitten = await kittenManagementService.GetEntityAsync(kittenId, token);
-
-            if (kitten == null)
-            {
-                await BotService.AnswerCallbackQueryAsync(
-                    c.CallbackId,
-                    _messagesProvider.CreateApiGetEntityFailureMessage(),
-                    token: token);
-                return;
-            }
+            var kittenManagementService = _managementServicesFactory.GetKittenManagementService();
 
             if (Enum.TryParse<KittenStatus>(args[1], out var kittenStatus))
             {
-                kitten.Status = kittenStatus;
-                var result = await kittenManagementService.UpdateEntityAsync(kitten, token);
+                var result = await kittenManagementService.UpdateStatusAsync(kittenId, kittenStatus, token);
 
                 if (result.Success)
                 {
                     await BotService.AnswerCallbackQueryAsync(
                         c.CallbackId,
-                        _messagesProvider.CreateKittenStatusSetSuccessMessage(kitten),
+                        _messagesProvider.CreateKittenStatusSetSuccessMessage(result.Result!),
                         token: token);
 
                     await BotService.EditOrSendNewMessageAsync(
                         c.Chat,
                         c.MessageId,
-                        _messageParametersProvider.GetEntityFormParameters(kitten),
+                        _messageParametersProvider.GetEntityFormParameters(result.Result!),
                         token: token);
                 }
                 else

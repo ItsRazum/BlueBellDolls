@@ -46,23 +46,21 @@ namespace BlueBellDolls.Bot.Providers
             string callback,
             int[] selectedPhotoIds,
             int[] sendedPhotoMessageIds,
-            string onDeletionCanceledCallback,
-            params string[] callbacksAfterDeletion)
+            string onDeletionCanceledCallback)
         {
             return new MessageParameters(
                 _messagesProvider.CreateDeletePhotosConfirmationMessage(entity, selectedPhotoIds, sendedPhotoMessageIds),
-                _keyboardsProvider.CreateYesNoKeyboard(callback, entity, onDeletionCanceledCallback, callbacksAfterDeletion));
+                _keyboardsProvider.CreateYesNoKeyboard(callback, entity, onDeletionCanceledCallback));
         }
 
         public MessageParameters GetDeleteEntityConfirmationParameters(
             IDisplayableEntity entity,
             string callback,
-            string onDeletionCanceledCallback,
-            params string[] callbacksAfterDeletion)
+            string onDeletionCanceledCallback)
         {
             return new MessageParameters(
                 _messagesProvider.CreateDeleteConfirmationMessage(entity),
-                _keyboardsProvider.CreateYesNoKeyboard(callback, entity, onDeletionCanceledCallback, callbacksAfterDeletion));
+                _keyboardsProvider.CreateYesNoKeyboard(callback, entity, onDeletionCanceledCallback));
         }
 
         public MessageParameters GetEntityListParameters<TEntity>(
@@ -120,11 +118,11 @@ namespace BlueBellDolls.Bot.Providers
                 _keyboardsProvider.CreateBookingRequestCloseKeyboard(bookingRequest));
         }
 
-        public MessageParameters GetBookingCloseParameters(BookingRequest bookingRequest, User curator)
+        public MessageParameters GetBookingClosedParameters(string previousMessageText, int kittenId)
         {
             return new MessageParameters(
-                _messagesProvider.CreateBookingCloseMessage(bookingRequest, curator),
-                _keyboardsProvider.CreateChangeKittenStatusKeyboard(bookingRequest.KittenId));
+                previousMessageText + _messagesProvider.CreateBookingClosedMessage(),
+                _keyboardsProvider.CreateBookingChangeKittenStatusKeyboard(kittenId));
         }
     }
 }

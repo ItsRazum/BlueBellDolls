@@ -1,15 +1,16 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Enums;
+using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Text;
-using BlueBellDolls.Common.Types;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Bot.Interfaces.Services;
 using Telegram.Bot.Types;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -19,30 +20,31 @@ namespace BlueBellDolls.Bot.Providers
         #region Fields
 
         private readonly EntityFormSettings _entityFormSettings;
-        private readonly EntitySettings _entitySettings;
         private readonly Dictionary<Type, Func<IEntity, bool, string>> _entityFormMessages;
         private readonly IEnumMapperService _enumMapperService;
         private readonly ICommonMessagesProvider _commonMessagesProvider;
+        private readonly IPhotosLimitsService _photosLimitsService;
 
         #endregion
 
         #region Constructor
 
         public MessagesProvider(
-            IOptions<EntityFormSettings> entityFormSettings, 
-            IOptions<EntitySettings> entityOptions,
+            IOptions<EntityFormSettings> entityFormSettings,
             IEnumMapperService enumMapperService,
-            ICommonMessagesProvider commonMessagesProvider)
+            ICommonMessagesProvider commonMessagesProvider,
+            IPhotosLimitsService photosLimitsService)
         {
             _entityFormSettings = entityFormSettings.Value;
-            _entitySettings = entityOptions.Value;
             _enumMapperService = enumMapperService;
             _commonMessagesProvider = commonMessagesProvider;
+            _photosLimitsService = photosLimitsService;
             _entityFormMessages = new()
             {
                 { typeof(ParentCat), (entity, enableEdit) => CreateParentCatFormMessage((ParentCat)entity, enableEdit) },
                 { typeof(Litter),    (entity, enableEdit) => CreateLitterFormMessage((Litter)entity, enableEdit) },
-                { typeof(Kitten),    (entity, enableEdit) => CreateKittenFormMessage((Kitten)entity, enableEdit) }
+                { typeof(Kitten),    (entity, enableEdit) => CreateKittenFormMessage((Kitten)entity, enableEdit) },
+                { typeof(CatColor),  (entity, enableEdit) => CreateCatColorFormMessage((CatColor)entity, enableEdit) }
             };
         }
 
@@ -86,25 +88,26 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateEntityFormMessage(IEntity entity, bool enableEdit = true)
             => _entityFormMessages[entity.GetType()](entity, enableEdit);
 
-        public string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosType photosManagementMode)
+        public string CreateEntityPhotosGuideMessage<TEntity>(TEntity entity, PhotosType photosType) where TEntity : class, IDisplayableEntity
         {
-            var result = photosManagementMode switch
+            var counter = $"{entity.Photos.Count(p => p.Type == photosType)}/{_photosLimitsService.GetLimit<TEntity>(photosType)}";
+            var result = photosType switch
             {
                 PhotosType.Photos =>
                     $"📷 {entity.DisplayName}\n" +
-                    $"├ Количество: {entity.Photos.Where(p => p.Type == PhotosType.Photos).Count()}/{_entitySettings.MaxPhotos[entity.GetType().Name]}\n" +
+                    $"├ Количество: {counter}\n" +
                     "└ Используйте номера для управления фото\n" +
                     "   ▪ Выберите одно как заглавное\n" +
                     "   ▪ Удалите ненужные",
 
                 PhotosType.Titles =>
                     "🏆 Управление титулами:\n" +
-                    $"├ Текущее количество: {((ParentCat)entity).Photos.Where(p => p.Type == PhotosType.Titles).Count()}/{_entitySettings.MaxParentCatTitlesCount}\n" +
+                    $"├ Текущее количество: {counter}\n" +
                     "└ Укажите номера для удаления",
 
                 PhotosType.GenTests =>
                     "🧬 Генетические тесты:\n" +
-                    $"├ Загружено: {((ParentCat)entity).Photos.Where(p => p.Type == PhotosType.GenTests).Count()}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
+                    $"├ Загружено: {counter}\n" +
                     "└ Укажите номера для удаления",
 
                 _ => "❌ Произошла ошибка"
@@ -115,14 +118,14 @@ namespace BlueBellDolls.Bot.Providers
         public string CreatePhotosLoadingMessage()
             => "⏳ Загрузка...";
 
-        public string CreatePhotosLimitReachedMessage(IDisplayableEntity entity)
-            => $"🚫 Максимум фотографий: {_entitySettings.MaxPhotos[entity.GetType().Name]}";
+        public string CreatePhotosLimitReachedMessage<TEntity>() where TEntity : class, IDisplayableEntity
+            => $"🚫 Максимум фотографий: {_photosLimitsService.GetLimit<TEntity>(PhotosType.Photos)}";
 
-        public string CreateTitlesLimitReachedMessage()
-            => $"🚫 Максимум титулов: {_entitySettings.MaxParentCatTitlesCount}";
+        public string CreateTitlesLimitReachedMessage<TEntity>() where TEntity : class, IDisplayableEntity
+            => $"🚫 Максимум титулов: {_photosLimitsService.GetLimit<TEntity>(PhotosType.Titles)}";
 
-        public string CreateGeneticTestsLimitReachedMessage()
-            => $"🚫 Максимум тестов: {_entitySettings.MaxParentCatGeneticTestsCount}";
+        public string CreateGeneticTestsLimitReachedMessage<TEntity>() where TEntity : class, IDisplayableEntity
+            => $"🚫 Максимум тестов: {_photosLimitsService.GetLimit<TEntity>(PhotosType.GenTests)}";
 
         public string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] photoMessageIds)
         {
@@ -331,11 +334,16 @@ namespace BlueBellDolls.Bot.Providers
 
         public string CreateBookingProcessingMessage(BookingRequest bookingRequest, User curator)
             => _commonMessagesProvider.CreateBookingRequestTemplateMessage(bookingRequest) +
-            $"({DateTime.UtcNow.AddHours(3):t}) Назначен куратор: {curator.FirstName} (@{curator.Username})";
+            $"\n({DateTime.UtcNow.AddHours(3):t}) Назначен куратор: {curator.FirstName} (@{curator.Username})";
 
-        public string CreateBookingCloseMessage(BookingRequest bookingRequest, User curator)
-            => _commonMessagesProvider.CreateBookingRequestTemplateMessage(bookingRequest) +
-            $"({DateTime.UtcNow.AddHours(3):t}) Заявка обработана (Куратор {curator.FirstName} (@{curator.Username}))";
+        public string CreateBookingClosedMessage()
+            => $"\n({DateTime.UtcNow.AddHours(3):t}) Заявка закрыта. Поменяйте статус котёнка, если требуется";
+
+        public string CreateBookingKittenStatusChangedMessage(KittenStatus kittenStatus)
+            => $"\n({DateTime.UtcNow.AddHours(3):t}) Установлен статус котёнка «{_enumMapperService.GetMapping(kittenStatus)}»";
+
+        public string CreateBookingClosedWithoutKittenStatusChange()
+            => $"({DateTime.UtcNow.AddHours(3):t}) Заявка закрыта.";
 
         #endregion
 
@@ -350,9 +358,9 @@ namespace BlueBellDolls.Bot.Providers
                 $"♂♀ {_entityFormSettings.ParentCatProperties[nameof(parentCat.IsMale)]}: {(parentCat.IsMale ? "мужской" : "женский")}\n" +
                 $"🎨 Окрас: {parentCat.Color}\n" +
                 "\n" +
-                $"📸 Фото: {parentCat.Photos.Where(p => p.Type == PhotosType.Photos).Count()}/{_entitySettings.MaxPhotos[nameof(ParentCat)]}\n" +
-                $"🏆 Титулы: {parentCat.Photos.Where(p => p.Type == PhotosType.Titles).Count()}/{_entitySettings.MaxParentCatTitlesCount}\n" +
-                $"🧬 Тесты: {parentCat.Photos.Where(p => p.Type == PhotosType.GenTests).Count()}/{_entitySettings.MaxParentCatGeneticTestsCount}\n" +
+                $"📸 Фото: {parentCat.Photos.Where(p => p.Type == PhotosType.Photos).Count()}/{_photosLimitsService.GetLimit<ParentCat>(PhotosType.Photos)}\n" +
+                $"🏆 Титулы: {parentCat.Photos.Where(p => p.Type == PhotosType.Titles).Count()}/{_photosLimitsService.GetLimit<ParentCat>(PhotosType.Titles)}\n" +
+                $"🧬 Тесты: {parentCat.Photos.Where(p => p.Type == PhotosType.GenTests).Count()}/{_photosLimitsService.GetLimit<ParentCat>(PhotosType.GenTests)}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Description)]}:\n{parentCat.Description}\n" +
                 "══════════════════════════";
@@ -369,7 +377,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"├ Мама: {litter.MotherCat?.Name ?? "—"}\n" +
                 $"└ Папа: {litter.FatherCat?.Name ?? "—"}\n" +
                 "\n" +
-                $"📸 Фото: {litter.Photos.Count}/{_entitySettings.MaxPhotos[nameof(Litter)]}\n" +
+                $"📸 Фото: {litter.Photos.Count}/{_photosLimitsService.GetLimit<Litter>(PhotosType.Photos)}\n" +
                 $"🐱 Котят: {litter.Kittens.Count}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.LitterProperties[nameof(litter.Description)]}:\n{litter.Description}\n" +
@@ -385,12 +393,22 @@ namespace BlueBellDolls.Bot.Providers
                 $"♂♀ {_entityFormSettings.KittenProperties[nameof(kitten.IsMale)]}: {(kitten.IsMale ? "мужской" : "женский")}\n" +
                 $"🎨 Окрас: {kitten.Color}\n" +
                 "\n" +
-                $"🏅 Класс: {kitten.Class}\n" +
-                $"📌 Статус: {_enumMapperService.GetMapping(kitten.Status)}\n" +
+                $"🏅 {_entityFormSettings.KittenProperties[nameof(kitten.Class)]}: {kitten.Class}\n" +
+                $"📌 {_entityFormSettings.KittenProperties[nameof(kitten.Status)]}: {_enumMapperService.GetMapping(kitten.Status, kitten.IsMale)}\n" +
                 "\n" +
                 $"📝 {_entityFormSettings.KittenProperties[nameof(kitten.Description)]}:\n{kitten.Description}\n" +
-                $"📸 Фото: {kitten.Photos.Count}/{_entitySettings.MaxPhotos[nameof(Kitten)]}\n" +
+                $"📸 Фото: {kitten.Photos.Count}/{_photosLimitsService.GetLimit<Kitten>(PhotosType.Photos)}\n" +
                 "══════════════════════════";
+        }
+
+        private string CreateCatColorFormMessage(CatColor color, bool enableEdit) 
+        {
+            return
+                (enableEdit ? $"{nameof(CatColor)} {color.Id}\n\n" : "") +
+                $"🎨 Идентификатор: {color.Identifier}\n" +
+                $"\n" +
+                $"📝 {_entityFormSettings.CatColorProperties[nameof(color.Description)]}: {color.Description}\n" +
+                $"📸 Фото: {color.Photos.Count}/{_photosLimitsService.GetLimit<CatColor>(PhotosType.Photos)}\n";
         }
 
         #endregion

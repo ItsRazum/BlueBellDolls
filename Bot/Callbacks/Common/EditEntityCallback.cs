@@ -33,7 +33,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<Litter>(), HandleCommandAsync<Litter>);
             AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<Kitten>(), HandleCommandAsync<Kitten>);
-            AddCommandHandler(CallbackDataProvider.GetEditEntityCallback<CatColor>(), HandleCommandAsync<CatColor>);
+            //CatColor имеет свой обработчик, см. Callbacks/CatColors/EditCatColorCallback.cs
         }
 
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity

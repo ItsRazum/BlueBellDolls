@@ -47,7 +47,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var entityId = int.Parse(args.Last());
             var photoId = int.Parse(args[1]);
             var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
-            var result = await managementService.SetDefaultPhotoAsync(entityId, photoId, token);
+            var result = await managementService.SetDefaultPhotoToEntityAsync(entityId, photoId, token);
 
             if (result.Success)
             {

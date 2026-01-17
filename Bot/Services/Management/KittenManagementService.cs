@@ -1,57 +1,40 @@
-﻿using BlueBellDolls.Bot.Records;
-using BlueBellDolls.Bot.Types;
+﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Extensions;
-using BlueBellDolls.Common.Records.Dtos;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Extensions;
-using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Management.Base;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Records;
+using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Extensions;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Records.Dtos;
 
 namespace BlueBellDolls.Bot.Services.Management
 {
     public class KittenManagementService(
         IKittenApiClient kittenApiClient,
         IEntityFormService entityFormService,
-        IPhotosDownloaderService photosDownloaderService, 
+        IPhotosDownloaderService photosDownloaderService,
         IMessagesProvider messagesProvider,
-        ILogger<KittenManagementService> logger) 
-        : DisplayableEntityManagementServiceBase<Kitten>(
-            kittenApiClient, 
-            messagesProvider, 
-            photosDownloaderService, 
-            logger), ICatManagementService<Kitten>
+        ILogger<KittenManagementService> logger)
+        : DisplayableEntityManagementServiceBase<Kitten, KittenDetailDto>(
+            kittenApiClient,
+            messagesProvider,
+            photosDownloaderService,
+            logger), IKittenManagementService
     {
         private readonly IKittenApiClient _kittenApiClient = kittenApiClient;
         private readonly IEntityFormService _entityFormService = entityFormService;
         private readonly IMessagesProvider _messagesProvider = messagesProvider;
         private readonly ILogger<KittenManagementService> _logger = logger;
 
-        public override async Task<Kitten?> GetEntityAsync(int entityId, CancellationToken token = default)
-        {
-            var dto = await _kittenApiClient.GetAsync(entityId, token);
-            return dto?.ToEFModel();
-        }
+        protected override Func<KittenDetailDto?, Kitten?> DtoToEntityFunc => (dto) => dto?.ToEFModel();
 
         public override Task<ManagementOperationResult<Kitten>> AddNewEntityAsync(CancellationToken token = default)
         {
             return Task.FromResult(new ManagementOperationResult<Kitten>(false, _messagesProvider.CreateKittenRequiresLitterMessage()));
-        }
-
-        public override async Task<ManagementOperationResult> DeleteEntityAsync(int entityId, CancellationToken token)
-        {
-            try
-            {
-                var success = await _kittenApiClient.DeleteAsync(entityId, token);
-                if (success)
-                    return new(true);
-
-                return new(false, _messagesProvider.CreateEntityDeletionError());
-            }
-            catch (Exception ex)
-            {
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
         }
 
         public override async Task<ManagementOperationResult<Kitten>> UpdateEntityByReplyAsync(
@@ -130,6 +113,38 @@ namespace BlueBellDolls.Bot.Services.Management
                 var result = await _kittenApiClient.UpdateColorAsync(entityId, color, token);
                 if (result == null)
                     return new(false, _messagesProvider.CreateColorUpdateErrorMessage());
+
+                return new(true, null, result.ToEFModel());
+            }
+            catch (Exception ex)
+            {
+                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+            }
+        }
+
+        public async Task<ManagementOperationResult<Kitten>> UpdateStatusAsync(int entityId, KittenStatus newStatus, CancellationToken token = default)
+        {
+            try
+            {
+                var result = await _kittenApiClient.UpdateStatusAsync(entityId, newStatus, token);
+                if (result == null)
+                    return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
+
+                return new(true, null, result.ToEFModel());
+            }
+            catch (Exception ex)
+            {
+                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+            }
+        }
+
+        public async Task<ManagementOperationResult<Kitten>> UpdateClassAsync(int entityId, KittenClass newClass, CancellationToken token = default)
+        {
+            try
+            {
+                var result = await _kittenApiClient.UpdateClassAsync(entityId, newClass, token);
+                if (result == null)
+                    return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
 
                 return new(true, null, result.ToEFModel());
             }

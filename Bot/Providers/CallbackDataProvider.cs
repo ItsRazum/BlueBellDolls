@@ -6,6 +6,7 @@ using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Common.Interfaces.Markers;
 
 namespace BlueBellDolls.Bot.Providers
 {
@@ -95,6 +96,12 @@ namespace BlueBellDolls.Bot.Providers
         public string GetCloseBookingCallback()
             => _settings.CloseBookingRequest;
 
+        public string GetSetBookingKittenStatusCallback()
+            => _settings.SetBookingKittenStatus;
+
+        public string GetClearBookingRequestKeyboardCallback()
+            => _settings.ClearBookingRequestKeyboard;
+
         #endregion
 
         #region Create methods
@@ -128,7 +135,11 @@ namespace BlueBellDolls.Bot.Providers
             var entityType = entity.GetType().Name;
             if (unitOwner == null)
             {
-                return $"{actionMode.ToString().ToLower()}{entityType}{Separator}{entity.Id}";
+                var searchQuery = $"{entity.Id}";
+                if (entity is ICanBeFoundWithName canBeFoundWithName && entity.Id == 0)
+                    searchQuery = canBeFoundWithName.QueryName;
+
+                return $"{actionMode.ToString().ToLower()}{entityType}{Separator}{searchQuery}";
             }
             else
             {
@@ -183,6 +194,9 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateSetKittenStatusCallback(int kittenId, KittenStatus kittenStatus)
             => $"{_settings.SetKittenStatus}{Separator}{kittenStatus}{Separator}{kittenId}";
 
+        public string CreateSetBookingKittenStatusCallback(int kittenId, KittenStatus kittenStatus)
+            => $"{_settings.SetBookingKittenStatus}{Separator}{kittenStatus}{Separator}{kittenId}";
+
         public string CreateProcessBookingCallback(int bookingRequestId)
             => $"{_settings.ProcessBookingRequest}{Separator}{bookingRequestId}";
 
@@ -190,5 +204,6 @@ namespace BlueBellDolls.Bot.Providers
             => $"{_settings.CloseBookingRequest}{Separator}{bookingRequestId}";
 
         #endregion
+
     }
 }

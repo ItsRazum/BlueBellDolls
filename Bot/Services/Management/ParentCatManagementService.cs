@@ -18,7 +18,7 @@ namespace BlueBellDolls.Bot.Services.Management
         IEntityFormService entityFormService,
         IPhotosDownloaderService photosDownloaderService,
         IMessagesProvider messagesProvider,
-        ILogger<ParentCatManagementService> logger) : DisplayableEntityManagementServiceBase<ParentCat>(
+        ILogger<ParentCatManagementService> logger) : DisplayableEntityManagementServiceBase<ParentCat, ParentCatDetailDto>(
             parentCatApiClient,
             messagesProvider,
             photosDownloaderService,
@@ -30,11 +30,7 @@ namespace BlueBellDolls.Bot.Services.Management
         private readonly IPhotosDownloaderService _photosDownloaderService = photosDownloaderService;
         private readonly ILogger<ParentCatManagementService> _logger = logger;
 
-        public override async Task<ParentCat?> GetEntityAsync(int entityId, CancellationToken token = default)
-        {
-            var dto = await _parentCatApiClient.GetAsync(entityId, token);
-            return dto?.ToEFModel();
-        }
+        protected override Func<ParentCatDetailDto?, ParentCat?> DtoToEntityFunc => (dto) => dto?.ToEFModel();
 
         public override async Task<ManagementOperationResult<ParentCat>> AddNewEntityAsync(CancellationToken token = default)
         {
@@ -169,10 +165,10 @@ namespace BlueBellDolls.Bot.Services.Management
             }
         }
 
-        public override async Task<ManagementOperationResult> AddPhotosToEntityAsync(
+        public override async Task<ManagementOperationResult<ParentCat>> AddPhotosToEntityAsync(
                 int entityId,
                 PhotoAdapter[] photos,
-                PhotosType photosManagementMode,
+                PhotosType photosType,
                 CancellationToken token)
         {
             if (photos == null || photos.Length == 0)
@@ -200,22 +196,22 @@ namespace BlueBellDolls.Bot.Services.Management
 
             try
             {
-                var uploadResults = photosManagementMode switch
+                var uploadResults = photosType switch
                 {
                     PhotosType.Photos => await _parentCatApiClient.UploadPhotosAsync(entityId, filesToUpload, token),
                     PhotosType.Titles => await _parentCatApiClient.UploadTitlesAsync(entityId, filesToUpload, token),
                     PhotosType.GenTests => await _parentCatApiClient.UploadGenTestsAsync(entityId, filesToUpload, token),
-                    _ => throw new ArgumentOutOfRangeException(nameof(photosManagementMode))
+                    _ => throw new ArgumentOutOfRangeException(nameof(photosType))
                 };
 
                 if (uploadResults == null)
                     return new(false, _messagesProvider.CreateApiUploadFailedMessage());
 
-                if (uploadResults.Any(p => !p.Uploaded))
+                if (uploadResults.Results.Any(p => !p.Uploaded))
                     anyDownloadFailed = true;
 
-                var warning = anyDownloadFailed ? _messagesProvider.CreateApiUploadFailedMessage([.. uploadResults.Select(p => p.FileIndex)]) : null;
-                return new(true, warning);
+                var warning = anyDownloadFailed ? _messagesProvider.CreateApiUploadFailedMessage([.. uploadResults.Results.Select(p => p.FileIndex)]) : null;
+                return new(true, warning, uploadResults.Dto.ToEFModel());
             }
             catch (Exception ex)
             {
@@ -228,43 +224,6 @@ namespace BlueBellDolls.Bot.Services.Management
                 {
                     await fileStream.DisposeAsync();
                 }
-            }
-        }
-
-        public override async Task<ManagementOperationResult> DeleteEntityAsync(int entityId, CancellationToken token)
-        {
-            try
-            {
-                var success = await _parentCatApiClient.DeleteAsync(entityId, token);
-
-                if (success)
-                    return new(true);
-
-                return new(false, _messagesProvider.CreateEntityDeletionError());
-            }
-            catch (Exception ex)
-            {
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
-        }
-
-        public override async Task<ManagementOperationResult> DeleteEntityPhotosAsync(
-            int entityId,
-            int[] photoIds,
-            CancellationToken token = default)
-        {
-            try
-            {
-                var success = await _parentCatApiClient.DeletePhotosAsync(entityId, photoIds, token);
-
-                if (success)
-                    return new(true);
-
-                return new(false, _messagesProvider.CreatePhotosDeletionFailureMessage());
-            }
-            catch (Exception ex)
-            {
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
     }

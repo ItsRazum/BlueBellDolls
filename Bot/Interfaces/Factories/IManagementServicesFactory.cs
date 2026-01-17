@@ -12,5 +12,6 @@ namespace BlueBellDolls.Bot.Interfaces.Factories
         ICatManagementService<TEntity> GetCatManagementService<TEntity>() where TEntity : Cat;
         ILitterManagementService GetLitterManagementService();
         IParentCatManagementService GetParentCatManagementService();
+        IKittenManagementService GetKittenManagementService();
     }
 }

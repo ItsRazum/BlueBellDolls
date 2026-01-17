@@ -1,12 +1,12 @@
-﻿using BlueBellDolls.Bot.Records;
-using BlueBellDolls.Bot.Types;
-using BlueBellDolls.Bot.Extensions;
-using BlueBellDolls.Common.Records.Dtos;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Extensions;
-using BlueBellDolls.Bot.Interfaces.Services.Api;
+﻿using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Records;
+using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Extensions;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Records.Dtos;
 
 namespace BlueBellDolls.Bot.Services.Management
 {
@@ -16,7 +16,7 @@ namespace BlueBellDolls.Bot.Services.Management
         IPhotosDownloaderService photosDownloaderService,
         IMessagesProvider messagesProvider,
         ILogger<CatColorManagementService> logger)
-        : DisplayableEntityManagementServiceBase<CatColor>(
+        : DisplayableEntityManagementServiceBase<CatColor, CatColorDetailDto>(
             catColorApiClient,
             messagesProvider,
             photosDownloaderService,
@@ -27,15 +27,11 @@ namespace BlueBellDolls.Bot.Services.Management
         private readonly IMessagesProvider _messagesProvider = messagesProvider;
         private readonly ILogger<CatColorManagementService> _logger = logger;
 
-        public override async Task<CatColor?> GetEntityAsync(int entityId, CancellationToken token = default)
-        {
-            var dto = await _catColorApiClient.GetAsync(entityId, token);
-            return dto?.ToEFModel();
-        }
+        protected override Func<CatColorDetailDto?, CatColor?> DtoToEntityFunc => (dto) => dto?.ToEFModel();
 
         public async Task<CatColor?> GetEntityAsync(string colorIdentifier, CancellationToken token = default)
         {
-            var dto = await _catColorApiClient.GetAsync(colorIdentifier, token);
+            var dto = await _catColorApiClient.GetAsync(colorIdentifier.Replace(" ", ""), token);
             return dto?.ToEFModel();
         }
 
@@ -56,23 +52,6 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось добавить новый CatColor");
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
-        }
-
-        public override async Task<ManagementOperationResult> DeleteEntityAsync(int entityId, CancellationToken token = default)
-        {
-            try
-            {
-                var success = await _catColorApiClient.DeleteAsync(entityId, token);
-                if (success)
-                    return new(true);
-
-                return new(false, _messagesProvider.CreateEntityDeletionError());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Не удалось удалить CatColor {id}", entityId);
                 return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }

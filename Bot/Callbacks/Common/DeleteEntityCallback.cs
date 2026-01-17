@@ -47,16 +47,12 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 return;
             }
 
-            (string onDeletionCanceledCallback, string rootPageCallback) callbacks = (
-                CallbackDataProvider.CreateEditEntityCallback(entity), 
-                CallbackDataProvider.CreateListEntityCallback(entity.GetType().Name, 1));
+            var onDeletionCanceledCallback = CallbackDataProvider.CreateEditEntityCallback(entity);
 
             if (args.Contains("fromLitter"))
             {
                 var litterId = int.Parse(args[2]);
-                callbacks = (
-                    CallbackDataProvider.CreateOpenEntityInLitterCallback(entity, litterId), 
-                    CallbackDataProvider.CreateBackToLitterCallback(litterId));
+                onDeletionCanceledCallback = CallbackDataProvider.CreateOpenEntityInLitterCallback(entity, litterId);
             }
 
             await BotService.EditOrSendNewMessageAsync(
@@ -64,9 +60,8 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 c.MessageId,
                 _messageParametersProvider.GetDeleteEntityConfirmationParameters(
                     entity,
-                    c.CallbackData, 
-                    callbacks.onDeletionCanceledCallback, 
-                    callbacks.rootPageCallback), 
+                    c.CallbackData,
+                    onDeletionCanceledCallback), 
                 token);
         }
     }

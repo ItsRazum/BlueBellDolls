@@ -9,20 +9,20 @@ using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Callbacks.Booking
 {
-    public class ProcessBookingRequestCallback : CallbackHandler
+    public class CloseBookingRequestCallback : CallbackHandler
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly ICallbackDataProvider _callbackDataProvider;
         private readonly IBookingManagementService _bookingManagementService;
         private readonly IMessagesProvider _messagesProvider;
 
-        public ProcessBookingRequestCallback(
-            IBotService botService, 
-            IOptions<BotSettings> botSettings, 
+        public CloseBookingRequestCallback(
+            IBotService botService,
+            IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IBookingManagementService bookingManagementService,
             IMessagesProvider messagesProvider,
-            IMessageParametersProvider messageParametersProvider) 
+            IMessageParametersProvider messageParametersProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _callbackDataProvider = callbackDataProvider;
@@ -30,20 +30,20 @@ namespace BlueBellDolls.Bot.Callbacks.Booking
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
 
-            AddCommandHandler(_callbackDataProvider.GetProcessBookingCallback(), HandleCallbackAsync);
+            AddCommandHandler(_callbackDataProvider.GetCloseBookingCallback(), HandleCallbackAsync);
         }
 
         private async Task HandleCallbackAsync(CallbackQueryAdapter c, CancellationToken token)
         {
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var bookingId = int.Parse(args.Last());
-            var result = await _bookingManagementService.ProcessBookingRequestAsync(bookingId, c.From!.Id, token);
+            var result = await _bookingManagementService.CloseBookingRequestAsync(bookingId, c.From!.Id, token);
             if (result.Success && result.Result != null)
             {
                 await BotService.EditOrSendNewMessageAsync(
                     c.Chat,
                     c.MessageId,
-                    _messageParametersProvider.GetBookingProcessingParameters(result.Result, c.From),
+                    _messageParametersProvider.GetBookingClosedParameters(c.MessageText, result.Result.KittenId),
                     token);
             }
             else

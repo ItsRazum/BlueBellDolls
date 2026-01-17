@@ -21,7 +21,7 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
 
         InlineKeyboardMarkup CreateEntityPhotosKeyboard(IDisplayableEntity entity, PhotosType photosUploadMode, int[] photoMessageIds, int[]? selectedPhotosIndexes = null);
 
-        InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion);
+        InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback);
 
         InlineKeyboardMarkup CreateEntityFromLitterKeyboard(IDisplayableEntity entity, int litterId);
 
@@ -37,6 +37,6 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
 
         InlineKeyboardMarkup CreateBookingRequestCloseKeyboard(BookingRequest bookingRequest);
 
-        InlineKeyboardMarkup CreateChangeKittenStatusKeyboard(int kittenId);
+        InlineKeyboardMarkup CreateBookingChangeKittenStatusKeyboard(int kittenId);
     }
 }

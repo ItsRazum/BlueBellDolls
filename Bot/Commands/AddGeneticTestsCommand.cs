@@ -48,16 +48,8 @@ namespace BlueBellDolls.Bot.Commands
 
             if (result.Success)
             {
-                var entity = await managementService.GetEntityAsync(entityId, token);
-
-                if (entity == null)
-                {
-                    await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
-                    return;
-                }
-
                 await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
-                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(entity), token);
+                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Result!), token);
             }
             else
                 await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);

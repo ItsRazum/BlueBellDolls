@@ -80,8 +80,8 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 var colorParts = buildedColor.Split('_', StringSplitOptions.RemoveEmptyEntries);
                 var colors = colorParts.Length switch
                 {
-                    1 => [.. catColorTree[colorParts[0]].Shades.Keys],
-                    2 => catColorTree[colorParts[0]].Shades[colorParts[1]],
+                    1 => [.. catColorTree[colorParts[0]].Keys],
+                    2 => catColorTree[colorParts[0]][colorParts[1]],
                     _ => []
                 };
                 await UpdateColorPicker(entity, buildedColor, colors, c, token);

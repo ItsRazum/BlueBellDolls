@@ -1,6 +1,7 @@
 ﻿using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Services.Api;
 using BlueBellDolls.Common.Dtos;
+using BlueBellDolls.Common.Extensions;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace BlueBellDolls.Bot.Services
@@ -38,6 +39,11 @@ namespace BlueBellDolls.Bot.Services
                 .SetSlidingExpiration(TimeSpan.FromMinutes(10));
             _memoryCache.Set(_cacheKey, tree, cacheEntryOptions);
             return true;
+        }
+
+        public async Task<string[]> GetCatColorMapAsync(CancellationToken token = default)
+        {
+            return (await GetCatColorTreeAsync(token))?.ToTreeMap() ?? [];
         }
     }
 }

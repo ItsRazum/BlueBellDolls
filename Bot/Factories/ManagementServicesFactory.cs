@@ -35,5 +35,10 @@ namespace BlueBellDolls.Bot.Factories
         {
             return _serviceProvider.GetRequiredService<IParentCatManagementService>();
         }
+
+        public IKittenManagementService GetKittenManagementService()
+        {
+            return _serviceProvider.GetRequiredService<IKittenManagementService>();
+        }
     }
 }

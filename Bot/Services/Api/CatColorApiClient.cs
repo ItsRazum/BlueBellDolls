@@ -3,27 +3,13 @@ using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Dtos;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
-using System.Net.Http.Json;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
     public class CatColorApiClient(IHttpClientFactory httpClientFactory, ILogger<CatColorApiClient> logger)
-        : DisplayableEntityApiClientBase<Kitten>(httpClientFactory, logger), ICatColorApiClient
+        : DisplayableEntityApiClientBase<CatColor, CatColorDetailDto>(httpClientFactory, logger), ICatColorApiClient
     {
         private readonly ILogger<CatColorApiClient> _logger = logger;
-
-        public async Task<CatColorDetailDto?> GetAsync(int id, CancellationToken token = default)
-        {
-            try
-            {
-                return await HttpClient.GetFromJsonAsync<CatColorDetailDto>($"/api/admin/catcolors/{id}", token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь CatColor {id} с сервера!", nameof(CatColorApiClient), nameof(GetListAsync), id);
-                return null;
-            }
-        }
 
         public async Task<CatColorDetailDto?> GetAsync(string colorIdentifier, CancellationToken token)
         {
@@ -78,21 +64,6 @@ namespace BlueBellDolls.Bot.Services.Api
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить CatColor {id}!", nameof(CatColorApiClient), nameof(UpdateAsync), id);
                 return null;
-            }
-        }
-
-        public async Task<bool> DeleteAsync(int id, CancellationToken token = default)
-        {
-            try
-            {
-                var response = await HttpClient.DeleteAsync($"/api/admin/catcolors/{id}", token);
-                response.EnsureSuccessStatusCode();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{service}.{method}(): Не удалось удалить CatColor {id}!", nameof(CatColorApiClient), nameof(DeleteAsync), id);
-                return false;
             }
         }
 

@@ -100,11 +100,7 @@ namespace BlueBellDolls.Bot.Services
 
             int[] sendedMessageIds = [.. sendedMessages.Select(m => m.Id)];
 
-            string redirectToCallback = photoKeys.Count() == photos.Count
-            ? _callbackDataProvider.CreateEditEntityCallback(entity)
-            : _callbackDataProvider.CreateManagePhotosCallback(entity, photosManagementMode);
-
-            var managePhotosCallback = _callbackDataProvider.CreateDeleteMessagesCallback() + _callbackDataSettings.MultipleCallbackSeparator + redirectToCallback;
+            var managePhotosCallback = _callbackDataProvider.CreateDeleteMessagesCallback();
 
             await _botService.SendMessageAsync(c.Chat,
                 _messageParametersProvider.GetDeleteEntityPhotosConfirmationParameters(
@@ -112,7 +108,6 @@ namespace BlueBellDolls.Bot.Services
                     c.CallbackData,
                     [.. photoKeys],
                     [.. sendedMessages.Select(p => p.MessageId)],
-                    managePhotosCallback,
                     managePhotosCallback),
                 token);
         }

@@ -21,6 +21,8 @@ using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Management.Base;
 using BlueBellDolls.Bot.Interfaces.ValueConverters;
+using BlueBellDolls.Common.Providers;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
 
 internal class Program
 {
@@ -42,7 +44,7 @@ internal class Program
         builder.Services
             .Configure<BotSettings>(builder.Configuration.GetSection(nameof(BotSettings)))
             .Configure<EntityFormSettings>(builder.Configuration.GetSection(nameof(EntityFormSettings)))
-            .Configure<EntitySettings>(builder.Configuration.GetSection(nameof(EntitySettings)))
+            .Configure<PhotosLimitsServiceSettings>(builder.Configuration.GetSection(nameof(PhotosLimitsServiceSettings)))
             .Configure<ApiSettings>(builder.Configuration.GetSection(nameof(ApiSettings)));
 
         // Провайдеры
@@ -75,7 +77,6 @@ internal class Program
 
         // Остальные сервисы
         builder.Services
-            .AddSingleton<ICatColorTreeService, CatColorTreeService>()
             .AddSingleton<IBotService, BotService>()
             .AddSingleton<IEntityFormService, EntityFormService>()
             .AddSingleton<IValueConverter, EntityValueConverter>()
@@ -83,18 +84,23 @@ internal class Program
             .AddSingleton<IMessagesHelperService, MessagesHelperService>()
             .AddSingleton<IPhotosDownloaderService, PhotosDownloaderService>()
             .AddSingleton<IEnumMapperService, EnumMapperService>()
+            .AddSingleton<ICommonMessagesProvider, CommonMessagesProvider>()
+            .AddSingleton<IPhotosLimitsService, PhotosLimitsService>()
 
             .AddScoped<IManagementServicesFactory, ManagementServicesFactory>()
 
+            .AddScoped<ICatColorTreeService, CatColorTreeService>()
             .AddScoped<IKittenApiClient, KittenApiClient>()
             .AddScoped<IParentCatApiClient, ParentCatApiClient>()
             .AddScoped<ILitterApiClient, LitterApiClient>()
             .AddScoped<ICatColorApiClient, CatColorApiClient>()
             .AddScoped<IBookingApiClient, BookingApiClient>()
+            .AddScoped<IConfigurationApiClient, ConfigurationApiClient>()
 
             .AddScoped<IBookingManagementService, BookingManagementService>()
 
             .AddScoped<KittenManagementService>()
+            .AddScoped<IKittenManagementService>(s => s.GetRequiredService<KittenManagementService>())
             .AddScoped<ICatManagementService<Kitten>>(s => s.GetRequiredService<KittenManagementService>())
             .AddScoped<IEntityManagementService<Kitten>>(s => s.GetRequiredService<KittenManagementService>())
             .AddScoped<IDisplayableEntityManagementService<Kitten>>(s => s.GetRequiredService<KittenManagementService>())
@@ -109,8 +115,12 @@ internal class Program
             .AddScoped<ILitterManagementService>(s => s.GetRequiredService<LitterManagementService>())
             .AddScoped<IEntityManagementService<Litter>>(s => s.GetRequiredService<LitterManagementService>())
             .AddScoped<IDisplayableEntityManagementService<Litter>>(s => s.GetRequiredService<LitterManagementService>())
+
+            .AddScoped<CatColorManagementService>()
+            .AddScoped<ICatColorManagementService>(s => s.GetRequiredService<CatColorManagementService>())
+            .AddScoped<IEntityManagementService<CatColor>>(s => s.GetRequiredService<CatColorManagementService>())
+            .AddScoped<IDisplayableEntityManagementService<CatColor>>(s => s.GetRequiredService<CatColorManagementService>());
             
-            .AddScoped<CatColorManagementService>();
 
         // Доп. настройки
         builder.Services.AddMemoryCache();

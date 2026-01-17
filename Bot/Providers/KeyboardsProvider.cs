@@ -101,12 +101,12 @@ namespace BlueBellDolls.Bot.Providers
             return result;
         }
 
-        public InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback, params string[] callbacksAfterDeletion)
+        public InlineKeyboardMarkup CreateYesNoKeyboard(string callback, IDisplayableEntity entity, string onDeletionCanceledCallback)
         {
             return new InlineKeyboardMarkup(
             [
                 [
-                    CreateDeleteYesButton(callback, callbacksAfterDeletion),
+                    CreateDeleteYesButton(callback),
                     CreateDeleteNoButton(onDeletionCanceledCallback)
                 ]
             ]);
@@ -214,21 +214,24 @@ namespace BlueBellDolls.Bot.Providers
             return result;
         }
 
-        public InlineKeyboardMarkup CreateChangeKittenStatusKeyboard(int kittenId)
+        public InlineKeyboardMarkup CreateBookingChangeKittenStatusKeyboard(int kittenId)
         {
             var result = new InlineKeyboardMarkup();
             result.AddNewRow(
                 InlineKeyboardButton.WithCallbackData(
                     "Оставить без изменений",
-                    _callbackDataProvider.CreateOpenKittenStatusCallback(kittenId)
+                    _callbackDataProvider.GetClearBookingRequestKeyboardCallback()
                 )
             );
-            result.AddNewRow(
-                InlineKeyboardButton.WithCallbackData(
-                    _enumMapperService.GetMapping(KittenStatus.Reserved),
-                    _callbackDataProvider.CreateSetKittenStatusCallback(kittenId, KittenStatus.Available)
-                )
-            );
+            foreach(var enumValue in Enum.GetValues<KittenStatus>().Except([KittenStatus.Available]))
+                result.AddNewRow(
+                    InlineKeyboardButton.WithCallbackData(
+                        _enumMapperService.GetMapping(enumValue),
+                        _callbackDataProvider.CreateSetBookingKittenStatusCallback(kittenId, enumValue)
+                    )
+                );
+
+            return result;
         }
 
         #endregion
@@ -381,10 +384,9 @@ namespace BlueBellDolls.Bot.Providers
                 _callbackDataProvider.CreateAddEntityCallback(typeof(TEntity).Name)
             );
 
-        private InlineKeyboardButton CreateDeleteYesButton(string callback, params string[] callbacksAfterDeletion)
+        private InlineKeyboardButton CreateDeleteYesButton(string callback)
         {
-            string[] callbacks = [_callbackDataProvider.CreateConfirmCallback(callback), .. callbacksAfterDeletion];
-            return InlineKeyboardButton.WithCallbackData("Да", $"{string.Join(_callbackDataSettings.MultipleCallbackSeparator, callbacks)}");
+            return InlineKeyboardButton.WithCallbackData("Да", $"{_callbackDataProvider.CreateConfirmCallback(callback)}");
         }
 
         private InlineKeyboardButton CreateDeleteNoButton(string callback)

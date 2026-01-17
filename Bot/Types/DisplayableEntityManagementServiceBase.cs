@@ -1,39 +1,92 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Records;
-using BlueBellDolls.Common.Records.Dtos;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Bot.Interfaces.Services.Api.Base;
 using BlueBellDolls.Bot.Interfaces.Management.Base;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.Services.Api.Base;
+using BlueBellDolls.Bot.Records;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Records.Dtos;
 
 namespace BlueBellDolls.Bot.Types
 {
-    public abstract class DisplayableEntityManagementServiceBase<TEntity>(
-        IDisplayableEntityApiClient apiClient,
+    public abstract class DisplayableEntityManagementServiceBase<TEntity, TDto>(
+        IDisplayableEntityApiClient<TDto> apiClient,
         IMessagesProvider messagesProvider,
         IPhotosDownloaderService photosDownloaderService,
-        ILogger logger) : IDisplayableEntityManagementService<TEntity> where TEntity : class, IDisplayableEntity
+        ILogger logger) : IDisplayableEntityManagementService<TEntity> where TEntity : class, IDisplayableEntity where TDto : class
     {
-        private readonly IDisplayableEntityApiClient _apiClient = apiClient;
+        private readonly IDisplayableEntityApiClient<TDto> _apiClient = apiClient;
         private readonly IMessagesProvider _messagesProvider = messagesProvider;
         private readonly IPhotosDownloaderService _photosDownloaderService = photosDownloaderService;
         private readonly ILogger _logger = logger;
 
-        public abstract Task<ManagementOperationResult<TEntity>> AddNewEntityAsync(CancellationToken token = default);
+        protected abstract Func<TDto?, TEntity?> DtoToEntityFunc { get; }
 
-        public abstract Task<ManagementOperationResult> DeleteEntityAsync(int entityId, CancellationToken token = default);
+        public abstract Task<ManagementOperationResult<TEntity>> AddNewEntityAsync(CancellationToken token = default);
 
         public abstract Task<ManagementOperationResult<TEntity>> UpdateEntityAsync(TEntity entity, CancellationToken token = default);
 
         public abstract Task<ManagementOperationResult<PagedResult<TEntity>>> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default);
 
-        public abstract Task<TEntity?> GetEntityAsync(int entityId, CancellationToken token = default);
-
         public abstract Task<ManagementOperationResult<TEntity>> UpdateEntityByReplyAsync(int modelId, Dictionary<string, string> properties, CancellationToken token = default);
 
+        public virtual async Task<ManagementOperationResult<PhotosLimitResponse>> GetPhotosLimitAsync(PhotosType photosType, CancellationToken token = default)
+        {
+            try
+            {
+                var result = await _apiClient.GetPhotosLimitAsync(photosType, token);
+                return result != null
+                    ? new(true, null, result)
+                    : new(false, _messagesProvider.CreateUnknownErrorMessage());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось получить лимит фотографий {type}!", photosType);
+                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+            }
+        }
 
-        public virtual async Task<ManagementOperationResult> AddPhotosToEntityAsync(int entityId, PhotoAdapter[] photos, PhotosType photosType, CancellationToken token = default)
+        public virtual async Task<ManagementOperationResult> DeleteEntityAsync(int entityId, CancellationToken token = default)
+        {
+            try
+            {
+                var success = await _apiClient.DeleteAsync(entityId, token);
+                if (success)
+                    return new(true);
+
+                return new(false, _messagesProvider.CreateEntityDeletionError());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Не удалось удалить {type} {id}", typeof(TEntity).Name, entityId);
+                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+            }
+        }
+
+        public virtual async Task<ManagementOperationResult<TEntity>> SetDefaultPhotoAsync(int entityId, int photoId, CancellationToken token = default)
+        {
+            try
+            {
+                var result = await _apiClient.SetDefaultPhotoAsync(entityId, photoId, token);
+
+                return result != null 
+                    ? new(true, null, DtoToEntityFunc(result)) 
+                    : new(false, _messagesProvider.CreateDefaultPhotoSetErrorMessage());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при установке заглавного фото для {type} {id}!", typeof(TEntity).Name, entityId);
+                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+            }
+        }
+
+        public virtual async Task<TEntity?> GetEntityAsync(int entityId, CancellationToken token = default)
+        {
+            var entity = await _apiClient.GetAsync(entityId, token);
+            return DtoToEntityFunc(entity);
+        }
+
+        public virtual async Task<ManagementOperationResult<TEntity>> AddPhotosToEntityAsync(int entityId, PhotoAdapter[] photos, PhotosType photosType, CancellationToken token = default)
         {
             if (photosType != PhotosType.Photos)
             {
@@ -68,15 +121,15 @@ namespace BlueBellDolls.Bot.Types
             {
                 var uploadResults = await _apiClient.UploadPhotosAsync(entityId, filesToUpload, token);
 
-                if (uploadResults?.Any(p => !p.Uploaded) == true)
+                if (uploadResults?.Results.Any(p => !p.Uploaded) == true)
                     return new(false, _messagesProvider.CreateApiUploadFailedMessage());
 
                 string? warning = anyDownloadFailed ? _messagesProvider.CreatePhotoDownloadFailedMessage() : null;
-                return new(true, warning);
+                return new(true, warning, DtoToEntityFunc(uploadResults!.Dto));
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при загрузке фотографий для {Type} {id}!", typeof(TEntity).Name, entityId);
+                _logger.LogError(ex, "Ошибка при загрузке фотографий для {type} {id}!", typeof(TEntity).Name, entityId);
                 return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
             finally
@@ -88,15 +141,15 @@ namespace BlueBellDolls.Bot.Types
             }
         }
 
-        public virtual async Task<ManagementOperationResult> DeleteEntityPhotosAsync(int entityId, int[] photoIds, CancellationToken token)
+        public virtual async Task<ManagementOperationResult<TEntity>> DeleteEntityPhotosAsync(int entityId, int[] photoIds, CancellationToken token)
         {
 
             try
             {
-                var success = await _apiClient.DeletePhotosAsync(entityId, photoIds, token);
+                var result = await _apiClient.DeletePhotosAsync(entityId, photoIds, token);
 
-                if (success)
-                    return new(true);
+                if (result != null)
+                    return new(true, null, DtoToEntityFunc(result));
 
                 return new(false, _messagesProvider.CreatePhotosDeletionFailureMessage());
             }
@@ -107,13 +160,15 @@ namespace BlueBellDolls.Bot.Types
             }
         }
 
-        public virtual async Task<ManagementOperationResult> SetDefaultPhotoAsync(int entityId, int photoId, CancellationToken token = default)
+        public virtual async Task<ManagementOperationResult<TEntity>> SetDefaultPhotoToEntityAsync(int entityId, int photoId, CancellationToken token = default)
         {
             try
             {
                 var result = await _apiClient.SetDefaultPhotoAsync(entityId, photoId, token);
 
-                return result ? new(true) : new(false, _messagesProvider.CreateDefaultPhotoSetErrorMessage());
+                return result != null 
+                    ? new(true, null, DtoToEntityFunc(result)) 
+                    : new(false, _messagesProvider.CreateDefaultPhotoSetErrorMessage());
             }
             catch (Exception ex)
             {
@@ -122,14 +177,14 @@ namespace BlueBellDolls.Bot.Types
             }
         }
 
-        public virtual async Task<ManagementOperationResult> ToggleEntityVisibilityAsync(int entityId, CancellationToken token = default)
+        public virtual async Task<ManagementOperationResult<TEntity>> ToggleEntityVisibilityAsync(int entityId, CancellationToken token = default)
         {
             try
             {
                 var result = await _apiClient.ToggleVisibilityAsync(entityId, token);
 
-                if (result)
-                    return new(true);
+                if (result != null)
+                    return new(true, null, DtoToEntityFunc(result));
 
                 return new(false, _messagesProvider.CreateUnknownErrorMessage());
             }

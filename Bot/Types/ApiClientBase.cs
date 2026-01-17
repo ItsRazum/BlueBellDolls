@@ -2,21 +2,20 @@
 
 namespace BlueBellDolls.Bot.Types
 {
-    public abstract class ApiClientBase(
+    public abstract class ApiClientBase<TDto>(
         IHttpClientFactory httpClientFactory,
-        ILogger logger)
+        ILogger logger) : TinyApiClientBase(httpClientFactory) where TDto : class
     {
-        protected HttpClient HttpClient { get; } = httpClientFactory.CreateClient(Constants.BlueBellDollsHttpClientName);
         private readonly ILogger _logger = logger;
 
-        protected async Task<FileUploadResult[]?> UploadFilesAsync(
+        protected async Task<EntityFilesUploadResult<TDto>?> UploadFilesAsync(
             string requestUrl,
             IEnumerable<(Stream fileStream, string fileName, string fileId)> files,
             CancellationToken token)
         {
             if (files == null || !files.Any())
             {
-                return [];
+                return null;
             }
 
             try
@@ -37,7 +36,7 @@ namespace BlueBellDolls.Bot.Types
                 var response = await HttpClient.PostAsync(requestUrl, content, token);
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<FileUploadResult[]>(token);
+                return await response.Content.ReadFromJsonAsync<EntityFilesUploadResult<TDto>>(token);
             }
             catch (Exception ex)
             {

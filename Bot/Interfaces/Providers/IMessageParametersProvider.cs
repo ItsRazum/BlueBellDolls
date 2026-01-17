@@ -20,16 +20,14 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
         MessageParameters GetDeleteEntityConfirmationParameters(
             IDisplayableEntity entity, 
             string callback, 
-            string onDeletionCanceledCallback, 
-            params string[] callbacksAfterDeletion);
+            string onDeletionCanceledCallback);
 
         MessageParameters GetDeleteEntityPhotosConfirmationParameters(
             IDisplayableEntity entity, 
             string callback, 
             int[] selectedPhotoIndexes, 
             int[] sendedPhotoMessageIds,
-            string onDeletionCanceledCallback,
-            params string[] callbacksAfterDeletion);
+            string onDeletionCanceledCallback);
 
         MessageParameters GetEntityListParameters<TEntity>(
             IEnumerable<TEntity> entities, 
@@ -52,7 +50,6 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
 
         MessageParameters GetBookingProcessingParameters(BookingRequest bookingRequest, User curator);
 
-        MessageParameters GetBookingCloseParameters(BookingRequest bookingRequest, User curator);
-
+        MessageParameters GetBookingClosedParameters(string previousMessageText, int kittenId);
     }
 }

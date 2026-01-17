@@ -2,27 +2,13 @@
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
-using System.Net.Http.Json;
 
 namespace BlueBellDolls.Bot.Services.Api
 {
     public class LitterApiClient(IHttpClientFactory httpClientFactory, ILogger<LitterApiClient> logger) 
-        : DisplayableEntityApiClientBase<Litter>(httpClientFactory, logger), ILitterApiClient
+        : DisplayableEntityApiClientBase<Litter, LitterDetailDto>(httpClientFactory, logger), ILitterApiClient
     {
         private readonly ILogger<LitterApiClient> _logger = logger;
-
-        public async Task<LitterDetailDto?> GetAsync(int id, CancellationToken token = default)
-        {
-            try
-            {
-                return await HttpClient.GetFromJsonAsync<LitterDetailDto>($"/api/admin/litters/{id}", token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь Litter {id} с сервера!", nameof(LitterApiClient), nameof(GetListAsync), id);
-                return null;
-            }
-        }
 
         public async Task<List<LitterDetailDto>?> GetListAsync(CancellationToken token = default)
         {
@@ -111,21 +97,6 @@ namespace BlueBellDolls.Bot.Services.Api
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить Litter {id}!", nameof(LitterApiClient), nameof(UpdateAsync), id);
                 return null;
-            }
-        }
-
-        public async Task<bool> DeleteAsync(int id, CancellationToken token = default)
-        {
-            try
-            {
-                var response = await HttpClient.DeleteAsync($"/api/admin/litters/{id}", token);
-                response.EnsureSuccessStatusCode();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{service}.{method}(): Не удалось удалить Litter {id}!", nameof(LitterApiClient), nameof(DeleteAsync), id);
-                return false;
             }
         }
 

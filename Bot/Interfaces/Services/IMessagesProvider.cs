@@ -24,15 +24,15 @@ namespace BlueBellDolls.Bot.Interfaces.Services
 
         string CreateEntityFormMessage(IEntity entity, bool enableEdit = true);
 
-        string CreateEntityPhotosGuideMessage(IDisplayableEntity entity, PhotosType photosType);
+        string CreateEntityPhotosGuideMessage<TEntity>(TEntity entity, PhotosType photosType) where TEntity : class, IDisplayableEntity;
 
         string CreatePhotosLoadingMessage();
 
-        string CreatePhotosLimitReachedMessage(IDisplayableEntity entity);
+        string CreatePhotosLimitReachedMessage<TEntity>() where TEntity : class, IDisplayableEntity;
 
-        string CreateTitlesLimitReachedMessage();
+        string CreateTitlesLimitReachedMessage<TEntity>() where TEntity : class, IDisplayableEntity;
 
-        string CreateGeneticTestsLimitReachedMessage();
+        string CreateGeneticTestsLimitReachedMessage<TEntity>() where TEntity : class, IDisplayableEntity;
 
         string CreateEntityPhotosMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] photoMessageIds);
 
@@ -112,6 +112,10 @@ namespace BlueBellDolls.Bot.Interfaces.Services
 
         string CreateBookingProcessingMessage(BookingRequest bookingRequest, User curator);
 
-        string CreateBookingCloseMessage(BookingRequest bookingRequest, User curator);
+        string CreateBookingClosedMessage();
+
+        string CreateBookingKittenStatusChangedMessage(KittenStatus kittenStatus);
+
+        string CreateBookingClosedWithoutKittenStatusChange();
     }
 }
