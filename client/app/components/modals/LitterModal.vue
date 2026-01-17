@@ -35,11 +35,13 @@ const freeKittensCount = computed(() => {
 
 const availableKittensString = freeKittensCount.value == 1 ? ` свободен` : ` свободных`;
 
+const loaded = ref(false);
+
 </script>
 
 <template>
-  <PhotoGalleryModal :is-open="isOpen" :photos="props.litter.photos" @close="close">
-    <CardWrapper class="card-info-container">
+  <PhotoGalleryModal :skeleton="!loaded" :is-open="isOpen" :photos="props.litter.photos" @close="close">
+    <CardWrapper v-if="loaded" class="card-info-container">
       <div class="card-header">
         <h2>{{ litterDisplayName }}</h2>
         <span>{{ litter.birthDay }}</span>
@@ -48,12 +50,12 @@ const availableKittensString = freeKittensCount.value == 1 ? ` свободен`
         <div class="card-info-props">
           <div class="card-property">
             <span>Папа: </span>
-            <RouterLink>{{ litter.fatherCat.name }}</RouterLink>
+            <NuxtLink>{{ litter.fatherCat.name }}</NuxtLink>
           </div>
 
           <div class="card-property">
             <span>Мама: </span>
-            <RouterLink>{{ litter.motherCat.name }}</RouterLink>
+            <NuxtLink>{{ litter.motherCat.name }}</NuxtLink>
           </div>
 
           <div class="card-property">
@@ -68,6 +70,26 @@ const availableKittensString = freeKittensCount.value == 1 ? ` свободен`
           <span style="margin-top: var(--padding-small)"> {{ litter.description }}</span>
         </div>
       </CardWrapper>
+    </CardWrapper>
+    <CardWrapper v-else class="card-info-container">
+      <div class="card-header">
+        <Skeleton width="16rem" height="2rem" radius="0.825rem" />
+        <Skeleton width="6rem" height="1rem" radius="0.825rem" />
+      </div>
+      <div class="card-info-body">
+        <CardWrapper class="card-info-props">
+          <Skeleton width="35%" height="1.25rem" radius="0.825rem" />
+          <Skeleton width="50%" height="1.25rem" radius="0.825rem" />
+          <Skeleton width="25%" height="1.25rem" radius="0.825rem" />
+          <Skeleton width="40%" height="1.25rem" radius="0.825rem" />
+
+          <div style="display: flex; flex-direction: column; margin-top: 0.875rem; gap: 0.3rem">
+            <Skeleton width="90%" height="0.825rem" radius="0.825rem" />
+            <Skeleton width="20rem" height="0.825rem" radius="0.825rem" />
+            <Skeleton width="70%" height="0.825rem" radius="0.825rem" />
+          </div>
+        </CardWrapper>
+      </div>
     </CardWrapper>
   </PhotoGalleryModal>
 </template>

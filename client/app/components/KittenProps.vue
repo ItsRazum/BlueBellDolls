@@ -97,4 +97,5 @@ const closeColorModal = () => {
   color: var(--color-link-hover);
   background-color: transparent;
 }
+
 </style>

@@ -8,8 +8,8 @@ import 'swiper/css/navigation';
 
 const props = withDefaults(defineProps<{
   photos: PhotoDto[];
-  aspectRatio: '4:3' | '1:1';
-  controlsPosition: 'outside' | 'inside';
+  aspectRatio?: '4:3' | '1:1';
+  controlsPosition?: 'outside' | 'inside';
 }>(), {
   aspectRatio: '4:3',
   controlsPosition: 'outside',
@@ -28,7 +28,7 @@ const nextButton = ref(null);
     <button ref="prevButton" class="nav-btn prev-btn">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M15 19L8 12L15 5"
-              :stroke="controlsPosition === 'inside' ? 'white' : 'black'"
+              :stroke="controlsPosition === 'inside' ? 'white' : 'var(--color-text-base)'"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
@@ -63,7 +63,7 @@ const nextButton = ref(null);
     <button ref="nextButton" class="nav-btn next-btn">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         <path d="M9 19L16 12L9 5"
-              :stroke="controlsPosition === 'inside' ? 'white' : 'black'"
+              :stroke="controlsPosition === 'inside' ? 'white' : 'var(--color-text-base)'"
               stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
     </button>
@@ -114,8 +114,8 @@ const nextButton = ref(null);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 2.625rem;
+  height: 2.625rem;
   border-radius: 50%;
   opacity: 0;
   transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s;
@@ -151,9 +151,8 @@ const nextButton = ref(null);
 }
 .mode-outside .nav-btn:hover {
   transform: scale(1.1);
-  background-color: rgba(0,0,0, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
-
 
 .mode-inside {
   display: block;
@@ -174,11 +173,11 @@ const nextButton = ref(null);
 }
 
 .mode-inside .prev-btn {
-  left: 15px;
+  left: 1rem;
 }
 
 .mode-inside .next-btn {
-  right: 15px;
+  right: 1rem;
 }
 
 .nav-btn:disabled {
@@ -190,12 +189,12 @@ const nextButton = ref(null);
 :deep(.swiper-pagination) {
   position: relative;
   bottom: 0;
-  margin-top: 15px;
+  margin-top: 1rem;
 }
 
 :deep(.swiper-pagination-bullet) {
-  width: 10px;
-  height: 10px;
+  width: 0.625rem;
+  height: 0.625rem;
   background-color: var(--color-button-disabled);
   opacity: 0.6;
   margin: 0 5px !important;
@@ -203,7 +202,7 @@ const nextButton = ref(null);
 }
 
 :deep(.swiper-pagination-bullet-active) {
-  background-color: black;
+  background-color: var(--color-text-base);
   opacity: 0.7;
   transform: scale(1.1);
 }

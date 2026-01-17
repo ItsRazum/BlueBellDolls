@@ -31,7 +31,7 @@ const close = () => {
       <CardWrapper class="booking-container">
         <span class="tip-text">Отличный выбор! Чтобы забронировать котёнка - оставьте заявку по форме ниже, или позвоните нам.</span>
         <div class="booking-cards">
-          <CardWrapper class="form-container">
+          <CardWrapper class="form-container" :show-border="false">
             <h2 style="margin-bottom: 0.875rem">
               Вы бронируете котёнка <span style="color: var(--color-context-blue)">{{kitten.name}}</span>
             </h2>
@@ -39,10 +39,10 @@ const close = () => {
             <input v-model="form.phone" placeholder="Номер телефона" v-maska="'+7(###) ###-##-##'"/>
             <button style="width: max-content">Отправить</button>
             <p style="color: var(--color-text-context)">
-              Нажимая кнопку <b>«Отправить»</b>,<br>Вы соглашаетесь с нашей <RouterLink to="/privacy">Политикой конфидециальности</RouterLink>
+              Нажимая кнопку <b>«Отправить»</b>,<br>Вы соглашаетесь с нашей <RouterLink to="/privacy">Политикой конфиденциальности</RouterLink>
             </p>
           </CardWrapper>
-          <CardWrapper class="form-container">
+          <CardWrapper class="form-container" :show-border="false">
             <p class="contacts">
               <b>
                 Номер телефона:<br>
@@ -52,7 +52,6 @@ const close = () => {
                 Эл. почта:<br>
                 <a href="mailto:ragdoll-bluebelldolls@mail.ru">ragdoll-bluebelldolls@mail.ru</a>
               </b>
-
             </p>
           </CardWrapper>
         </div>

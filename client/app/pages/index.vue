@@ -1,98 +1,147 @@
 ﻿<script setup lang="ts">
 
-import {KittenClass, KittenStatus, PhotosType} from "~~/enums/enums";
-import Advertisement from "~/components/Advertisement.vue";
-import PhotoGallery from "~/components/PhotoGallery.vue";
-
-
-
-const mainPhoto = ref<PhotoDto>({
-  id: 1,
-  url: 'photo.png',
-  type: PhotosType.Photos,
-  isMain: true
-});
-
-const photo = ref<PhotoDto>({
-  id: 2,
-  url: 'photo.png',
-  type: PhotosType.Photos,
-  isMain: false
-});
-
-const photos = [ mainPhoto.value, photo.value, photo.value, photo.value, photo.value ];
-
-const catColor = ref<CatColorDto>({
-  id: 3,
-  identifier: 'Seal Bicolor',
-  description: 'Seal bicolor - один из самых популярных окрасов Рэгдолл, легко узнаётся по треугольной белой "маске" на морде, красиво подчёркивающей глаза животного.',
-  photos: photos
-});
-
-const mockCatBoy = ref<ParentCatListDto>({
-  id: 1,
-  name: 'Boy BlueBellDolls',
-  birthDay: '07.11.2025',
-  isMale: true,
-  isEnabled: true,
-  color: 'Seal Bicolor',
-  description: 'Это описание кота. От себя рекомендую писать в описании хотя-бы 100 символов ;)',
-  mainPhotoUrl: 'photo.png'
-});
-
-const mockCatGirl = ref<KittenListDto>({
-  id: 1,
-  name: 'Girl BlueBellDolls',
-  birthDay: '07.11.2025',
-  isMale: false,
-  isEnabled: true,
-  description: 'Это описание котёнка. От себя рекомендую писать в описании хотя-бы 100 символов ;)',
-  mainPhotoUrl: 'photo.png',
-  class: KittenClass.Pet,
-  status: KittenStatus.Available,
-  litterId: 1,
-  litterLetter: 'A',
-  color: catColor.value,
-});
-
-const mockLitter = ref<LitterDetailDto>({
-  id: 1,
-  letter: 'A',
-  birthDay: '07.11.2025',
-  description: 'Это описание помёта. От себя рекомендую писать в описании хотя-бы 100 символов ;)',
-  kittens: [
-      mockCatGirl.value
-  ],
-  fatherCatId: 2,
-  fatherCat: ref<ParentCatMinimalDto>({
-    id: 2,
-    name: 'Caesar BlueBellDolls',
-  }),
-  motherCatId: 3,
-  motherCat: ref<ParentCatMinimalDto>({
-    id: 3,
-    name: 'Tess BlueBellDolls',
-  }),
-  photos: [ {
-    id: 1,
-    url: 'photo.png',
-    type: PhotosType.Photos,
-    isMain: true,
-  } ],
+definePageMeta({
+  title: "Питомник Рэгдолл №1 в России.",
+  backgroundImage: "/header.jpg",
+  buttonText: "Котята на продажу",
+  buttonUrl: "/litters"
 })
+
+const kittenApi = useKittenApi();
+
+const { data: kittens, pending } = await kittenApi.getAvailableKittens();
 
 </script>
 
 <template>
-
   <main>
-
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; margin: 40px">
-      <LitterListItem :litter="mockLitter"/>
-      <Advertisement photo-url="photo.png" name="Статья" description="Это описание статьи. Лучше всего писать его на 3-4 строки, чтобы компонент не выглядел 'сплюснутым' сверху и снизу" redirect-url="/"/>
-      <ParentCatListItem :parent-cat="mockCatBoy"/>
-      <PhotoGallery :photos="photos"/>
+    <div class="articles-container">
+      <Article title="О породе рэгдолл"
+               photo-url="photo.png"
+               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+               redirect-url="/about-ragdoll"/>
+      <Article title="Свободные котята"
+               photo-url="photo.png"
+               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+               redirect-url="/litters"/>
+      <Article title="О нас"
+               photo-url="photo.png"
+               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+               redirect-url="/about"/>
     </div>
-
+    <div class="first-message-container">
+      <MessageBox imageUrl="/photo.png" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." />
+    </div>
+    <div v-if="pending" class="kittens-container">
+      <h2 class="text-3xl">Котята на продажу</h2>
+      <div class="carousel-wrapper">
+        <KittenListItemSkeleton variant="compact"/>
+        <KittenListItemSkeleton variant="compact"/>
+        <KittenListItemSkeleton variant="compact"/>
+      </div>
+    </div>
+    <div v-else-if="kittens.length === 0" class="kittens-container">
+      <div class="no-kittens-container">
+        <span class="font-bold text-3xl text-white">Скоро здесь появятся новые котята</span>
+        <span class="text-2xl text-white text-center">Готовимся к пополнению в питомнике. Следите за обновлениями, чтобы не пропустить свое счастье.</span>
+      </div>
+    </div>
+    <div v-else-if="kittens.length < 4" class="kittens-container">
+      <h2 class="text-3xl">Котята на продажу</h2>
+      <div class="carousel-wrapper">
+        <KittenListItem variant="compact" v-for="kitten in kittens" :key="kitten.id" :kitten="kitten" />
+      </div>
+      <RouterLink to="litters" class="text-[1.25rem]">Показать больше</RouterLink>
+    </div>
+    <div v-else class="kittens-container">
+      <h2 class="text-3xl">Котята на продажу</h2>
+      <KittensCarousel :kittens="kittens" />
+      <RouterLink to="litters" class="text-[1.25rem]">Показать больше</RouterLink>
+    </div>
+    <div class="cats-container">
+      <span class="kittens-title">У нашего питомника только лучшие кошки-производители. Убедитесь сами</span>
+      <div class="cats-articles-container">
+        <Article title="Наши кошки"
+                 photo-url="photo.png"
+                 description="Узнайте больше о наших прекрасных дамах"
+                 redirect-url="/litters"/>
+        <Article title="Наши коты"
+                 photo-url="photo.png"
+                 description="Познакомьтесь с нашими очаровательными мальчиками"
+                 redirect-url="/about"/>
+      </div>
+    </div>
   </main>
 </template>
+
+<style scoped>
+
+.articles-container {
+  display: flex;
+  justify-content: center;
+  background-color: var(--color-pages-primary-background);
+  gap: var(--padding-extra-large);
+  padding: var(--padding-pages);
+}
+
+.first-message-container {
+  display: flex;
+  background-color: var(--color-pages-secondary-background);
+  padding: var(--padding-large) 5.375rem;
+}
+
+.kittens-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-pages-primary-background);
+  padding: var(--padding-large) var(--padding-extra-large);
+  gap: var(--padding-extra-large);
+}
+
+.no-kittens-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  width: 48.75rem;
+  height: 19rem;
+  padding: var(--padding-large);
+  border-radius: var(--border-radius-main);
+  background-image: url("/photo.png");
+  background-size: cover;
+}
+
+.carousel-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--padding-extra-large);
+  justify-content: center;
+  width: 100%;
+  max-width: 1150px;
+  margin: 0 auto;
+}
+
+.cats-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--color-pages-secondary-background);
+  gap: var(--padding-extra-large);
+  padding: var(--padding-large);
+}
+
+.cats-articles-container {
+  display: flex;
+  justify-content: center;
+  gap: var(--padding-large);
+}
+
+.kittens-title {
+  font-weight: 500;
+  font-size: 1.875rem;
+  max-width: 55rem;
+  text-align: center;
+}
+
+</style>

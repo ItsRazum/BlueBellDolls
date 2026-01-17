@@ -43,38 +43,37 @@ const closeLitterModal = () => {
   isLitterModalOpen.value = false;
 }
 
-
 </script>
 
 <template>
   <CardWrapper class="litter-card">
     <div class="card-expanded">
       <div class="card-photo-container">
-        <img class="card-expanded-photo" :src="litter.photos[0].url" :alt="litterDisplayName" />
+        <img class="card-expanded-photo" :src="apiBaseUrl + litter.photos[0].url" :alt="litterDisplayName" />
         <button class="link-btn" @click="openLitterModal">Больше фото</button>
       </div>
-      <CardWrapper :enable-blur="true" class="card-info-container">
+      <CardWrapper :enable-blur="true" :show-border="false" class="card-info-container">
         <div class="card-header">
-          <h2 style="font-size: 36px">{{ litterDisplayName }}</h2>
-          <span style="font-weight: 505; color: var(--color-text-caption); font-size: 24px">{{ litter.birthDay }}</span>
+          <h2 class="text-4xl">{{ litterDisplayName }}</h2>
+          <span class="font-medium text-2xl text-(--color-text-caption)">{{ litter.birthDay }}</span>
         </div>
-        <CardWrapper class="card-info-body">
+        <CardWrapper :show-border="false" class="card-info-body">
           <div class="card-info-props">
             <div class="card-property">
               <span>Папа: </span>
-              <RouterLink>{{ litter.fatherCat.name }}</RouterLink>
+              <NuxtLink>{{ litter.fatherCat.name }}</NuxtLink>
             </div>
             <div class="card-property">
               <span>Мама: </span>
-              <RouterLink>{{ litter.motherCat.name }}</RouterLink>
+              <NuxtLink>{{ litter.motherCat.name }}</NuxtLink>
             </div>
             <div class="card-property">
-              <span style="color: var(--color-context-blue);">{{ litter.kittens.length }}</span>
+              <span class="text-(--color-context-blue)">{{ litter.kittens.length }}</span>
               <span>{{ kittensString }} всего</span>
             </div>
 
             <div class="card-property">
-              <span style="color: var(--color-context-blue);">{{ litter.kittens.length }}</span>
+              <span class="text-(--color-context-blue)">{{ litter.kittens.length }}</span>
               <span>{{ availableKittensString }}</span>
             </div>
           </div>
@@ -82,7 +81,7 @@ const closeLitterModal = () => {
         </CardWrapper>
       </CardWrapper>
     </div>
-    <div class="separator"/>
+    <div class="separator horizontal"/>
     <div class="kittens-grid">
       <KittenListItem
           v-for="kitten in litter.kittens"
@@ -100,6 +99,8 @@ span {
 }
 
 .litter-card {
+  width: 100%;
+  box-sizing: border-box;
   padding: var(--padding-large);
   display: flex;
   flex-direction: column;
@@ -108,6 +109,7 @@ span {
 }
 
 .card-info-container {
+  width: 100%;
   gap: var(--padding-large);
 }
 
@@ -121,8 +123,8 @@ span {
 }
 
 .card-expanded-photo {
-  height: 295px;
-  width: 295px;
+  height: 18.5rem;
+  width: 18.5rem;
 }
 
 .kittens-grid {

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-  defineProps({
+  const props = defineProps({
     enableBlur: {
       type: Boolean,
       default: false
+    },
+    showBorder:{
+      type: Boolean,
+      default: true
     }
   });
 </script>
@@ -11,7 +15,8 @@
   <div :class="[
       'card-wrapper',
       { 'card-wrapper--blurred': enableBlur }
-    ]">
+    ]"
+      :style="`borderWidth: ${(showBorder ? 1 : 0)}px;`">
     <slot></slot>
   </div>
 </template>
@@ -19,7 +24,7 @@
 <style scoped>
   .card-wrapper {
     background-color: var(--color-background-card);
-    border: 1px solid var(--color-border-card);
+    border: solid var(--color-border-card);
     border-radius: var(--border-radius-main);
     box-shadow: var(--shadow-base);
   }
