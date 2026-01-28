@@ -1,93 +1,166 @@
 ﻿<script setup lang="ts">
+import { vMaska } from "maska/vue";
+
+const { t } = useI18n();
+const developerModal = useModal();
+const config = useAppConfig();
 
 const form = reactive({
-  name: '',
-  phone: ''
+  name: "",
+  phone: "",
 });
 
-const isDeveloperModalOpen = ref(false);
-const openDeveloperModal = () => {
-  isDeveloperModalOpen.value = true;
-}
+const isLoading = ref(false);
+const statusMessage = ref<string | null>(null);
+const isSuccess = ref(false);
 
-const closeDeveloperModal = () => {
-  isDeveloperModalOpen.value = false;
-}
+const isValid = computed(() => form.name.length > 2 && form.phone.length >= 17);
 
+const reset = () => {
+  statusMessage.value = null;
+
+  if (isSuccess.value) {
+    form.name = "";
+    form.phone = "";
+    isSuccess.value = false;
+  }
+};
+
+const feebackApi = useFeedbackRequestApi();
+
+const submitFeedback = async () => {
+  if (!isValid.value || isLoading.value) return;
+  isLoading.value = true;
+
+  const payload = ref<CreateFeedbackRequestDto>({
+    name: form.name,
+    phoneNumber: form.phone,
+  });
+  try {
+    await feebackApi.sendRequest(payload.value);
+
+    isSuccess.value = true;
+    statusMessage.value = t("common.form.success");
+  } catch (error) {
+    isSuccess.value = false;
+    statusMessage.value = error.data.message ?? 'Неизвестная ошибка';
+  } finally {
+    isLoading.value = false;
+  }
+};
 </script>
 
 <template>
   <div class="container">
     <div class="contacts-container">
-      <div class="form-container">
-        <span class="mb-[0.875rem] text-2xl font-medium">Остались вопросы? Мы готовы вам перезвонить.</span>
-        <input v-model="form.name" placeholder="Имя" />
-        <input v-model="form.phone" placeholder="Номер телефона" v-maska="'+7(###) ###-##-##'"/>
-        <button style="width: max-content">Отправить</button>
-        <p style="color: var(--color-text-context)">
-          Нажимая кнопку <b>«Отправить»</b>,<br>Вы соглашаетесь с нашей <RouterLink to="/privacy">Политикой конфиденциальности</RouterLink>
+
+      <div class="form-container relative-container">
+
+        <StatusOverlay
+            :message="statusMessage"
+            :is-success="isSuccess"
+            @close="reset"
+            class="rounded-(--border-radius-main) m-(--padding-small)"
+        />
+
+        <span class="mb-[0.875rem] text-2xl font-medium">{{ $t('footer.questionTitle') }}</span>
+
+        <input
+            v-model="form.name"
+            :placeholder="$t('common.form.namePlaceholder')"
+            :disabled="isLoading"
+        />
+
+        <input
+            v-model="form.phone"
+            :placeholder="$t('common.form.phonePlaceholder')"
+            v-maska="'+7(###) ###-##-##'"
+            :disabled="isLoading"
+        />
+
+        <button
+            style="width: max-content"
+            @click="submitFeedback"
+            :disabled="!isValid || isLoading"
+        >
+          {{ isLoading ? $t('common.form.sending') : $t('common.form.send') }}
+        </button>
+
+        <p style="color: var(--color-text-context); white-space: pre-line">
+          {{ $t("common.form.privacyText") }}
+          <NuxtLinkLocale to="/privacy">{{ $t("common.form.privacyLink") }}</NuxtLinkLocale>
         </p>
       </div>
-      <div class="separator vertical h-[15rem] m-[2rem]"/>
+
+      <div class="separator vertical h-[15rem] m-[2rem]" />
+
       <div class="form-container">
-        <span class="mb-[0.875rem] text-2xl font-medium">Или свяжитесь с нами самостоятельно.</span>
+        <span class="mb-[0.875rem] text-2xl font-medium">{{ $t("footer.orContact") }}</span>
         <p class="contacts text-xl">
           <b>
-            Номер телефона:<br>
-            <a href="tel:+79166468510">+7(916)646-85-10</a> (Елена)
-            <br>
-            <br>
-            Эл. почта:<br>
-            <a href="mailto:ragdoll-bluebelldolls@mail.ru">ragdoll-bluebelldolls@mail.ru</a>
+            {{ $t("common.contacts.phoneLabel") }}<br />
+            <a :href="`tel:${config.contacts.phoneLink}`">{{ config.contacts.phoneDisplay }}</a> ({{
+              $t("common.contacts.name")
+            }})
+            <br />
+            <br />
+            {{ $t("common.contacts.emailLabel") }}<br />
+            <a :href="`mailto:${config.contacts.email}`">{{ config.contacts.email }}</a>
+            <br />
+            <br />
+            {{ $t("common.contacts.telegramLabel") }}<br />
+            <a :href="config.contacts.telegram">@elena_ragdoll_BlueBellDolls</a>
           </b>
         </p>
       </div>
     </div>
+
     <div class="footer-container">
       <div class="links-container">
         <div class="block-container">
-          <NuxtLink to="/" class="link primary">BlueBellDolls</NuxtLink>
-          <NuxtLink to="/litters" class="link secondary">Котята</NuxtLink>
-          <NuxtLink to="/parentcats?isMale=false" class="link secondary">Кошки</NuxtLink>
-          <NuxtLink to="/parentcats?isMale=true" class="link secondary">Коты</NuxtLink>
-          <NuxtLink to="/gallery" class="link secondary">Галерея</NuxtLink>
+          <NuxtLinkLocale to="/" class="link primary">BlueBellDolls</NuxtLinkLocale>
+          <NuxtLinkLocale to="/litters" class="link secondary">{{ $t("footer.nav.kittens") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/cats/females" class="link secondary">{{ $t("footer.nav.femalecats") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/cats/males" class="link secondary">{{ $t("footer.nav.malecats") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/gallery" class="link secondary">{{ $t("footer.nav.gallery") }}</NuxtLinkLocale>
         </div>
         <div class="block-container">
-          <NuxtLink to="/about" class="link primary">О нас</NuxtLink>
-          <NuxtLink to="/history" class="link secondary">История</NuxtLink>
-          <NuxtLink to="/achievements" class="link secondary">Достижения</NuxtLink>
-          <NuxtLink to="/route" class="link secondary">Как добраться</NuxtLink>
+          <NuxtLinkLocale to="/about" class="link primary">{{ $t("footer.about.aboutUs") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/history" class="link secondary">{{ $t("footer.about.ourStory") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/achievements" class="link secondary">{{ $t("footer.about.achievements") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/route" class="link secondary">{{ $t("footer.about.howToGetToUs") }}</NuxtLinkLocale>
         </div>
         <div class="block-container">
-          <NuxtLink to="/about-ragdoll" class="link primary">Порода Рэгдолл</NuxtLink>
-          <NuxtLink to="/ragdoll-history" class="link secondary">История</NuxtLink>
-          <NuxtLink to="/ragdoll-stats" class="link secondary">Характеристика</NuxtLink>
+          <NuxtLinkLocale to="/about-ragdoll" class="link primary">{{ $t("footer.aboutRagdoll.ragdollBreed") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/ragdoll-history" class="link secondary">{{ $t("footer.aboutRagdoll.ragdollHistory") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/ragdoll-stats" class="link secondary">{{ $t("footer.aboutRagdoll.ragdollCharacteristics") }}</NuxtLinkLocale>
         </div>
         <div class="block-container">
-          <span class="link primary">Приватность</span>
-          <NuxtLink to="/privacy" class="link secondary">Политика конфиденциальности</NuxtLink>
-          <NuxtLink to="/cookies" class="link secondary">Файлы Cookie</NuxtLink>
+          <span class="link primary">{{ $t("footer.privacy.title") }}</span>
+          <NuxtLinkLocale to="/privacy" class="link secondary">{{ $t("footer.privacy.privacyPolicy") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/cookies" class="link secondary">Файлы Cookie</NuxtLinkLocale>
         </div>
         <div class="block-container">
-          <span class="link primary">Соц. сети</span>
-          <a class="link secondary">Telegram</a>
-          <a class="link secondary">Instagram</a>
-          <a class="link secondary">Facebook</a>
-          <a class="link secondary">VK</a>
+          <span class="link primary">{{ $t("footer.socials") }}</span>
+          <a class="link secondary" :href="config.socials.telegram">Telegram</a>
+          <a class="link secondary" :href="config.socials.instagram">Instagram</a>
+          <a class="link secondary" :href="config.socials.facebook">Facebook</a>
+          <a class="link secondary" :href="config.socials.vk">VK</a>
         </div>
       </div>
       <div class="author-container">
-        <p class="dev">Разработка сайта: <button @click="openDeveloperModal" class="link-btn dev-link">Demid Krisov</button></p>
+        <p class="dev">
+          {{ $t("footer.developedBy") }}
+          <button @click="developerModal.open" class="link-btn dev-link">Demid Krisov</button>
+        </p>
       </div>
     </div>
   </div>
 
-
-  <DeveloperModal @close="closeDeveloperModal" :is-open="isDeveloperModalOpen" />
+  <DeveloperModal @close="developerModal.close" :is-open="developerModal.isOpen.value" />
 </template>
 
 <style scoped>
-
 .container {
   display: flex;
   flex-direction: column;
@@ -115,6 +188,11 @@ const closeDeveloperModal = () => {
   flex-direction: column;
   padding: var(--padding-large);
   gap: var(--padding-small);
+}
+
+.relative-container {
+  position: relative;
+  overflow: hidden;
 }
 
 a {
@@ -167,7 +245,6 @@ a:hover {
 }
 
 .dev-link {
-  color: #899DD5;
+  color: #899dd5;
 }
-
 </style>

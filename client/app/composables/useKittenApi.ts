@@ -1,59 +1,81 @@
 ﻿export const useKittenApi = () => {
-    const config = useRuntimeConfig();
-    const apiBase = config.public.apiBase;
-    const route = useRoute();
-    const getById = async (id: number) => {
-        return await useFetch<KittenDetailDto>(`/api/kittens/${id}`, {
-            baseURL: apiBase,
-            lazy: true,
-            key: `kitten-${id}`
-        });
-    }
+  const config = useRuntimeConfig();
+  const apiBase = config.public.apiBase;
+  const route = useRoute();
+  const nuxtApp = useNuxtApp();
 
-    const getAvailableKittens = async () => {
-        return await useFetch<KittenListDto[]>(`/api/kittens`,
-            {
-                baseURL: apiBase,
-                lazy: true,
-                key: `kittens`
-            });
-    }
+  const getById = (
+    idSource: MaybeRefOrGetter<number | undefined>,
+    initialDataSource: MaybeRefOrGetter<KittenDetailDto | null | undefined> = undefined,
+  ) => {
+    const key = computed(() => {
+      const id = toValue(idSource);
+      return id ? `kitten-${id}` : null;
+    });
 
-    const getByPage = async () => {
-        const page = () => route.query.page;
-        if (!page()) {
-            await navigateTo({
-                path: route.path,
-                query: {
-                    ...route.query,
-                    page: '1'
-                }
-            }, { replace: true });
+    return useAsyncData(
+      () => key.value,
+      async () => {
+        const initialData = toValue(initialDataSource);
+        if (initialData) {
+          return initialData;
         }
 
-        return await useFetch<PagedResult<KittenListDto>>(`/api/kittens`, {
+        const id = toValue(idSource);
+        if (id) {
+          return await $fetch<KittenDetailDto>(`/api/kittens/${id}`, {
             baseURL: apiBase,
-            key: `kittens-page-${page()}`,
-            lazy: true,
-            query: {
-                page: page(),
-            }
-        });
-    }
+          });
+        }
+        return null;
+      },
+      {
+        watch: [() => toValue(idSource)],
 
-    const bookKitten = async (customer: BookingDto) => {
-        return await $fetch(`/api/bookingrequests/${customer.kittenId}`, {
-            baseURL: apiBase,
-            method: 'POST',
-            lazy: true,
-            body: customer,
-        });
-    }
+        getCachedData: (key) => {
+          if (toValue(initialDataSource)) return;
+          return nuxtApp.payload.data[key] || nuxtApp.static.data[key];
+        },
+      },
+    );
+  };
 
-    return {
-        getById,
-        getAvailableKittens,
-        getByPage,
-        bookKitten,
+  const getAvailableKittens = async () => {
+    return await useFetch<KittenListDto[]>(`/api/kittens`, {
+      baseURL: apiBase,
+      lazy: true,
+      key: `kittens`,
+    });
+  };
+
+  const getByPage = async () => {
+    const page = () => route.query.page;
+    if (!page()) {
+      await navigateTo(
+        { path: route.path, query: { ...route.query, page: "1" } },
+        { replace: true },
+      );
     }
-}
+    return await useFetch<PagedResult<KittenListDto>>(`/api/kittens`, {
+      baseURL: apiBase,
+      key: `kittens-page-${page()}`,
+      lazy: true,
+      query: { page: page() },
+    });
+  };
+
+  const bookKitten = async (customer: CreateBookingRequestDto) => {
+    return await $fetch(`/api/bookingrequests/`, {
+      baseURL: apiBase,
+      method: "POST",
+      body: customer,
+    });
+  };
+
+  return {
+    getById,
+    getAvailableKittens,
+    getByPage,
+    bookKitten,
+  };
+};

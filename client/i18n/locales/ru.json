@@ -1,0 +1,245 @@
+﻿{
+  "seo": {
+    "titles": {
+      "loading": "Загрузка...",
+
+      "main": "BlueBellDolls - Питомник Рэгдолл №1 в России",
+      "litters": "Наши котята",
+      "litter": "Помёт «{letter}»",
+      "kitten": "Котёнок {name}",
+      "malecats": "Наши коты",
+      "femalecats": "Наши кошки",
+      "cat": "{name}",
+      "catcolors": "Окрасы Рэгдолл",
+      "catcolor": "Окрас: {color}",
+      "gallery": "Галерея",
+
+      "aboutUs": "О нас",
+      "story": "Наша история",
+      "achievements": "Наши достижения",
+      "howToGetToUs": "Как до нас добраться",
+
+      "ragdoll": "Порода Рэгдолл",
+      "ragdollHistory": "История породы Рэгдолл",
+      "ragdollCharacteristics": "Характеристика породы Рэгдолл",
+
+      "privacy": "Политика конфиденциальности"
+    }
+  },
+  "nav": {
+    "kittens": "Котята",
+    "malecats": "Коты",
+    "femalecats": "Кошки",
+    "catcolors": "Окрасы",
+    "gallery": "Галерея"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "thankYou": "Спасибо!",
+    "error": "Ошибка:",
+    "contacts": {
+      "name": "Елена",
+      "phoneLabel": "Номер телефона:",
+      "emailLabel": "Эл. почта:",
+      "telegramLabel": "Telegram:"
+    },
+    "form": {
+      "namePlaceholder": "Имя",
+      "phonePlaceholder": "Номер телефона",
+      "send": "Отправить",
+      "sending": "Отправка...",
+      "success": "Мы перезвоним вам в ближайшее время.",
+      "privacyText": "Нажимая кнопку «Отправить»,\nвы соглашаетесь с нашей",
+      "privacyLink": "Политикой конфиденциальности"
+    }
+  },
+  "pages": {
+    "main": {
+      "title": "Питомник Рэгдолл №1 в России.",
+      "buttonText": "Котята на продажу",
+      "welcomeMessage": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "articles": {
+        "aboutRagdoll": {
+          "title": "О породе рэгдолл",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "availableKittens": {
+          "title": "Свободные котята",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "aboutUs": {
+          "title": "О нас",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "ourFemaleCats": {
+          "title": "Наши кошки",
+          "description": "Узнайте больше о наших прекрасных дамах."
+        },
+        "ourMaleCats": {
+          "title": "Наши коты",
+          "description": "Познакомьтесь с нашими очаровательными мальчиками."
+        }
+      },
+      "kittensWillBeSoon": "Скоро здесь появятся новые котята",
+      "stayTunedForNewKittens": "Готовимся к пополнению в питомнике. Следите за обновлениями, чтобы не пропустить свое счастье.",
+      "kittensForSale": "Котята на продажу",
+      "showMoreKittens": "Показать больше",
+      "ourCatsDescription": "У нашего питомника только лучшие кошки-производители. Убедитесь сами"
+    },
+    "litters": {
+      "title": "Лучшие котята Рэгдолл для вашей семьи.",
+      "welcomeMessage": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "visitInvitationMessage": "Приезжайте к нам в гости! Наш питомник открыт для посещения, вы можете приехать, познакомиться с котятами вживую, сделать фотографии и лично пообщаться с нами. Договориться о посещении можно по телефону или в удобном мессенджере.",
+      "articles": {
+        "kittenBookingRules": {
+          "title": "Условия брони котёнка",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "preparingForTheKittenMove": {
+          "title": "Подготовка к переезду",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "faq": {
+          "title": "Ответы на частые вопросы",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        }
+      }
+    },
+    "cats": {
+      "females": {
+        "title": "Знакомьтесь - наши прекрасные дамы."
+      },
+      "males": {
+        "title": "Знакомьтесь - наши очаровательные мальчики."
+      }
+    },
+    "cat": {
+      "title": "Знакомьтесь - {name}.",
+      "maleButtonText": "Посмотреть других котов",
+      "femaleButtonText": "Посмотреть других кошек"
+    },
+    "catcolors": {
+      "title": "Ознакомьтесь со всеми окрасами Рэгдолл."
+    },
+    "catcolor": {
+      "title": "Окрас: {color}",
+      "buttonText": "Посмотреть другие окрасы"
+    },
+    "kitten": {
+      "title": "Знакомьтесь - {name}.",
+      "buttonText": "Посмотреть других котят"
+    },
+    "litter": {
+      "title": "Вы просматриваете помёт «{letter}».",
+      "buttonText": "Посмотреть других котят"
+    },
+    "privacy": {
+      "title": "Политика конфиденциальности"
+    },
+    "errors": {
+      "notFound": {
+        "title": "Запрашиваемый контент не найден!",
+        "buttonText": "Вернуться на главную"
+      }
+    }
+  },
+  "components": {
+    "common": {
+      "more": "Подробнее",
+      "morePhotos": "Больше фото",
+      "catcolors": {
+        "title": "Окрас: {color}"
+      },
+      "cats": {
+        "gender": "Пол",
+        "maleDefault": "Мужской",
+        "maleCompact": "Мальчик",
+        "femaleDefault": "Женский",
+        "femaleCompact": "Девочка",
+        "color": "Окрас"
+      },
+      "kittens": {
+        "statuses": {
+          "maleAvailable": "Доступен",
+          "femaleAvailable": "Доступна",
+          "maleReserved": "Забронирован",
+          "femaleReserved": "Забронирована",
+          "underObservation": "Под наблюдением",
+          "sold": "В новом доме"
+        },
+        "tips": {
+          "classes": {
+            "Pet": "Домашний любимец. Переезжает уже кастрированным, без права разведения.",
+            "Breed": "Котенок с правом разведения. Подходит для племенной работы.",
+            "Show": "Шоу-класс. Эталон породы, подходит для выставок и разведения."
+          },
+          "statuses": {
+            "Available": "Малыш свободен и готов к знакомству с будущими хозяевами.",
+            "Reserved": "За котенка внесен залог, он ожидает переезда в новую семью.",
+            "UnderObservation": "Мы пока наблюдаем за развитием котенка. Возможно, он станет доступен позже.",
+            "Sold": "Котенок уже нашел свой дом."
+          }
+        },
+        "class": "Класс",
+        "status": "Статус",
+        "book": "Забронировать"
+      },
+      "litters": {
+        "title": "Помёт «{letter}»",
+        "father": "Папа",
+        "mother": "Мама",
+        "totalKittens": "котёнок всего | котёнка всего | котят всего",
+        "availableKittens": "свободен | свободных"
+      }
+    },
+    "detail": {
+      "parentcats": {
+        "photosLabels": {
+          "Photos": "Фото",
+          "Titles": "Титулы",
+          "GenTests": "Ген. тесты"
+        }
+      }
+    },
+    "modals": {
+      "close": "Закрыть",
+      "copyLink": "Скопировать ссылку",
+      "linkCopied": "Ссылка скопирована!",
+      "kittenBooking": {
+        "requestInstruction": "Отличный выбор! Чтобы забронировать котёнка - оставьте заявку по форме ниже, или позвоните нам.",
+        "youBookingKitten": "Вы бронируете котёнка",
+        "youCanCloseThisWindow": "Вы можете закрыть это окно."
+      }
+    },
+    "article": {
+      "follow": "Перейти"
+    }
+  },
+  "footer": {
+    "questionTitle": "Остались вопросы? Мы готовы вам перезвонить.",
+    "orContact": "Или свяжитесь с нами самостоятельно.",
+    "socials": "Соц. сети",
+    "developedBy": "Разработка сайта:",
+    "nav": {
+      "kittens": "Котята",
+      "femalecats": "Кошки",
+      "malecats": "Коты",
+      "gallery": "Галерея"
+    },
+    "about": {
+      "aboutUs": "О нас",
+      "ourStory": "История",
+      "achievements": "Достижения",
+      "howToGetToUs": "Как добраться"
+    },
+    "aboutRagdoll": {
+      "ragdollBreed": "Порода Рэгдолл",
+      "ragdollHistory": "История",
+      "ragdollCharacteristics": "Характеристика"
+    },
+    "privacy": {
+      "title": "Приватность",
+      "privacyPolicy": "Политика конфиденциальности"
+    }
+  }
+}

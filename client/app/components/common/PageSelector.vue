@@ -1,5 +1,4 @@
 ﻿<script setup lang="ts">
-
 const props = defineProps<{
   currentPage: number;
   total: number;
@@ -17,48 +16,60 @@ const pages = computed(() => {
 const prevButton = computed(() => {
   const isDisabled = props.currentPage <= 1;
   return {
-    tag: isDisabled ? 'button' : 'NuxtLink',
+    tag: isDisabled ? "button" : "NuxtLink",
     props: isDisabled
-        ? { disabled: true, class: 'nav-btn arrow-btn' }
-        : { to: getLink(props.currentPage - 1), class: 'nav-btn arrow-btn' }
+      ? { disabled: true, class: "nav-btn arrow-btn" }
+      : { to: getLink(props.currentPage - 1), class: "nav-btn arrow-btn" },
   };
 });
 
 const nextButton = computed(() => {
   const isDisabled = props.currentPage >= props.total;
   return {
-    tag: isDisabled ? 'button' : 'NuxtLink',
+    tag: isDisabled ? "button" : "NuxtLink",
     props: isDisabled
-        ? { disabled: true, class: 'nav-btn arrow-btn' }
-        : { to: getLink(props.currentPage + 1), class: 'nav-btn arrow-btn' }
+      ? { disabled: true, class: "nav-btn arrow-btn" }
+      : { to: getLink(props.currentPage + 1), class: "nav-btn arrow-btn" },
   };
 });
 
 const getLink = (page: number) => `${props.url}?page=${page}`;
-
 </script>
 
 <template>
   <CardWrapper class="controls-container">
     <component :is="prevButton.tag" v-bind="prevButton.props">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M15 19L8 12L15 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M15 19L8 12L15 5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </component>
     <div v-for="page in pages" :key="page" class="pages-container">
-      <span class="nav-btn page-number current" v-if="currentPage == page">{{page}}</span>
-      <NuxtLink class="nav-btn page-number" v-else :to="getLink(page)">{{page}}</NuxtLink>
+      <span class="nav-btn page-number current" v-if="currentPage == page">{{ page }}</span>
+      <NuxtLinkLocale class="nav-btn page-number" v-else :to="getLink(page)">{{
+        page
+      }}</NuxtLinkLocale>
     </div>
     <component :is="nextButton.tag" v-bind="nextButton.props">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M9 19L16 12L9 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M9 19L16 12L9 5"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </component>
   </CardWrapper>
 </template>
 
 <style scoped>
-
 .nav-btn {
   cursor: pointer;
   display: flex;
@@ -66,7 +77,9 @@ const getLink = (page: number) => `${props.url}?page=${page}`;
   justify-content: center;
   padding: 0.8rem 0.725rem;
   border-radius: calc(var(--border-radius-main) - 0.25rem);
-  transition: opacity 0.3s ease, background-color 0.2s;
+  transition:
+    opacity 0.3s ease,
+    background-color 0.2s;
   font-size: 1.25rem;
   font-family: var(--font-family-base);
   font-weight: 600;
@@ -126,5 +139,4 @@ const getLink = (page: number) => `${props.url}?page=${page}`;
   cursor: default;
   pointer-events: none;
 }
-
 </style>

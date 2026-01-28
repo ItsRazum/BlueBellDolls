@@ -1,18 +1,19 @@
 export enum PhotosType {
+  None,
   Photos,
   Titles,
-  GenTests
+  GenTests,
 }
 
 export enum KittenClass {
-    Pet = 'Pet',
-    Breed = 'Breed',
-    Show = 'Show'
+  Pet,
+  Breed,
+  Show,
 }
 
 export enum KittenStatus {
-    Available,
-    UnderObservation,
-    Reserved,
-    Sold
+  Available,
+  UnderObservation,
+  Reserved,
+  Sold,
 }

@@ -2,26 +2,48 @@
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
-  compatibilityDate: '2025-07-15',
+  compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
-  css: ['~/assets/css/main.css'],
+  css: ["~/assets/css/main.css"],
+  modules: ["nuxt-svgo", "@nuxtjs/i18n", "@nuxtjs/color-mode"],
+  svgo: {
+    autoImportPath: "./assets/",
+  },
   vite: {
-      plugins: [
-          tailwindcss()
-      ]
+    plugins: [tailwindcss()],
   },
   runtimeConfig: {
-      public: {
-          apiBase: 'localhost:5070/api'
-      }
+    public: {
+      apiBase: "localhost:5070/api",
+    },
   },
   imports: {
-      dirs: ['types/*.ts', 'types/*.d.ts']
+    dirs: ["types/*.ts", "types/*.d.ts"],
   },
-    components: [
-        {
-            path: '~/components',
-            pathPrefix: false,
-        },
+  components: [
+    {
+      path: "~/components",
+      pathPrefix: false,
+    },
+  ],
+  i18n: {
+    langDir: "locales",
+    locales: [
+      { code: "ru", iso: "ru-RU", file: "ru.json", name: "Русский" },
+      { code: "en", iso: "en-US", file: "en.json", name: "English" },
     ],
+    defaultLocale: "ru",
+    strategy: "prefix_except_default",
+
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: "i18n_redirected",
+      redirectOn: "root",
+    },
+  },
+  colorMode: {
+    classSuffix: '',
+    preference: 'system',
+    fallback: 'light'
+  }
 });

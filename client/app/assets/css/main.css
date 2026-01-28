@@ -1,40 +1,41 @@
-@import './cards.css';
+@import "./cards.css";
 @import "tailwindcss";
 @tailwind base;
 @tailwind components;
 
 main {
-    width: 100%;
-    max-width: 1280px;
-    font-weight: normal;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border-inline: var(--border-global);
-    border-top: none;
-    padding: 0;
+  width: 100%;
+  max-width: 1280px;
+  font-weight: normal;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-inline: var(--border-global);
+  border-top: none;
+  padding: 0;
 }
 
 body {
-    background-color: var(--color-global-background);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    margin: 0;
-    min-height: 100vh;
+  background-color: var(--color-global-background);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 0;
+  min-height: 100vh;
 }
 
 #__nuxt {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 *,
 *::before,
 *::after {
-    transition: background-color 0.3s ease,
+  transition:
+    background-color 0.3s ease,
     color 0.3s ease,
     border-color 0.3s ease,
     fill 0.3s ease,
@@ -43,228 +44,239 @@ body {
 }
 
 @layer base {
+  :root {
+    --color-text-base: #000000;
+    --color-text-light: #ffffff;
+    --color-text-context: #61646b;
+    --color-text-caption: #4e5156;
+    --color-link: #3f5fff;
+    --color-link-hover: #334ecc;
 
-    :root {
-        --color-text-base: #000000;
-        --color-text-light: #ffffff;
-        --color-text-context: #61646B;
-        --color-text-caption: #4E5156;
-        --color-link: #3F5FFF;
-        --color-link-hover: #334ECC;
+    --color-global-background: #eaf9ff;
+    --color-pages-primary-background: #ffffff;
+    --color-pages-secondary-background: #f3fbff;
+    --color-dark-blue: #426784;
 
-        --color-global-background: #EAF9FF;
-        --color-pages-primary-background: #FFFFFF;
-        --color-pages-secondary-background: #F3FBFF;
-        --color-dark-blue: #426784;
+    --color-context-blue: #1d4ed8;
+    --color-background-blue: #f1f5f9;
+    --color-gender-male: #4389ce;
+    --color-gender-female: #ff7bf6;
+    --color-status-available: #419f3c;
+    --color-status-reserved: #eba036;
+    --color-status-unavailable: #e23f3f;
+    --color-kitten-class: #419f3c;
+    --color-button-disabled: #a5a4aa;
 
-        --color-context-blue: #1D4ED8;
-        --color-background-blue: #F1F5F9;
-        --color-gender-male: #4389CE;
-        --color-gender-female: #FF7BF6;
-        --color-status-available: #419F3C;
-        --color-status-reserved: #EBA036;
-        --color-status-unavailable: #E23F3F;
-        --color-kitten-class: #419F3C;
-        --color-button-disabled: #797D7E;
+    --color-skeleton-light-base: #d6d6d6;
+    --color-skeleton-light-higlight: #ebebeb;
 
-        --color-skeleton-light-base: #D6D6D6;
-        --color-skeleton-light-higlight: #EBEBEB;
+    --color-skeleton-dark-base: #cccccc;
+    --color-skeleton-dark-higlight: #e0e0e0;
 
-        --color-skeleton-dark-base: #CCCCCC;
-        --color-skeleton-dark-higlight: #E0E0E0;
+    --color-hover: rgba(102, 103, 124, 0.15);
 
-        --color-hover: rgba(102, 103, 124, 0.15);
+    --color-background-card: rgba(255, 255, 255, 0.7);
+    --color-border-card: rgba(0, 0, 0, 0.2);
+    --color-shadow-card: rgba(0, 0, 0, 0.2);
 
-        --color-background-card: rgba(255, 255, 255, 0.7);
-        --color-border-card: rgba(0, 0, 0, 0.2);
-        --color-shadow-card: rgba(0, 0, 0, 0.20);
+    --font-family-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-size-title: 2.5rem;
 
-        --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        --font-size-title: 2.5rem;
+    --border-radius-main: 0.935rem;
+    --blur-base: 15px;
+    --shadow-base: 0px 3px 10px var(--color-shadow-card);
+    --border-global: none;
 
-        --border-radius-main: 0.935rem;
-        --blur-base: 10px;
-        --shadow-base: 0px 3px 10px var(--color-shadow-card);
-        --border-global: none;
+    --color-primary-button: #2ca1ff;
+    --color-primary-button-hover: #1a90f0;
+    --color-tooltip-background: #334155;
 
-        --color-primary-button: #2CA1FF;
-        --color-primary-button-hover: #1A90F0;
-        --font-size-button: 0.825rem;
+    --color-success-overlay-stroke: #7cdf9e;
+    --color-success-overlay-background: rgba(195, 244, 209, 0.6);
 
-        --padding-small: 0.625rem;
-        --padding-medium: 1rem;
-        --padding-large: 1.25rem;
-        --padding-extra-large: 1.5rem;
-        --padding-pages: 2.5rem;
-    }
+    --color-error-overlay-stroke: #ef5858;
+    --color-error-overlay-background: rgba(244, 195, 197, 0.6);
 
-    :root[data-theme="dark"] {
-        --color-global-background: #0B0D12;
-        --color-pages-primary-background: #1c1c20;
-        --color-pages-secondary-background: #17171c;
-        --color-dark-blue: #1E293B;
+    --font-size-button: 0.825rem;
 
-        --color-background-card: rgba(38, 38, 42, 0.7);
-        --color-border-card: rgba(148, 163, 184, 0.1);
+    --padding-small: 0.625rem;
+    --padding-medium: 1rem;
+    --padding-large: 1.25rem;
+    --padding-extra-large: 1.5rem;
+    --padding-pages: 2.5rem;
+  }
 
-        --color-gender-female: #E494C1;
+  :root[data-theme="dark"] {
+    --color-global-background: #0b0d12;
+    --color-pages-primary-background: #1c1c20;
+    --color-pages-secondary-background: #17171c;
+    --color-dark-blue: #1e293b;
 
-        --color-gender-male: #BAE6FD;
-        --color-status-available: #4ADE80;
-        --color-status-reserved: #FDBA74;
-        --color-status-unavailable: #F87171;
-        --color-text-base: #E2E8F0;
-        --color-text-light: #FFFFFF;
+    --color-background-card: rgba(38, 38, 42, 0.7);
+    --color-border-card: rgba(148, 163, 184, 0.1);
 
-        --color-text-context: #9CA3AF;
-        --color-text-caption: #90959F;
+    --color-gender-female: #e494c1;
 
-        --color-link: #93C5FD;
-        --color-link-hover: #75A7CF;
+    --color-gender-male: #bae6fd;
+    --color-status-available: #4ade80;
+    --color-status-reserved: #fdba74;
+    --color-status-unavailable: #f87171;
+    --color-text-base: #e2e8f0;
+    --color-text-light: #ffffff;
 
-        --color-primary-button: #3B82F6;
-        --color-primary-button-hover: #2563EB;
+    --color-text-context: #9ca3af;
+    --color-text-caption: #90959f;
 
-        --color-background-blue: rgba(100, 100, 100, 0.25);
-        --color-context-blue: #FFFFFF;
+    --color-link: #93c5fd;
+    --color-link-hover: #75a7cf;
 
-        --color-skeleton-light-base: var(--color-skeleton-dark-base);
-        --color-skeleton-light-higlight: var(--color-skeleton-dark-higlight);
+    --color-primary-button: #3b82f6;
+    --color-primary-button-hover: #2563eb;
 
-        --color-skeleton-dark-base: #383B3E;
-        --color-skeleton-dark-higlight: #48545A;
+    --color-background-blue: rgba(100, 100, 100, 0.25);
+    --color-context-blue: #ffffff;
 
-        --color-hover: rgba(255, 255, 255, 0.05);
+    --color-skeleton-light-base: var(--color-skeleton-dark-base);
+    --color-skeleton-light-higlight: var(--color-skeleton-dark-higlight);
 
-        --border-global: 1px solid rgba(255, 255, 255, 0.2);
-    }
+    --color-skeleton-dark-base: #383b3e;
+    --color-skeleton-dark-higlight: #48545a;
 
+    --color-hover: rgba(255, 255, 255, 0.05);
 
-    a, p, span, h1, h2, h3 {
-        color: var(--color-text-base);
-        font-family: var(--font-family-base);
-    }
+    --border-global: 1px solid rgba(255, 255, 255, 0.2);
+  }
 
-    a,
-    .link {
-        color: var(--color-link);
-        font-weight: 525;
-        text-decoration: underline;
-        padding: 0;
-        cursor: pointer;
-    }
-    a,
-    .link:hover {
-        color: var(--color-link-hover);
-        background-color: transparent;
-    }
+  a,
+  p,
+  span,
+  h1,
+  h2,
+  h3 {
+    color: var(--color-text-base);
+    font-family: var(--font-family-base);
+  }
 
-    span {
-        line-height: 1;
-    }
+  a,
+  .link {
+    color: var(--color-link);
+    font-weight: 525;
+    text-decoration: underline;
+    padding: 0;
+    cursor: pointer;
+  }
+  a,
+  .link:hover {
+    color: var(--color-link-hover);
+    background-color: transparent;
+  }
 
+  span {
+    line-height: 1;
+  }
 
+  h1 {
+    font-size: var(--font-size-title);
+    font-weight: bold;
+    margin: 0;
+  }
 
-    h1 {
-        font-size: var(--font-size-title);
-        font-weight: bold;
-        margin: 0;
-    }
+  h2 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: bold;
+    line-height: 1;
+  }
 
-    h2 {
-        font-size: 1.5rem;
-        margin: 0;
-        font-weight: bold;
-        line-height: 1;
-    }
+  p {
+    margin: 0;
+  }
 
-    p {
-        margin: 0;
-    }
-
+  body.scroll-locked .navigation {
+    padding-right: var(--scrollbar-width) !important;
+  }
 }
 
 @layer components {
-    button,
-    .btn {
-        background-color: var(--color-primary-button);
-        color: var(--color-text-light);
-        border: none;
-        border-radius: var(--border-radius-main);
-        cursor: pointer;
+  button,
+  .btn {
+    background-color: var(--color-primary-button);
+    color: var(--color-text-light);
+    border: none;
+    border-radius: var(--border-radius-main);
+    cursor: pointer;
 
-        font-weight: bold;
-        font-size: var(--font-size-button);
-        text-align: center;
+    font-weight: bold;
+    font-size: var(--font-size-button);
+    text-align: center;
 
-        display: block;
-        padding: var(--padding-small) var(--padding-extra-large);
-        transition: background 0.2s;
-        line-height: 1.5;
+    display: block;
+    padding: var(--padding-small) var(--padding-extra-large);
+    transition: background 0.2s;
+    line-height: 1.5;
 
-        box-shadow: var(--shadow-base);
-        text-decoration: none;
-    }
+    box-shadow: var(--shadow-base);
+    text-decoration: none;
+  }
 
-    button:hover,
-    .btn:hover {
-        background-color: var(--color-primary-button-hover);
-    }
+  button:hover,
+  .btn:hover {
+    background-color: var(--color-primary-button-hover);
+  }
 
-    .btn a {
-        text-decoration: none;
-        color: var(--color-text-light);
-    }
+  .btn a {
+    text-decoration: none;
+    color: var(--color-text-light);
+  }
 
-    button:disabled,
-    .btn:disabled {
-        background-color: var(--color-button-disabled);
-        cursor: default;
-    }
+  button:disabled,
+  .btn:disabled {
+    background-color: var(--color-button-disabled);
+    cursor: default;
+  }
 
-    input {
-        padding: var(--padding-small) var(--padding-extra-large);
-        font-size: 1.25rem;
-        outline: none;
-        border: 1px solid var(--color-text-light);
-        color: var(--color-text-base);
-        border-color: var(--color-border-card);
-        box-shadow: var(--shadow-base);
-        border-radius: 8px;
-    }
+  input {
+    padding: var(--padding-small) var(--padding-extra-large);
+    font-size: 1.25rem;
+    outline: none;
+    border: 1px solid var(--color-text-light);
+    color: var(--color-text-base);
+    border-color: var(--color-border-card);
+    box-shadow: var(--shadow-base);
+    border-radius: 8px;
+  }
 
-    .separator {
-        background-color: var(--color-text-context);
-    }
+  .separator {
+    background-color: var(--color-text-context);
+  }
 
-    .separator.vertical {
-        height: 100%;
-        max-height: 700px;
-        width: 1px;
-    }
+  .separator.vertical {
+    height: 100%;
+    max-height: 700px;
+    width: 1px;
+  }
 
-    .separator.horizontal {
-        width: 100%;
-        max-width: 700px;
-        height: 1px;
-    }
+  .separator.horizontal {
+    width: 100%;
+    max-width: 700px;
+    height: 1px;
+  }
 
-    .link-btn {
-        all: unset;
+  .link-btn {
+    all: unset;
 
-        color: var(--color-link);
-        text-decoration: underline;
-        font-weight: 525;
+    color: var(--color-link);
+    text-decoration: underline;
+    font-weight: 525;
 
-        cursor: pointer;
-        font-family: var(--font-family-base);
-        font-size: 1.125rem;
-        transition: color 0.2s;
-    }
+    cursor: pointer;
+    font-family: var(--font-family-base);
+    font-size: 1.125rem;
+    transition: color 0.2s;
+  }
 
-    .link-btn:hover {
-        color: var(--color-link-hover);
-        background-color: transparent;
-    }
+  .link-btn:hover {
+    color: var(--color-link-hover);
+    background-color: transparent;
+  }
 }
-

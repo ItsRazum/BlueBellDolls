@@ -1,12 +1,10 @@
 ﻿<script setup lang="ts">
-
 defineProps<{
-  photoUrl: string,
-  title: string,
-  description: string,
-  redirectUrl: string,
+  photoUrl: string;
+  title: string;
+  description: string;
+  redirectUrl: string;
 }>();
-
 </script>
 
 <template>
@@ -18,14 +16,15 @@ defineProps<{
         <span class="description">{{ description.slice(0, 150) }}</span>
       </CardWrapper>
       <div>
-        <NuxtLink :to="redirectUrl" class="btn">Перейти</NuxtLink>
+        <NuxtLinkLocale :to="redirectUrl" class="btn">{{
+          $t("components.article.follow")
+        }}</NuxtLinkLocale>
       </div>
     </div>
   </CardWrapper>
 </template>
 
 <style scoped>
-
 .card-compact-photo {
   width: 100%;
   height: 13.5rem;
@@ -59,5 +58,4 @@ defineProps<{
   margin: var(--padding-large);
   margin-top: 0;
 }
-
 </style>

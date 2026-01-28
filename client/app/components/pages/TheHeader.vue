@@ -1,5 +1,4 @@
 ﻿<script setup lang="ts">
-
 const props = defineProps<{
   title: string;
   backgroundImage: string;
@@ -12,7 +11,7 @@ const bgStyle = computed(() => `url('${props.backgroundImage}')`);
 const isTop = ref(true);
 
 const handleScroll = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     isTop.value = window.scrollY === 0;
   }
 };
@@ -20,44 +19,64 @@ const handleScroll = () => {
 onMounted(() => {
   handleScroll();
 
-  window.addEventListener('scroll', handleScroll);
+  window.addEventListener("scroll", handleScroll);
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener("scroll", handleScroll);
 });
-
 </script>
 
 <template>
-  <div class="navigation" :class="{'transparent': isTop}">
-    <div class="links-container">
-      <NuxtLink to="/" class="link main" :class="{'transparent': isTop}">BlueBellDolls</NuxtLink>
-      <div class="other-links">
-        <NuxtLink to="/litters?page=1" class="link secondary" :class="{'transparent': isTop}">Помёты</NuxtLink>
-        <NuxtLink to="/parentcats?isMale=false&page=1" class="link secondary" :class="{'transparent': isTop}">Кошки</NuxtLink>
-        <NuxtLink to="/parentcats?isMale=true&page=1" class="link secondary" :class="{'transparent': isTop}">Коты</NuxtLink>
-        <NuxtLink to="/catcolors?page=1" class="link secondary" :class="{'transparent': isTop}">Окрасы</NuxtLink>
-        <NuxtLink to="/gallery" class="link secondary" :class="{'transparent': isTop}">Галерея</NuxtLink>
+  <div class="navigation" :class="{ transparent: isTop }">
+
+    <nav class="navigation-container">
+      <div class="links-container">
+        <NuxtLinkLocale to="/">
+          <SvgoLogo class="link main" :class="{ transparent: isTop }" />
+        </NuxtLinkLocale>
+        <div class="other-links">
+          <NuxtLinkLocale to="/litters" class="link secondary" :class="{ transparent: isTop }">{{
+              $t("nav.kittens")
+            }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/cats/females" class="link secondary" :class="{ transparent: isTop }">{{
+              $t("nav.femalecats")
+            }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/cats/males" class="link secondary" :class="{ transparent: isTop }">{{
+              $t("nav.malecats")
+            }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/catcolors" class="link secondary" :class="{ transparent: isTop }">{{
+              $t("nav.catcolors")
+            }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/gallery" class="link secondary" :class="{ transparent: isTop }">{{
+              $t("nav.gallery")
+            }}</NuxtLinkLocale>
+        </div>
       </div>
-    </div>
+
+      <div>
+        <SvgoMoon/>
+      </div>
+    </nav>
   </div>
   <div class="image-container">
     <div class="title-container">
-      <h1 class="title">{{title}}</h1>
-      <NuxtLink class="button-link" v-if="buttonUrl" :to="buttonUrl">{{buttonText}}</NuxtLink>
+      <h1 class="title">{{ $t(title) }}</h1>
+      <NuxtLinkLocale class="button-link" v-if="buttonUrl" :to="buttonUrl">{{
+        $t(buttonText ?? "")
+      }}</NuxtLinkLocale>
     </div>
   </div>
+  <span class="indev">Сайт находится в разработке<br>некоторые элементы могут претерпеть изменения в итоговой версии.</span>
 </template>
 
 <style scoped>
-
 .navigation {
   z-index: 100;
   background-color: var(--color-background-card);
   backdrop-filter: blur(var(--blur-base));
   -webkit-backdrop-filter: blur(var(--blur-base));
-  padding: 0.750rem 0;
+  padding: 0.75rem 0;
   border: 1px solid var(--color-border-card);
   display: flex;
   justify-content: center;
@@ -76,12 +95,20 @@ onUnmounted(() => {
   backdrop-filter: none;
 }
 
+.navigation-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  width: 100%;
+  max-width: 1280px;
+}
+
 .links-container {
   display: flex;
   align-items: center;
+  flex-direction: row;
   gap: 4.75rem;
-  width: 100%;
-  max-width: 1280px;
 }
 
 .other-links {
@@ -95,16 +122,19 @@ onUnmounted(() => {
 }
 
 .link.main {
-  font-size: 1.75rem;
-  font-weight: bold;
-  padding-left: 2rem;
+  font-size: 190px;
+  height: auto;
+  margin-bottom: 0;
+  margin-top: 0.5rem;
 }
 
 .link.secondary {
   font-size: 1.25rem;
-  padding: var(--padding-small)  var(--padding-large);
+  padding: var(--padding-small) var(--padding-large);
   border-radius: var(--border-radius-main);
-  transition: backdrop-filter 0.3s, background-color 0.3s;
+  transition:
+    backdrop-filter 0.3s,
+    background-color 0.3s;
 }
 
 .link.transparent {
@@ -161,4 +191,13 @@ onUnmounted(() => {
   background-color: rgb(235, 235, 245);
 }
 
+.indev {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 20px;
+  color: red;
+  z-index: 1000;
+  font-weight: bold
+}
 </style>

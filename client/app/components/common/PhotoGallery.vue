@@ -1,60 +1,67 @@
 ﻿<script setup lang="ts">
-
-import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination } from "swiper/modules";
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
 
-const props = withDefaults(defineProps<{
-  photos: PhotoDto[];
-  aspectRatio?: '4:3' | '1:1';
-  controlsPosition?: 'outside' | 'inside';
-}>(), {
-  aspectRatio: '4:3',
-  controlsPosition: 'outside',
-});
+const config = useRuntimeConfig();
+const apiBaseUrl = config.public.apiBase;
+
+const props = withDefaults(
+  defineProps<{
+    photos: PhotoDto[];
+    aspectRatio?: "4:3" | "1:1";
+    controlsPosition?: "outside" | "inside";
+  }>(),
+  {
+    aspectRatio: "4:3",
+    controlsPosition: "outside",
+  },
+);
 
 const modules = [Navigation, Pagination];
 
 const prevButton = ref(null);
 const nextButton = ref(null);
-
 </script>
 
 <template>
   <div class="gallery-wrapper" :class="[`mode-${controlsPosition}`]">
-
     <button ref="prevButton" class="nav-btn prev-btn">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M15 19L8 12L15 5"
-              :stroke="controlsPosition === 'inside' ? 'white' : 'var(--color-text-base)'"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M15 19L8 12L15 5"
+          :stroke="controlsPosition === 'inside' ? 'white' : 'var(--color-text-base)'"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
 
     <swiper
-        :style="{
+      :style="{
         '--swiper-navigation-color': '#ffffff',
         '--swiper-pagination-color': '#ffffff',
         'max-width': props.aspectRatio == '4:3' ? '37.5rem' : '25rem',
       }"
-        :space-between="10"
-        :pagination="{ clickable: true }"
-        :navigation="{
+      :space-between="10"
+      :pagination="{ clickable: true }"
+      :navigation="{
         prevEl: prevButton,
         nextEl: nextButton,
       }"
-        :modules="modules"
-        class="main-swiper"
+      :modules="modules"
+      class="main-swiper"
     >
       <swiper-slide v-for="photo in photos" :key="photo.id">
         <div class="image-container">
           <img
-              :class="props.aspectRatio === '4:3' ? 'image-4x3' : 'image-1x1'"
-              :src="photo.url"
-              loading="lazy"
-              alt="cat photo"
+            :class="props.aspectRatio === '4:3' ? 'image-4x3' : 'image-1x1'"
+            :src="apiBaseUrl + photo.url"
+            loading="lazy"
+            alt="cat photo"
           />
         </div>
       </swiper-slide>
@@ -62,16 +69,19 @@ const nextButton = ref(null);
 
     <button ref="nextButton" class="nav-btn next-btn">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        <path d="M9 19L16 12L9 5"
-              :stroke="controlsPosition === 'inside' ? 'white' : 'var(--color-text-base)'"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path
+          d="M9 19L16 12L9 5"
+          :stroke="controlsPosition === 'inside' ? 'white' : 'var(--color-text-base)'"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
       </svg>
     </button>
   </div>
 </template>
 
 <style scoped>
-
 .gallery-wrapper {
   display: flex;
   align-items: center;
@@ -118,7 +128,10 @@ const nextButton = ref(null);
   height: 2.625rem;
   border-radius: 50%;
   opacity: 0;
-  transition: opacity 0.3s ease, transform 0.2s ease, background-color 0.2s;
+  transition:
+    opacity 0.3s ease,
+    transform 0.2s ease,
+    background-color 0.2s;
   z-index: 10;
 }
 
@@ -185,7 +198,6 @@ const nextButton = ref(null);
   cursor: default;
 }
 
-
 :deep(.swiper-pagination) {
   position: relative;
   bottom: 0;
@@ -206,5 +218,4 @@ const nextButton = ref(null);
   opacity: 0.7;
   transform: scale(1.1);
 }
-
 </style>

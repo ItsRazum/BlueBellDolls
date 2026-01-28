@@ -1,39 +1,67 @@
 ﻿export const useLitterApi = () => {
-    const config = useRuntimeConfig();
-    const apiBase = config.public.apiBase;
-    const route = useRoute();
+  const config = useRuntimeConfig();
+  const apiBase = config.public.apiBase;
+  const route = useRoute();
+  const nuxtApp = useNuxtApp();
 
-    const getById = async (id: number) => {
-        return await useFetch<KittenDetailDto>(`/api/litters/${id}`, {
+  const getById = (
+    idSource: MaybeRefOrGetter<number | undefined>,
+    initialDataSource: MaybeRefOrGetter<LitterDetailDto | null | undefined> = undefined,
+  ) => {
+    const key = computed(() => {
+      const id = toValue(idSource);
+      return id ? `litter-${id}` : null;
+    });
+
+    return useAsyncData(
+      () => key.value,
+      async () => {
+        const initialData = toValue(initialDataSource);
+        if (initialData) return initialData;
+
+        const id = toValue(idSource);
+        if (id) {
+          return await $fetch<LitterDetailDto>(`/api/litters/${id}`, {
             baseURL: apiBase,
-            key: `litter-${id}`
-        });
-    }
-
-    const getByPage = async () => {
-        const page = () => route.query.page;
-        if (!page()) {
-            await navigateTo({
-                path: route.path,
-                query: {
-                    ...route.query,
-                    page: '1'
-                }
-            }, { replace: true });
+          });
         }
+        return null;
+      },
+      {
+        watch: [() => toValue(idSource)],
+        getCachedData: (key) => {
+          if (toValue(initialDataSource)) return;
+          return nuxtApp.payload.data[key] || nuxtApp.static.data[key];
+        },
+      },
+    );
+  };
 
-        return await useFetch<PagedResult<KittenListDto>>(`/api/litters`, {
-            baseURL: apiBase,
-            key: `litters-page-${page()}`,
-            lazy: true,
-            query: {
-                page: page()
-            }
+  const getByPage = () => {
+    const page = () => route.query.page || "1";
+
+    const key = `litters-page-${page()}`;
+
+    return useAsyncData(
+      key,
+      async () => {
+        return await $fetch<PagedResult<LitterListDto>>(`/api/litters`, {
+          baseURL: apiBase,
+          query: {
+            page: page(),
+          },
         });
-    }
+      },
+      {
+        watch: [() => route.query.page],
+        lazy: true,
+        getCachedData: (key) => nuxtApp.payload.data[key] || nuxtApp.static.data[key],
+      },
+    );
+  };
 
-    return {
-        getById,
-        getByPage,
-    }
-}
+  return {
+    getById,
+    getByPage,
+  };
+};

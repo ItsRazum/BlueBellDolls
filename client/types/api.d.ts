@@ -1,26 +1,29 @@
-import { PhotosType } from '../enums/enums.ts';
+import { PhotosType } from "../enums/enums.ts";
 
 declare global {
-    export interface PagedResult<T> {
-        items: T[];
-        pageNumber: number;
-        pageSize: number;
-        totalItems: number;
-        totalPages: number;
-    }
+  export interface PagedResult<T> {
+    items: T[];
+    pageNumber: number;
+    pageSize: number;
+    totalItems: number;
+    totalPages: number;
+  }
 
-    export interface PhotoDto {
-        id: number;
-        url: string;
-        type: PhotosType;
-        isMain: boolean;
-    }
+  export interface PhotoDto {
+    id: number;
+    url: string;
+    type: PhotosType;
+    isMain: boolean;
+  }
 
-    export interface BookingDto {
-        id: number;
-        name: string;
-        phoneNumber: string;
-        kittenId: number;
-    }
+  export interface CreateBookingRequestDto {
+    name: string;
+    phoneNumber: string;
+    kittenId: number;
+  }
+
+  export interface CreateFeedbackRequestDto {
+    name: string;
+    phoneNumber: string;
+  }
 }
-

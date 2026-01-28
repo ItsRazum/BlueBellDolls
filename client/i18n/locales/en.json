@@ -1,0 +1,186 @@
+﻿{
+  "nav": {
+    "kittens": "Kittens",
+    "malecats": "Male cats",
+    "femalecats": "Female cats",
+    "catcolors": "Cat colors",
+    "gallery": "Gallery"
+  },
+  "common": {
+    "contacts": {
+      "phoneLabel": "Phone Number:",
+      "emailLabel": "Email:",
+      "telegramLabel": "Telegram:"
+    },
+    "form": {
+      "namePlaceholder": "Name",
+      "phonePlaceholder": "Phone number",
+      "send": "Send",
+      "sending": "Sending...",
+      "success": "We will call you back shortly!\nYou can close this window now.",
+      "privacyText": "By clicking \"Send\", you agree to our",
+      "privacyLink": "Privacy Policy"
+    }
+  },
+  "pages": {
+    "main": {
+      "title": "The #1 Ragdoll Cattery in Russia.",
+      "buttonText": "Kittens for sale",
+      "welcomeMessage": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "articles": {
+        "aboutRagdoll": {
+          "title": "About Ragdolls",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "availableKittens": {
+          "title": "Available Kittens",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "aboutUs": {
+          "title": "About us",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "ourFemaleCats": {
+          "title": "Our Females",
+          "description": "Learn more about our beautiful ladies."
+        },
+        "ourMaleCats": {
+          "title": "Our Males",
+          "description": "Meet our charming boys."
+        }
+      },
+      "kittensWillBeSoon": "There will be new kittens here soon",
+      "stayTunedForNewKittens": "We are preparing for a new addition to the cattery. Stay tuned for updates so you don't miss out on your own little kitten.",
+      "kittensForSale": "Kittens for Sale",
+      "showMoreKittens": "Show more",
+      "ourCatsDescription": "Our cattery only has the best cats.\nSee for yourself"
+    },
+    "litters": {
+      "title": "The Best Ragdoll Kittens for Your Family.",
+      "welcomeMessage": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+      "visitInvitationMessage": "Come visit us! Our cattery is open to visitors. You are welcome to meet the kittens in person, take photos, and chat with us. You can schedule a visit by phone or via your preferred messenger.",
+      "articles": {
+        "kittenBookingRules": {
+          "title": "Reservation Terms",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "preparingForTheKittenMove": {
+          "title": "Preparing for the Move",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        "faq": {
+          "title": "Frequently Asked Questions",
+          "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        }
+      }
+    },
+    "femalecats": {
+      "title": "Meet our beautiful ladies."
+    },
+    "malecats": {
+      "title": "Meet our charming boys."
+    },
+    "catcolors": {
+      "title": "Explore all Ragdoll colors."
+    }
+  },
+  "components": {
+    "common": {
+      "more": "More",
+      "morePhotos": "More photos",
+      "catcolors": {
+        "title": "Color:"
+      },
+      "cats": {
+        "gender": "Gender",
+        "maleDefault": "Male",
+        "maleCompact": "Male",
+        "femaleDefault": "Female",
+        "femaleCompact": "Female",
+        "color": "Color"
+      },
+      "kittens": {
+        "statuses": {
+          "maleAvailable": "Available",
+          "femaleAvailable": "Available",
+          "maleReserved": "Reserved",
+          "femaleReserved": "Reserved",
+          "underObservation": "Under observation",
+          "sold": "Found a home"
+        },
+        "tips": {
+          "classes": {
+            "Pet": "Pet class. Moves to a new home already neutered/spayed, not for breeding.",
+            "Breed": "Kitten with breeding rights. Suitable for breeding programs.",
+            "Show": "Show class. Breed standard, suitable for exhibitions and breeding."
+          },
+          "statuses": {
+            "Available": "The kitten is free and ready to meet future owners.",
+            "Reserved": "A deposit has been paid; the kitten is awaiting the move to a new family.",
+            "UnderObservation": "We are currently observing the kitten's development. It may become available later.",
+            "Sold": "The kitten has already found its home."
+          }
+        },
+        "class": "Class",
+        "status": "Status",
+        "book": "Reserve"
+      },
+      "litters": {
+        "title": "Litter",
+        "father": "Father",
+        "mother": "Mother",
+        "totalKittens": "kitten total | kittens total",
+        "availableKittens": "available"
+      }
+    },
+    "detail": {
+      "parentcats": {
+        "photosLabels": {
+          "Photos": "Photos",
+          "Titles": "Titles",
+          "GenTests": "Gen. tests"
+        }
+      }
+    },
+    "modals": {
+      "close": "Close",
+      "copyLink": "Copy link",
+      "linkCopied": "Link copied!",
+      "kittenBooking": {
+        "requestInstruction": "Excellent choice! To book a kitten - leave a request in the form below, or call us.",
+        "youBookingKitten": "You're booking kitten",
+        "youCanCloseThisWindow": "You can close this window now."
+      }
+    },
+    "article": {
+      "follow": "Read more"
+    }
+  },
+  "footer": {
+    "questionTitle": "Have questions? We are ready to call you back.",
+    "orContact": "Or contact us directly.",
+    "socials": "Socials",
+    "developedBy": "Website developed by:",
+    "nav": {
+      "kittens": "Kittens",
+      "femalecats": "Females",
+      "malecats": "Males",
+      "gallery": "Gallery"
+    },
+    "about": {
+      "aboutUs": "About Us",
+      "ourStory": "Our Story",
+      "achievements": "Achievements",
+      "howToGetToUs": "Location"
+    },
+    "aboutRagdoll": {
+      "ragdollBreed": "The Ragdoll Breed",
+      "ragdollHistory": "History",
+      "ragdollCharacteristics": "Characteristics"
+    },
+    "privacy": {
+      "title": "Privacy",
+      "privacyPolicy": "Privacy Policy"
+    }
+  }
+}

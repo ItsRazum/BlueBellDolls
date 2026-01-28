@@ -1,81 +1,97 @@
 ﻿<script setup lang="ts">
-
 definePageMeta({
-  title: "Питомник Рэгдолл №1 в России.",
+  title: "pages.main.title",
   backgroundImage: "/header.jpg",
-  buttonText: "Котята на продажу",
-  buttonUrl: "/litters"
-})
+  buttonText: "pages.main.buttonText",
+  buttonUrl: "/litters",
+});
 
 const kittenApi = useKittenApi();
 
 const { data: kittens, pending } = await kittenApi.getAvailableKittens();
-
 </script>
 
 <template>
-  <main>
-    <div class="articles-container">
-      <Article title="О породе рэгдолл"
-               photo-url="photo.png"
-               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-               redirect-url="/about-ragdoll"/>
-      <Article title="Свободные котята"
-               photo-url="photo.png"
-               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-               redirect-url="/litters"/>
-      <Article title="О нас"
-               photo-url="photo.png"
-               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-               redirect-url="/about"/>
+  <div class="articles-container">
+    <Article
+      :title="$t('pages.main.articles.aboutRagdoll.title')"
+      photo-url="photo.png"
+      :description="$t('pages.main.articles.aboutRagdoll.description')"
+      redirect-url="/about-ragdoll"
+    />
+    <Article
+      :title="$t('pages.main.articles.availableKittens.title')"
+      photo-url="photo.png"
+      :description="$t('pages.main.articles.availableKittens.description')"
+      redirect-url="/litters"
+    />
+    <Article
+      :title="$t('pages.main.articles.aboutUs.title')"
+      photo-url="photo.png"
+      :description="$t('pages.main.articles.aboutUs.description')"
+      redirect-url="/about"
+    />
+  </div>
+  <div class="first-message-container">
+    <MessageBox imageUrl="/photo.png" :text="$t('pages.main.welcomeMessage')" />
+  </div>
+  <div v-if="pending" class="kittens-container">
+    <h2 class="text-3xl">{{ $t("pages.main.kittensForSale") }}</h2>
+    <div class="carousel-wrapper">
+      <KittenListItemSkeleton variant="compact" />
+      <KittenListItemSkeleton variant="compact" />
+      <KittenListItemSkeleton variant="compact" />
     </div>
-    <div class="first-message-container">
-      <MessageBox imageUrl="/photo.png" text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." />
+  </div>
+  <div v-else-if="kittens.length === 0" class="kittens-container">
+    <div class="no-kittens-container">
+      <span class="font-bold text-3xl text-white">{{ $t("pages.main.kittensWillBeSoon") }}</span>
+      <span class="text-2xl text-white text-center">{{
+        $t("pages.main.stayTunedForNewKittens")
+      }}</span>
     </div>
-    <div v-if="pending" class="kittens-container">
-      <h2 class="text-3xl">Котята на продажу</h2>
-      <div class="carousel-wrapper">
-        <KittenListItemSkeleton variant="compact"/>
-        <KittenListItemSkeleton variant="compact"/>
-        <KittenListItemSkeleton variant="compact"/>
-      </div>
+  </div>
+  <div v-else-if="kittens.length < 4" class="kittens-container">
+    <h2 class="text-3xl">{{ $t("pages.main.kittensForSale") }}</h2>
+    <div class="carousel-wrapper">
+      <KittenListItem
+        variant="compact"
+        v-for="kitten in kittens"
+        :key="kitten.id"
+        :kitten="kitten"
+      />
     </div>
-    <div v-else-if="kittens.length === 0" class="kittens-container">
-      <div class="no-kittens-container">
-        <span class="font-bold text-3xl text-white">Скоро здесь появятся новые котята</span>
-        <span class="text-2xl text-white text-center">Готовимся к пополнению в питомнике. Следите за обновлениями, чтобы не пропустить свое счастье.</span>
-      </div>
+    <NuxtLinkLocale to="litters" class="text-[1.25rem]">{{
+      $t("pages.main.showMoreKittens")
+    }}</NuxtLinkLocale>
+  </div>
+  <div v-else class="kittens-container">
+    <h2 class="text-3xl">{{ $t("pages.main.kittensForSale") }}</h2>
+    <KittensCarousel :kittens="kittens" />
+    <NuxtLinkLocale to="litters" class="text-[1.25rem]">{{
+      $t("pages.main.showMoreKittens")
+    }}</NuxtLinkLocale>
+  </div>
+  <div class="cats-container">
+    <span class="kittens-title">{{ $t("pages.main.ourCatsDescription") }}</span>
+    <div class="cats-articles-container">
+      <Article
+        :title="$t('pages.main.articles.ourFemaleCats.title')"
+        photo-url="photo.png"
+        :description="$t('pages.main.articles.ourFemaleCats.description')"
+        redirect-url="/femalecats"
+      />
+      <Article
+        :title="$t('pages.main.articles.ourMaleCats.title')"
+        photo-url="photo.png"
+        :description="$t('pages.main.articles.ourMaleCats.description')"
+        redirect-url="/malecats"
+      />
     </div>
-    <div v-else-if="kittens.length < 4" class="kittens-container">
-      <h2 class="text-3xl">Котята на продажу</h2>
-      <div class="carousel-wrapper">
-        <KittenListItem variant="compact" v-for="kitten in kittens" :key="kitten.id" :kitten="kitten" />
-      </div>
-      <RouterLink to="litters" class="text-[1.25rem]">Показать больше</RouterLink>
-    </div>
-    <div v-else class="kittens-container">
-      <h2 class="text-3xl">Котята на продажу</h2>
-      <KittensCarousel :kittens="kittens" />
-      <RouterLink to="litters" class="text-[1.25rem]">Показать больше</RouterLink>
-    </div>
-    <div class="cats-container">
-      <span class="kittens-title">У нашего питомника только лучшие кошки-производители. Убедитесь сами</span>
-      <div class="cats-articles-container">
-        <Article title="Наши кошки"
-                 photo-url="photo.png"
-                 description="Узнайте больше о наших прекрасных дамах"
-                 redirect-url="/litters"/>
-        <Article title="Наши коты"
-                 photo-url="photo.png"
-                 description="Познакомьтесь с нашими очаровательными мальчиками"
-                 redirect-url="/about"/>
-      </div>
-    </div>
-  </main>
+  </div>
 </template>
 
 <style scoped>
-
 .articles-container {
   display: flex;
   justify-content: center;
@@ -143,5 +159,4 @@ const { data: kittens, pending } = await kittenApi.getAvailableKittens();
   max-width: 55rem;
   text-align: center;
 }
-
 </style>
