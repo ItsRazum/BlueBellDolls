@@ -40,13 +40,13 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var entityId = int.Parse(args.Last());
 
             var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
-            var entity = await managementService.GetEntityAsync(entityId, token);
+            var result = await managementService.GetEntityAsync(entityId, token);
 
-            if (entity == null || entity.Photos.Count == 0) return;
+            if (!result.Success || result.Value?.Photos.Count is null or 0) return;
 
             await BotService.DeleteMessageAsync(c.Chat, c.MessageId, token);
 
-            await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, entity, token);
+            await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, result.Value, token);
         }
     }
 }

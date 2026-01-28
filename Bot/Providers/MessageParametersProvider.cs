@@ -67,12 +67,12 @@ namespace BlueBellDolls.Bot.Providers
             IEnumerable<TEntity> entities, 
             ListUnitActionMode actionMode, 
             (int page, int totalPagesCount, int totalEntitiesCount) pageParameters,
-            IEntity? unitOwner = null) 
+            int? litterOwnerId = null) 
             where TEntity : class, IDisplayableEntity
         {
             return new MessageParameters(
                 _messagesProvider.CreateEntityListMessage<TEntity>(actionMode, pageParameters.totalEntitiesCount),
-                _keyboardsProvider.CreateEntityListKeyboard(entities, actionMode, 1, (pageParameters.page, pageParameters.totalPagesCount), unitOwner));
+                _keyboardsProvider.CreateEntityListKeyboard(entities, actionMode, 1, (pageParameters.page, pageParameters.totalPagesCount), litterOwnerId));
         }
 
         public MessageParameters GetEntityFromLitterParameters(IDisplayableEntity entity, int litterId)

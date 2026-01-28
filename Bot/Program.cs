@@ -15,14 +15,14 @@ using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using BlueBellDolls.Bot.Interfaces.Factories;
-using BlueBellDolls.Bot.Interfaces.Services.Api;
 using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Providers;
-using BlueBellDolls.Bot.Interfaces.Management;
-using BlueBellDolls.Bot.Interfaces.Management.Base;
 using BlueBellDolls.Bot.Interfaces.ValueConverters;
 using BlueBellDolls.Common.Providers;
 using CatColor = BlueBellDolls.Common.Models.CatColor;
+using BlueBellDolls.Bot.Interfaces.Services.Api;
+using BlueBellDolls.Bot.Interfaces.Services.Management;
+using BlueBellDolls.Bot.Interfaces.Services.Management.Base;
 
 internal class Program
 {
@@ -96,8 +96,10 @@ internal class Program
             .AddScoped<ICatColorApiClient, CatColorApiClient>()
             .AddScoped<IBookingApiClient, BookingApiClient>()
             .AddScoped<IConfigurationApiClient, ConfigurationApiClient>()
+            .AddScoped<IFeedbackApiClient, FeedbackApiClient>()
 
             .AddScoped<IBookingManagementService, BookingManagementService>()
+            .AddScoped<IFeedbackManagementService, FeedbackManagementService>()
 
             .AddScoped<KittenManagementService>()
             .AddScoped<IKittenManagementService>(s => s.GetRequiredService<KittenManagementService>())

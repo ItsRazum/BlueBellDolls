@@ -42,27 +42,17 @@ namespace BlueBellDolls.Bot.Callbacks.ParentCats
             var pageIndex = int.Parse(args[2]);
             var litterId = int.Parse(args.Last());
 
-            var litter = await _managementServicesFactory
-                .GetEntityManagementService<Litter>()
-                .GetEntityAsync(litterId, token);
-
-            if (litter == null)
-            {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(typeof(Litter), litterId), token: token);
-                return;
-            }
-
             var result = await _managementServicesFactory
                 .GetParentCatManagementService()
                 .GetByPageAsync(isMale, pageIndex, _inlineKeyboardsSettings.PageSize, token);
 
             if (result.Success)
             {
-                var page = result.Result!;
+                var page = result.Value!;
                 await BotService.EditOrSendNewMessageAsync(
                     c.Chat,
                     c.MessageId,
-                    _messageParametersProvider.GetEntityListParameters(page.Items, Enums.ListUnitActionMode.Select, (pageIndex, page.TotalPages, page.TotalItems), litter),
+                    _messageParametersProvider.GetEntityListParameters(page.Items, Enums.ListUnitActionMode.Select, (pageIndex, page.TotalPages, page.TotalItems), litterId),
                     token);
             }
 

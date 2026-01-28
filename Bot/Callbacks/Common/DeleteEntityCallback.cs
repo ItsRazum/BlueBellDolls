@@ -39,27 +39,27 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var entityId = int.Parse(args.Last());
             var managementService = _managementServiceFactory.GetEntityManagementService<TEntity>();
-            var entity = await managementService.GetEntityAsync(entityId, token);
+            var result = await managementService.GetEntityAsync(entityId, token);
 
-            if (entity == null)
+            if (!result.Success)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
                 return;
             }
 
-            var onDeletionCanceledCallback = CallbackDataProvider.CreateEditEntityCallback(entity);
+            var onDeletionCanceledCallback = CallbackDataProvider.CreateEditEntityCallback(result.Value!);
 
             if (args.Contains("fromLitter"))
             {
                 var litterId = int.Parse(args[2]);
-                onDeletionCanceledCallback = CallbackDataProvider.CreateOpenEntityInLitterCallback(entity, litterId);
+                onDeletionCanceledCallback = CallbackDataProvider.CreateOpenEntityInLitterCallback(result.Value!, litterId);
             }
 
             await BotService.EditOrSendNewMessageAsync(
                 c.Chat, 
                 c.MessageId,
                 _messageParametersProvider.GetDeleteEntityConfirmationParameters(
-                    entity,
+                    result.Value!,
                     c.CallbackData,
                     onDeletionCanceledCallback), 
                 token);

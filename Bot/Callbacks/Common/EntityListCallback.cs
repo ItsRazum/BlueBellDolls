@@ -1,13 +1,13 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Enums;
-using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Bot.Types;
-using Microsoft.Extensions.Options;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Interfaces;
-using CatColor = BlueBellDolls.Common.Models.CatColor;
 using BlueBellDolls.Bot.Interfaces.Factories;
 using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
+using CatColor = BlueBellDolls.Common.Models.CatColor;
 
 namespace BlueBellDolls.Bot.Callbacks.Common
 {
@@ -47,14 +47,9 @@ namespace BlueBellDolls.Bot.Callbacks.Common
 
                 // Проверяем, есть ли информация о владельце (например, список котят *для* помёта 5)
                 // Если длина 5, значит есть владелец (индекс 4)
-                var ownerId = listArgs.Length == 5
-                    ? int.Parse(listArgs[4]) : 0; // ID владельца или 0, если нет
-
-                var owner = ownerId == 0 
-                    ? null 
-                    : await _managementServicesFactory
-                    .GetEntityManagementService<Litter>()
-                    .GetEntityAsync(ownerId, token); //Могут быть проблемы, если владельцем в будущем сможет быть не только Litter
+                int? ownerId = listArgs.Length == 5
+                    ? int.Parse(listArgs[4]) : null; // ID владельца или 0, если нет
+                //Могут быть проблемы, если владельцем в будущем сможет быть не только Litter
 
                 var pageIndex = int.Parse(args.Last());
                 var result = await _managementServicesFactory
@@ -63,11 +58,11 @@ namespace BlueBellDolls.Bot.Callbacks.Common
 
                 if (result.Success)
                 {
-                    var page = result.Result!;
+                    var page = result.Value!;
                     await BotService.EditOrSendNewMessageAsync(
                         c.Chat,
                         c.MessageId,
-                        _messageParametersProvider.GetEntityListParameters(page.Items, actionType, (pageIndex, page.TotalPages, page.TotalItems), owner),
+                        _messageParametersProvider.GetEntityListParameters(page.Items, actionType, (pageIndex, page.TotalPages, page.TotalItems), ownerId),
                         token);
                 }
             }

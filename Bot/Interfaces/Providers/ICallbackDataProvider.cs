@@ -41,7 +41,7 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
         string CreateBackToLitterCallback(int litterId);
         string CreateListEntityCallback(string entityName, int page);
         string CreateDeleteEntityCallback(IDisplayableEntity entity, int fromLitterId = 0);
-        string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null);
+        string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, int? litterOwnerId = null);
         string CreateAddEntityCallback(string entityName);
         string CreateManagePhotosCallback(IDisplayableEntity entity, PhotosType photosType);
         string CreateTogglePhotoSelectionCallback(IDisplayableEntity entity, int photoId, bool select, PhotosType photosType);

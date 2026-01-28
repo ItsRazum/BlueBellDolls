@@ -1,8 +1,8 @@
 ﻿using BlueBellDolls.Bot.Adapters;
 using BlueBellDolls.Bot.Interfaces.Factories;
-using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.Services.Management;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Enums;
@@ -45,7 +45,7 @@ namespace BlueBellDolls.Bot.Callbacks.Booking
             var kittenId = int.Parse(args.Last());
             var kittenManagementService = _managementServicesFactory.GetKittenManagementService();
             var result = await kittenManagementService.UpdateStatusAsync(kittenId, kittenStatus, token);
-            if (result.Success && result.Result != null)
+            if (result.Success && result.Value != null)
             {
                 await BotService.EditOrSendNewMessageAsync(
                     c.Chat,

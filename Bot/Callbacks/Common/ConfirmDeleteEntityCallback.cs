@@ -48,7 +48,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 c.CallbackId, 
                 result.Success 
                 ? _messagesProvider.CreateEntityDeletionSuccess() 
-                : result.ErrorText!,
+                : _messagesProvider.CreateUnknownErrorMessage(result.Message),
                 token: token);
 
             var pageResult = await managementService.GetByPageAsync(1, _inlineKeyboardSettings.PageSize, token);
@@ -57,9 +57,9 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                     c.Chat, 
                     c.MessageId, 
                     _messageParametersProvider.GetEntityListParameters(
-                        pageResult.Result!.Items,
+                        pageResult.Value!.Items,
                         Enums.ListUnitActionMode.Edit, 
-                        (1, pageResult.Result.TotalPages, pageResult.Result.TotalItems)), 
+                        (1, pageResult.Value.TotalPages, pageResult.Value.TotalItems)), 
                     token);
         }
     }

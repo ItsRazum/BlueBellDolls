@@ -11,7 +11,7 @@ namespace BlueBellDolls.Bot.Services.Api
     {
         private readonly ILogger<KittenApiClient> _logger = logger;
 
-        public async Task<List<KittenListDto>?> GetListAsync(KittenStatus? status = null, CancellationToken token = default)
+        public async Task<ServiceResult<List<KittenListDto>>> GetListAsync(KittenStatus? status = null, CancellationToken token = default)
         {
             var requestUrl = "/api/admin/kittens";
             if (status.HasValue)
@@ -19,65 +19,65 @@ namespace BlueBellDolls.Bot.Services.Api
 
             try
             {
-                return await HttpClient.GetFromJsonAsync<List<KittenListDto>>(requestUrl, token);
+                var response = await HttpClient.GetAsync(requestUrl, token);
+                return await FromResponse<List<KittenListDto>>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь список Kitten с сервера!", nameof(KittenApiClient), nameof(GetListAsync));
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<KittenDetailDto?> AddAsync(CreateKittenDto dto, CancellationToken token = default)
+        public async Task<ServiceResult<KittenDetailDto>> AddAsync(CreateKittenDto dto, CancellationToken token = default)
         {
             var requestUrl = "/api/admin/kittens";
 
             try
             {
                 var response = await HttpClient.PostAsJsonAsync(requestUrl, dto, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<KittenDetailDto>(token);
+                return await FromResponse<KittenDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось добавить новую сущность Kitten!", nameof(KittenApiClient), nameof(AddAsync));
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<KittenDetailDto?> UpdateAsync(int id, UpdateKittenDto dto, CancellationToken token = default)
+        public async Task<ServiceResult<KittenDetailDto>> UpdateAsync(int id, UpdateKittenDto dto, CancellationToken token = default)
         {
             var requestUrl = $"/api/admin/kittens/{id}";
 
             try
             {
                 var response = await HttpClient.PutAsJsonAsync(requestUrl, dto, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<KittenDetailDto?>(token);
+                return await FromResponse<KittenDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить Kitten {id}!", nameof(KittenApiClient), nameof(UpdateAsync), id);
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<PagedResult<KittenMinimalDto>?> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<KittenMinimalDto>>> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default)
         {
             var requestUrl = $"/api/admin/kittens?page={pageIndex}&pageSize={pageSize}";
 
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<KittenMinimalDto>>(requestUrl, token);
+                var response = await HttpClient.GetAsync(requestUrl, token);
+                return await FromResponse<PagedResult<KittenMinimalDto>>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось получить страницу {p} списка Kitten!", nameof(KittenApiClient), nameof(GetByPageAsync), pageIndex);
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<KittenDetailDto?> UpdateColorAsync(int entityId, string color, CancellationToken token)
+        public async Task<ServiceResult<KittenDetailDto>> UpdateColorAsync(int entityId, string color, CancellationToken token)
         {
             var requestUrl = $"/api/admin/kittens/{entityId}/color";
 
@@ -85,18 +85,17 @@ namespace BlueBellDolls.Bot.Services.Api
             {
                 var request = new UpdateColorRequest(color);
                 var response = await HttpClient.PutAsJsonAsync(requestUrl, request, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<KittenDetailDto>(token);
+                return await FromResponse<KittenDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить цвет для Kitten {id}!",
                     nameof(KittenApiClient), nameof(UpdateColorAsync), entityId);
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<KittenDetailDto?> UpdateStatusAsync(int entityId, KittenStatus newStatus, CancellationToken token)
+        public async Task<ServiceResult<KittenDetailDto>> UpdateStatusAsync(int entityId, KittenStatus newStatus, CancellationToken token)
         {
             var requestUrl = $"/api/admin/kittens/{entityId}/status";
 
@@ -104,18 +103,17 @@ namespace BlueBellDolls.Bot.Services.Api
             {
                 var request = new UpdateKittenStatusRequest(newStatus);
                 var response = await HttpClient.PostAsJsonAsync(requestUrl, request, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<KittenDetailDto>(token);
+                return await FromResponse<KittenDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить статус для Kitten {id}!",
-                    nameof(KittenApiClient), nameof(UpdateColorAsync), entityId);
-                return null;
+                    nameof(KittenApiClient), nameof(UpdateStatusAsync), entityId);
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<KittenDetailDto?> UpdateClassAsync(int entityId, KittenClass newClass, CancellationToken token)
+        public async Task<ServiceResult<KittenDetailDto>> UpdateClassAsync(int entityId, KittenClass newClass, CancellationToken token)
         {
             var requestUrl = $"/api/admin/kittens/{entityId}/class";
 
@@ -123,14 +121,13 @@ namespace BlueBellDolls.Bot.Services.Api
             {
                 var request = new UpdateKittenClassRequest(newClass);
                 var response = await HttpClient.PostAsJsonAsync(requestUrl, request, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<KittenDetailDto>(token);
+                return await FromResponse<KittenDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить класс для Kitten {id}!",
-                    nameof(KittenApiClient), nameof(UpdateColorAsync), entityId);
-                return null;
+                    nameof(KittenApiClient), nameof(UpdateClassAsync), entityId);
+                return new(500, "Неизвестная ошибка");
             }
         }
     }

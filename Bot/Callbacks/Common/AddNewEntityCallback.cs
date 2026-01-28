@@ -7,6 +7,7 @@ using BlueBellDolls.Common.Interfaces;
 using CatColor = BlueBellDolls.Common.Models.CatColor;
 using BlueBellDolls.Bot.Interfaces.Factories;
 using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Callbacks.Common
 {
@@ -14,17 +15,20 @@ namespace BlueBellDolls.Bot.Callbacks.Common
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IMessagesProvider _messagesProvider;
 
         public AddNewEntityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory)
+            IManagementServicesFactory managementServicesFactory,
+            IMessagesProvider messagesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messageParametersProvider = messageParametersProvider;
             _managementServicesFactory = managementServicesFactory;
+            _messagesProvider = messagesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetAddEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetAddEntityCallback<Litter>(), HandleCommandAsync<Litter>);
@@ -36,11 +40,11 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
             var result = await managementService.AddNewEntityAsync(token);
 
-            if (result.Result != null)
-                await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
+            if (result.Success)
+                await BotService.EditMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Value!), token);
 
             else
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
         }
     }
 }

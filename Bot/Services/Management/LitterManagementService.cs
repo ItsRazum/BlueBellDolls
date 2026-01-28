@@ -1,12 +1,11 @@
-﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Extensions;
-using BlueBellDolls.Bot.Interfaces.Management;
+﻿using BlueBellDolls.Bot.Extensions;
 using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Services.Api;
-using BlueBellDolls.Bot.Records;
+using BlueBellDolls.Bot.Interfaces.Services.Management;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Extensions;
+using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 
@@ -23,6 +22,7 @@ namespace BlueBellDolls.Bot.Services.Management
             litterApiClient,
             messagesProvider,
             photosDownloaderService,
+            entityFormService,
             logger), ILitterManagementService
     {
         private readonly ILitterApiClient _litterApiClient = litterApiClient;
@@ -33,144 +33,89 @@ namespace BlueBellDolls.Bot.Services.Management
 
         protected override Func<LitterDetailDto?, Litter?> DtoToEntityFunc => (dto) => dto?.ToEFModel();
 
-        public override async Task<ManagementOperationResult<Litter>> AddNewEntityAsync(CancellationToken token = default)
+        public override async Task<ServiceResult<Litter>> AddNewEntityAsync(CancellationToken token = default)
         {
             try
             {
                 var dto = new CreateLitterDto(
                     BirthDay: DateOnly.FromDateTime(DateTime.Now),
-                    Description: "Добавьте описание!",
+                    Description: string.Empty,
                     MotherCatId: null,
                     FatherCatId: null
                 );
 
-                var resultDto = await _litterApiClient.AddAsync(dto, token);
+                var result = await _litterApiClient.AddAsync(dto, token);
 
-                if (resultDto != null)
-                    return new(true, null, resultDto.ToEFModel());
+                if (result != null)
+                    return new(result.StatusCode, result.Message, result.Value?.ToEFModel());
 
-                return new(false, _messagesProvider.CreateEntityAdditionErrorMessage());
+                return new(500, _messagesProvider.CreateEntityAdditionErrorMessage());
             }
             catch (Exception ex)
             {
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
 
-        public override async Task<ManagementOperationResult<Litter>> UpdateEntityByReplyAsync(
-            int modelId,
-            Dictionary<string, string> properties,
-            CancellationToken token = default)
-        {
-            try
-            {
-                var currentDto = await _litterApiClient.GetAsync(modelId, token);
-                if (currentDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityFailureMessage());
-
-                var tempEfModel = currentDto.ToEFModel();
-                foreach (var (propertyName, value) in properties)
-                {
-                    if (!_entityFormService.UpdateProperty(tempEfModel, propertyName, value))
-                        return new(false, _messagesProvider.CreatePropertyUpdateFailureMessage(propertyName));
-                }
-
-                return await UpdateEntityAsync(tempEfModel, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при обновлении Litter {id}", modelId);
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
-        }
-
-        public override async Task<ManagementOperationResult<Litter>> UpdateEntityAsync(Litter entity, CancellationToken token = default)
-        {
-            try
-            {
-                var updateDto = entity.ToUpdateDto();
-                var result = await _litterApiClient.UpdateAsync(entity.Id, updateDto, token);
-                if (result == null)
-                    return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
-
-                return new(true, null, result.ToEFModel());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Не удалось обновить Litter {id}!", entity.Id);
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
-        }
-
-        public override async Task<ManagementOperationResult<PagedResult<Litter>>> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default)
+        public override async Task<ServiceResult<PagedResult<Litter>>> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default)
         {
             try
             {
                 var result = await _litterApiClient.GetByPageAsync(pageIndex, pageSize, token);
 
-                if (result != null)
-                {
-                    return new(true, null, new PagedResult<Litter>(
-                        [.. result.Items.Select(dto => dto.ToEFModel())],
-                        result.PageNumber,
-                        result.PageSize,
-                        result.TotalItems,
-                        result.TotalPages));
-                }
+                var page = result.Value;
+                if (page == null)
+                    return new(result.StatusCode, result.Message);
 
-                return new(false, _messagesProvider.CreateApiGetPageFailureMessage<Litter>());
+                return new(result.StatusCode, result.Message, new PagedResult<Litter>(
+                    [.. page.Items.Select(dto => dto.ToEFModel())],
+                    page.PageNumber,
+                    page.PageSize,
+                    page.TotalItems,
+                    page.TotalPages));
             }
             catch (Exception ex)
             {
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Не удалось обновить получить страницу Litter!");
+                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
 
-        public async Task<ManagementOperationResult<Kitten>> AddNewKittenToLitterAsync(int litterId, CancellationToken token)
+        public async Task<ServiceResult<Kitten>> AddNewKittenToLitterAsync(int litterId, CancellationToken token)
         {
             try
             {
                 var kittenDto = new CreateKittenDto(
                     LitterId: litterId,
-                    Name: "Новый котёнок",
+                    Name: string.Empty,
                     IsMale: true,
-                    Description: "Добавьте описание!",
-                    Color: "Не указан",
+                    Description: string.Empty,
                     Class: KittenClass.Pet,
                     Status: KittenStatus.Available);
                 var result = await _litterApiClient.AddKittenAsync(litterId, kittenDto, token);
-                return new(true, null, result?.ToEFModel());
+                return new(result.StatusCode, result.Message, result.Value?.ToEFModel());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{Service}.{Method}(): Произошла необработанная ошибка", nameof(LitterManagementService), nameof(AddNewKittenToLitterAsync));
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
 
-        public async Task<ManagementOperationResult<Litter>> SetParentCatForLitterAsync(int litterId, int parentCatId, CancellationToken token)
+        public async Task<ServiceResult<StructWrapper<(bool isMale, Litter litter)>>> SetParentCatForLitterAsync(int litterId, int parentCatId, CancellationToken token)
         {
             try
             {
-                var parentCat = await _parentCatApiClient.GetAsync(parentCatId, token);
-                if (parentCat != null)
-                {
-                    var result = parentCat.IsMale
-                        ? await _litterApiClient.SetFatherCatAsync(litterId, parentCatId, token)
-                        : await _litterApiClient.SetMotherCatAsync(litterId, parentCatId, token);
+                var result = await _litterApiClient.SetParentCatAsync(litterId, parentCatId, token);
+                if (result.Value == null)
+                    return new(result.StatusCode, result.Message);
 
-                    if (result == null)
-                        return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
-
-                    return new(true, Result: result.ToEFModel());
-                }
-
-                return new(false, _messagesProvider.CreateEntityNotFoundMessage(typeof(ParentCat), parentCatId));
+                return new(result.StatusCode, result.Message, new((result.Value.IsMale, result.Value.Litter.ToEFModel())));
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{Service}.{Method}(): Произошла необработанная ошибка", nameof(LitterManagementService), nameof(SetParentCatForLitterAsync));
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
     }

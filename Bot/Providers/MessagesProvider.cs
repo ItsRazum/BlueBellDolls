@@ -7,6 +7,7 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
+using System.Drawing;
 using System.Globalization;
 using System.Text;
 using Telegram.Bot.Types;
@@ -53,15 +54,17 @@ namespace BlueBellDolls.Bot.Providers
         #region IMessagesProvider implementation
 
         public string CreateStartMessage()
-            => "Это главное меню панели управления сайтом BlueBellDolls.\n" 
-             + "\n" + "📌 Основные команды:\n" 
-             + "├ /newcat - Создать нового производителя\n" 
-             + "└ /newlitter - Создать новый помёт\n" 
+            => "Это главное меню панели управления сайтом BlueBellDolls.\n"
              + "\n" 
-             + "📂 Списки сущностей:\n" 
-             + "├ /catlist - Список производителей\n" 
-             + "├ /kittenlist - Список всех котят\n" 
-             + "└ /litterlist - Список всех помётов\n" 
+             + "📌 Основные команды:\n"
+             + "├ /newcat - Создать нового производителя\n"
+             + "└ /newlitter - Создать новый помёт\n"
+             + "\n"
+             + "📂 Списки сущностей:\n"
+             + "├ /catlist - Список производителей\n"
+             + "├ /kittenlist - Список всех котят\n"
+             + "├ /litterlist - Список всех помётов\n"
+             + "└ /catcolorlist - Список всех окрасов\n"
              + "\n" 
              + "ℹ️ Инструкция по редактированию:\n" 
              + "Используйте ответ на сообщение сущности с новыми значениями в формате:\n" 
@@ -101,12 +104,12 @@ namespace BlueBellDolls.Bot.Providers
                     "   ▪ Удалите ненужные",
 
                 PhotosType.Titles =>
-                    "🏆 Управление титулами:\n" +
+                    "🏆 <b>Управление титулами</b>:\n" +
                     $"├ Текущее количество: {counter}\n" +
                     "└ Укажите номера для удаления",
 
                 PhotosType.GenTests =>
-                    "🧬 Генетические тесты:\n" +
+                    "🧬 <b>Генетические тесты</b>:\n" +
                     $"├ Загружено: {counter}\n" +
                     "└ Укажите номера для удаления",
 
@@ -152,7 +155,7 @@ namespace BlueBellDolls.Bot.Providers
         }
 
         public string CreateDeletePhotosConfirmationMessage(IDisplayableEntity entity, int[] selectedPhotoIds, int[] sendedPhotoMessageIds)
-            => $"⚠️ Подтвердите удаление {selectedPhotoIds.Length} фото:\n" 
+            => $"⚠️ Подтвердите удаление <b>{selectedPhotoIds.Length}</b> фото:\n" 
              + $"Сущность: {entity.DisplayName} ({entity.GetType().Name} {entity.Id})\n" 
              + $"Ключи : ID сообщений:\n" 
              + $"{string.Join(", ", selectedPhotoIds)} : {string.Join(", ", sendedPhotoMessageIds)}";
@@ -176,9 +179,9 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateCouldNotExtractMessagesFromCallbackMessage(CallbackQueryAdapter c)
             => $"❌ Ошибка обработки callback: {c.CallbackData}";
 
-        public string CreateParentCatSetForLitter(ParentCat parentCat, Litter litter)
+        public string CreateParentCatSetForLitter(bool isMale, Litter litter)
         {
-            var parentGender = parentCat.IsMale ? "папа" : "мама";
+            var parentGender = isMale ? "папа" : "мама";
             return
                 $"✅ Установлен родитель ({parentGender}):\n" +
                 $"├ Для помёта: {litter.Letter}\n" +
@@ -197,14 +200,14 @@ namespace BlueBellDolls.Bot.Providers
             => CreateEntityNotFoundMessage();
 
         public string CreateColorSetSuccessfullyMessage(string color)
-            => $"🎨 Цвет успешно установлен: {color}";
+            => $"🎨 Окрас успешно установлен: {color}";
 
         public string CreateColorPickerMessage(Cat cat, string buildedColor)
         {
             var parts = buildedColor.Split('_', StringSplitOptions.RemoveEmptyEntries);
             var sb = new StringBuilder();
 
-            sb.AppendLine($"🎨 Выбор цвета для {cat.DisplayName} ({cat.GetType().Name} {cat.Id})")
+            sb.AppendLine($"🎨 Выбор цвета для <b>{cat.DisplayName}</b> ({cat.GetType().Name} {cat.Id})")
               .AppendLine("══════════════════════════");
 
             int counter = 1;
@@ -312,7 +315,7 @@ namespace BlueBellDolls.Bot.Providers
             => "❌ Не удалось изменить видимость сущности: сервер не ответил или отклонил запрос";
 
         public string CreateKittenClassSelectionMenuMessage(Kitten kitten)
-            => $"🎖 Выбор класса для {kitten.DisplayName} ({kitten.GetType().Name} {kitten.Id})\n" +
+            => $"🎖 Выбор класса для <b>{kitten.DisplayName}</b> ({kitten.GetType().Name} {kitten.Id})\n" +
                $"Текущее значение: {kitten.Class}\n" +
                "══════════════════════════\n" +
                "➡️ Сделайте выбор, указав нужный класс";
@@ -321,7 +324,7 @@ namespace BlueBellDolls.Bot.Providers
             => $"✅ Котёнок {kitten.DisplayName} успешно получил класс «{kitten.Class}»!";
 
         public string CreateKittenStatusSelectionMenuMessage(Kitten kitten)
-            => $"📌 Выбор статуса для {kitten.DisplayName} ({kitten.GetType().Name} {kitten.Id})\n" +
+            => $"📌 Выбор статуса для <b>{kitten.DisplayName}</b> ({kitten.GetType().Name} {kitten.Id})\n" +
                $"Текущее значение: {_enumMapperService.GetMapping(kitten.Status)}\n" +
                "══════════════════════════\n" +
                "➡️ Сделайте выбор, указав нужный статус";
@@ -353,16 +356,16 @@ namespace BlueBellDolls.Bot.Providers
         {
             return
                 (enableEdit ? $"{nameof(ParentCat)} {parentCat.Id}\n\n" : "") +
-                $"🐾 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Name)]}: {parentCat.Name}\n" +
+                $"🐾 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Name)]}: {ValueOrNull(parentCat.Name) ?? "Новый производитель"}\n" +
                 $"📅 {_entityFormSettings.ParentCatProperties[nameof(parentCat.BirthDay)]}: {parentCat.BirthDay.ToString(new CultureInfo("ru-RU"))}\n" +
                 $"♂♀ {_entityFormSettings.ParentCatProperties[nameof(parentCat.IsMale)]}: {(parentCat.IsMale ? "мужской" : "женский")}\n" +
-                $"🎨 Окрас: {parentCat.Color}\n" +
+                $"🎨 Окрас: {parentCat.Color?.DisplayName ?? "Не указан"}\n" +
                 "\n" +
                 $"📸 Фото: {parentCat.Photos.Where(p => p.Type == PhotosType.Photos).Count()}/{_photosLimitsService.GetLimit<ParentCat>(PhotosType.Photos)}\n" +
                 $"🏆 Титулы: {parentCat.Photos.Where(p => p.Type == PhotosType.Titles).Count()}/{_photosLimitsService.GetLimit<ParentCat>(PhotosType.Titles)}\n" +
                 $"🧬 Тесты: {parentCat.Photos.Where(p => p.Type == PhotosType.GenTests).Count()}/{_photosLimitsService.GetLimit<ParentCat>(PhotosType.GenTests)}\n" +
                 "\n" +
-                $"📝 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Description)]}:\n{parentCat.Description}\n" +
+                $"📝 {_entityFormSettings.ParentCatProperties[nameof(parentCat.Description)]}:\n{ValueOrNull(parentCat.Description) ?? "Добавьте описание!"}\n" +
                 "══════════════════════════";
         }
 
@@ -380,7 +383,7 @@ namespace BlueBellDolls.Bot.Providers
                 $"📸 Фото: {litter.Photos.Count}/{_photosLimitsService.GetLimit<Litter>(PhotosType.Photos)}\n" +
                 $"🐱 Котят: {litter.Kittens.Count}\n" +
                 "\n" +
-                $"📝 {_entityFormSettings.LitterProperties[nameof(litter.Description)]}:\n{litter.Description}\n" +
+                $"📝 {_entityFormSettings.LitterProperties[nameof(litter.Description)]}:\n{ValueOrNull(litter.Description) ?? "Добавьте описание!"}\n" +
                 "══════════════════════════";
         }
 
@@ -388,15 +391,15 @@ namespace BlueBellDolls.Bot.Providers
         {
             return
                 (enableEdit ? $"{nameof(Kitten)} {kitten.Id}\n\n" : "") +
-                $"🐾 {_entityFormSettings.KittenProperties[nameof(kitten.Name)]}: {kitten.Name}\n" +
+                $"🐾 {_entityFormSettings.KittenProperties[nameof(kitten.Name)]}: {ValueOrNull(kitten.Name) ?? "Новый котёнок"}\n" +
                 $"📅 {_entityFormSettings.KittenProperties[nameof(kitten.BirthDay)]}: {kitten.BirthDay.ToString(new CultureInfo("ru-RU"))}\n" +
                 $"♂♀ {_entityFormSettings.KittenProperties[nameof(kitten.IsMale)]}: {(kitten.IsMale ? "мужской" : "женский")}\n" +
-                $"🎨 Окрас: {kitten.Color}\n" +
+                $"🎨 Окрас: {kitten.Color?.DisplayName ?? "Не указан"}\n" +
                 "\n" +
                 $"🏅 {_entityFormSettings.KittenProperties[nameof(kitten.Class)]}: {kitten.Class}\n" +
                 $"📌 {_entityFormSettings.KittenProperties[nameof(kitten.Status)]}: {_enumMapperService.GetMapping(kitten.Status, kitten.IsMale)}\n" +
                 "\n" +
-                $"📝 {_entityFormSettings.KittenProperties[nameof(kitten.Description)]}:\n{kitten.Description}\n" +
+                $"📝 {_entityFormSettings.KittenProperties[nameof(kitten.Description)]}:\n{ValueOrNull(kitten.Description) ?? "Добавьте описание!"}\n" +
                 $"📸 Фото: {kitten.Photos.Count}/{_photosLimitsService.GetLimit<Kitten>(PhotosType.Photos)}\n" +
                 "══════════════════════════";
         }
@@ -405,10 +408,18 @@ namespace BlueBellDolls.Bot.Providers
         {
             return
                 (enableEdit ? $"{nameof(CatColor)} {color.Id}\n\n" : "") +
-                $"🎨 Идентификатор: {color.Identifier}\n" +
+                $"🎨 Идентификатор: {ValueOrNull(color.Identifier) ?? "Неизвестен"}\n" +
                 $"\n" +
-                $"📝 {_entityFormSettings.CatColorProperties[nameof(color.Description)]}: {color.Description}\n" +
+                $"📝 {_entityFormSettings.CatColorProperties[nameof(color.Description)]}: {ValueOrNull(color.Description) ?? "Добавьте описание!"}\n" +
                 $"📸 Фото: {color.Photos.Count}/{_photosLimitsService.GetLimit<CatColor>(PhotosType.Photos)}\n";
+        }
+
+        private static string? ValueOrNull(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return null;
+
+            return value;
         }
 
         #endregion

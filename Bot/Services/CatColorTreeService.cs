@@ -21,11 +21,11 @@ namespace BlueBellDolls.Bot.Services
             {
                 return cachedTree;
             }
-            var tree = await _catColorApiClient.GetCatColorTreeAsync(token);
+            var result = await _catColorApiClient.GetCatColorTreeAsync(token);
             var cacheEntryOptions = new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-            _memoryCache.Set(_cacheKey, tree, cacheEntryOptions);
-            return tree;
+            _memoryCache.Set(_cacheKey, result, cacheEntryOptions);
+            return result.Value;
         }
 
         public async Task<bool> ForceUpdateCatColorTree(CancellationToken token = default)

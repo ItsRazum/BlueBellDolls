@@ -53,15 +53,15 @@ namespace BlueBellDolls.Bot.Providers
             ListUnitActionMode actionMode = ListUnitActionMode.Edit,
             int rowLength = 1,
             (int page, int totalPagesCount)? pageParameters = null,
-            IEntity? unitOwner = null)
+            int? litterOwnerId = null)
             where TEntity : class, IDisplayableEntity
         {
             var result = new InlineKeyboardMarkup();
-            if (unitOwner != null)
-                result.AddNewRow(CreateBackToLitterButton(unitOwner.Id));
+            if (litterOwnerId != null)
+                result.AddNewRow(CreateBackToLitterButton(litterOwnerId.Value));
 
             foreach (var chunk in entities.OrderBy(e => e.DisplayName).Chunk(rowLength))
-                result.AddNewRow([.. chunk.Select(e => CreateListEntityReferenceButton(e, actionMode, unitOwner))]);
+                result.AddNewRow([.. chunk.Select(e => CreateListEntityReferenceButton(e, actionMode, litterOwnerId))]);
 
             if (pageParameters != null)
                 result.AddNewRow(CreatePageControlsButtons<TEntity>(pageParameters.Value));
@@ -370,11 +370,11 @@ namespace BlueBellDolls.Bot.Providers
             );
         }
 
-        private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
+        private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, int? litterOwnerId = null)
         {
             return InlineKeyboardButton.WithCallbackData(
                 $"{(entity.IsEnabled ? "" : "(Скрыто) ")}" + entity.DisplayName + $" (Id {entity.Id})",
-                _callbackDataProvider.CreateEntityReferenceCallback(entity, actionMode, unitOwner)
+                _callbackDataProvider.CreateEntityReferenceCallback(entity, actionMode, litterOwnerId)
             );
         }
 

@@ -39,9 +39,9 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             var kittenId = int.Parse(args.Last());
             
             var kittenManagementService = _managementServicesFactory.GetEntityManagementService<Kitten>();
-            var kitten = await kittenManagementService.GetEntityAsync(kittenId, token);
+            var result = await kittenManagementService.GetEntityAsync(kittenId, token);
 
-            if (kitten == null)
+            if (!result.Success)
             {
                 await BotService.AnswerCallbackQueryAsync(
                     c.CallbackId,
@@ -53,7 +53,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             await BotService.EditOrSendNewMessageAsync(
                 c.Chat,
                 c.MessageId,
-                _messageParametersProvider.GetKittenClassParameters(kitten),
+                _messageParametersProvider.GetKittenClassParameters(result.Value!),
                 token: token);
         }
     }

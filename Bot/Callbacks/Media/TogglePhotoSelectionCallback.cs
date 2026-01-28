@@ -45,11 +45,11 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1] PhotoIndex, [2]bool Select, [3] PhotosManagementMode, [4]EntityId
             var entityId = int.Parse(args.Last());
 
-            var entity = await _managementServicesFactory
+            var result = await _managementServicesFactory
                 .GetEntityManagementService<TEntity>()
                 .GetEntityAsync(entityId, token);
 
-            if (entity == null)
+            if (!result.Success)
             {
                 await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
@@ -70,7 +70,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
                 c.Chat, 
                 c.MessageId, 
                 _messageParametersProvider.GetEntityPhotosParameters(
-                    entity,
+                    result.Value!,
                     photoManagementMode,
                     [..photoIds.Order()], 
                     [..photoMessageIds]),

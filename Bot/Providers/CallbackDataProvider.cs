@@ -130,10 +130,10 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateDeleteEntityCallback(IDisplayableEntity entity, int fromLitterId = 0)
             => $"{_settings.DeleteEntity}{entity.GetType().Name}{(fromLitterId != 0 ? $"{Separator}fromLitter{Separator}{fromLitterId}" : string.Empty)}{Separator}{entity.Id}";
 
-        public string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, IEntity? unitOwner = null)
+        public string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, int? litterOwnerId = null)
         {
             var entityType = entity.GetType().Name;
-            if (unitOwner == null)
+            if (litterOwnerId == null)
             {
                 var searchQuery = $"{entity.Id}";
                 if (entity is ICanBeFoundWithName canBeFoundWithName && entity.Id == 0)
@@ -146,7 +146,7 @@ namespace BlueBellDolls.Bot.Providers
                 if (actionMode != ListUnitActionMode.Select)
                     throw new ArgumentException("При указанном владельце сущности режим работы может быть только Select!");
 
-                return $"{_settings.SelectToLitter}{Separator}{unitOwner.Id}{Separator}{entityType}{Separator}{entity.Id}";
+                return $"{_settings.SelectToLitter}{Separator}{litterOwnerId}{Separator}{entityType}{Separator}{entity.Id}";
             }
         }
 

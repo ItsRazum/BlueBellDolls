@@ -1,5 +1,5 @@
-﻿using BlueBellDolls.Bot.Interfaces.Management;
-using BlueBellDolls.Bot.Interfaces.Management.Base;
+﻿using BlueBellDolls.Bot.Interfaces.Services.Management;
+using BlueBellDolls.Bot.Interfaces.Services.Management.Base;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Types;
 

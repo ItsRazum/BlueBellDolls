@@ -1,13 +1,13 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Bot.Types;
-using Microsoft.Extensions.Options;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Bot.Interfaces.Factories;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Callbacks.Media
 {
@@ -39,15 +39,15 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
 
             var managementService = _managementServicesFactory.GetEntityManagementService<ParentCat>();
-            var entity = await managementService.GetEntityAsync(int.Parse(args.Last()), token);
+            var result = await managementService.GetEntityAsync(int.Parse(args.Last()), token);
 
-            if (entity == null)
+            if (!result.Success)
             {
                 await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
             }
 
-            await _messagesHelperService.SendDeleteTitlesConfirmationAsync(c, entity, token);
+            await _messagesHelperService.SendDeleteTitlesConfirmationAsync(c, result.Value!, token);
         }
     }
 }

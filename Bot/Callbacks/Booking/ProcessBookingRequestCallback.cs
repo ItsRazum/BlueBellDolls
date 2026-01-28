@@ -1,7 +1,7 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Interfaces.Services.Management;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
@@ -38,12 +38,12 @@ namespace BlueBellDolls.Bot.Callbacks.Booking
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var bookingId = int.Parse(args.Last());
             var result = await _bookingManagementService.ProcessBookingRequestAsync(bookingId, c.From!.Id, token);
-            if (result.Success && result.Result != null)
+            if (result.Success && result.Value != null)
             {
                 await BotService.EditOrSendNewMessageAsync(
                     c.Chat,
                     c.MessageId,
-                    _messageParametersProvider.GetBookingProcessingParameters(result.Result, c.From),
+                    _messageParametersProvider.GetBookingProcessingParameters(result.Value, c.From),
                     token);
             }
             else

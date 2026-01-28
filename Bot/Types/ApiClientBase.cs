@@ -8,14 +8,14 @@ namespace BlueBellDolls.Bot.Types
     {
         private readonly ILogger _logger = logger;
 
-        protected async Task<EntityFilesUploadResult<TDto>?> UploadFilesAsync(
+        protected async Task<ServiceResult<EntityFilesUploadResult<TDto>>> UploadFilesAsync(
             string requestUrl,
             IEnumerable<(Stream fileStream, string fileName, string fileId)> files,
             CancellationToken token)
         {
             if (files == null || !files.Any())
             {
-                return null;
+                return new(403, "Нет файлов для загрузки");
             }
 
             try
@@ -36,12 +36,12 @@ namespace BlueBellDolls.Bot.Types
                 var response = await HttpClient.PostAsync(requestUrl, content, token);
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<EntityFilesUploadResult<TDto>>(token);
+                return await FromResponse<EntityFilesUploadResult<TDto>>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось загрузить файлы на сервер!");
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
     }

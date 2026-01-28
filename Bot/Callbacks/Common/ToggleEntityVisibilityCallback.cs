@@ -23,7 +23,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
             IManagementServicesFactory managementServicesFactory,
-            IKeyboardsProvider keyboardsProvider) 
+            IKeyboardsProvider keyboardsProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
@@ -42,23 +42,14 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
             var result = await managementService.ToggleEntityVisibilityAsync(entityId, token);
 
-            if (result.Success)
+            if (!result.Success)
             {
-                var entity = await managementService.GetEntityAsync(entityId, token);
-
-                if (entity == null)
-                {
-                    await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
-                    return;
-                }
-
-                await BotService.EditInlineKeyboardAsync(c.Chat, c.MessageId, _keyboardsProvider.CreateEntityOptionsKeyboard(entity), token);
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateToggleEntityVisibilitySuccessMessage(entity), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
+                return;
             }
-            else
-            {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
-            }
+
+            await BotService.EditInlineKeyboardAsync(c.Chat, c.MessageId, _keyboardsProvider.CreateEntityOptionsKeyboard(result.Value!), token);
+            await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateToggleEntityVisibilitySuccessMessage(result.Value!), token: token);
         }
     }
 }

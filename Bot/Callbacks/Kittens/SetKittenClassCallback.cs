@@ -1,13 +1,12 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Bot.Types;
-using Microsoft.Extensions.Options;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Bot.Interfaces.Factories;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Enums;
+using BlueBellDolls.Common.Interfaces;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Callbacks.Kittens
 {
@@ -44,24 +43,24 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             if (Enum.TryParse<KittenClass>(args[1], out var kittenClass))
             {
                 var result = await kittenManagementService.UpdateClassAsync(kittenId, kittenClass, token);
-                if (result.Success)
+                if (result.Success && result.Value != null)
                 {
                     await BotService.AnswerCallbackQueryAsync(
                         c.CallbackId,
-                        _messagesProvider.CreateKittenClassSetSuccessMessage(result.Result!),
+                        _messagesProvider.CreateKittenClassSetSuccessMessage(result.Value),
                         token: token);
 
                     await BotService.EditOrSendNewMessageAsync(
                         c.Chat,
                         c.MessageId,
-                        _messageParametersProvider.GetEntityFormParameters(result.Result!),
+                        _messageParametersProvider.GetEntityFormParameters(result.Value),
                         token: token);
                 }
                 else
                 {
                     await BotService.AnswerCallbackQueryAsync(
                         c.CallbackId,
-                        _messagesProvider.CreateUnknownErrorMessage(result.ErrorText),
+                        _messagesProvider.CreateUnknownErrorMessage(result.Message),
                         token: token);
                 }
             }

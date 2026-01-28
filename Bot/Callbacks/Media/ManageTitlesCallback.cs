@@ -36,12 +36,12 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var entityId = int.Parse(args.Last());
 
             var managementService = _managementServicesFactory.GetEntityManagementService<ParentCat>();
-            var entity = await managementService.GetEntityAsync(entityId, token);
+            var result = await managementService.GetEntityAsync(entityId, token);
 
-            if (entity == null || !entity.Photos.Where(p => p.Type == PhotosType.Titles).Any()) return;
+            if (!result.Success || result.Value?.Photos.Where(p => p.Type == PhotosType.Titles).Any() is null or false) return;
             await BotService.DeleteMessageAsync(c.Chat, c.MessageId, token);
 
-            await _messagesHelperService.SendTitlesManagementMessageAsync(c.Chat, entity, token);
+            await _messagesHelperService.SendTitlesManagementMessageAsync(c.Chat, result.Value, token);
         }
     }
 }

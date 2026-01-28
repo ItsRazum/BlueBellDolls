@@ -40,15 +40,15 @@ namespace BlueBellDolls.Bot.Callbacks.Common
         {
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
             var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
-            var entity = await managementService.GetEntityAsync(entityId, token);
+            var result = await managementService.GetEntityAsync(entityId, token);
 
-            if (entity == null)
+            if (!result.Success)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
                 return;
             }
 
-            await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(entity), token);
+            await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Value!), token);
         }
     }
 }

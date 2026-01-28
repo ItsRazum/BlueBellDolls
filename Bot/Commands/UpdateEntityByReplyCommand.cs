@@ -28,6 +28,7 @@ namespace BlueBellDolls.Bot.Commands
             AddCommandHandler("update_entity_by_reply_parentcat", HandleCommandAsync<ParentCat>);
             AddCommandHandler("update_entity_by_reply_litter", HandleCommandAsync<Litter>);
             AddCommandHandler("update_entity_by_reply_kitten", HandleCommandAsync<Kitten>);
+            AddCommandHandler("update_entity_by_reply_catcolor", HandleCommandAsync<CatColor>);
         }
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity
@@ -47,7 +48,7 @@ namespace BlueBellDolls.Bot.Commands
                         return;
 
                     var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
-                    var result = await managementService.UpdateEntityByReplyAsync(modelId, properties, token);
+                    var result = await managementService.UpdateEntityAsync(modelId, properties, token);
 
                     if (result.Success)
                     {
@@ -58,7 +59,7 @@ namespace BlueBellDolls.Bot.Commands
                         }
 
                         await BotService.DeleteMessageAsync(m.Chat, m.MessageId, token);
-                        var entity = result.Result;
+                        var entity = result.Value;
 
                         await BotService.SendMessageAsync(m.Chat,
                             _messageParametersProvider.GetEntityFormParameters(entity!), token);

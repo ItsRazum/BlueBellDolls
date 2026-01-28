@@ -11,85 +11,87 @@ namespace BlueBellDolls.Bot.Services.Api
     {
         private readonly ILogger<CatColorApiClient> _logger = logger;
 
-        public async Task<CatColorDetailDto?> GetAsync(string colorIdentifier, CancellationToken token)
+        public async Task<ServiceResult<CatColorDetailDto>> GetAsync(string colorIdentifier, CancellationToken token)
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<CatColorDetailDto>($"/api/admin/catcolors/identifier/{colorIdentifier}", token);
+                var response = await HttpClient.GetAsync($"/api/admin/catcolors/identifier/{colorIdentifier}", token);
+                return await FromResponse<CatColorDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь CatColor {identifier} с сервера!", nameof(CatColorApiClient), nameof(GetAsync), colorIdentifier);
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<List<CatColorDetailDto>?> GetListAsync(CancellationToken token = default)
+        public async Task<ServiceResult<List<CatColorDetailDto>>> GetListAsync(CancellationToken token = default)
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<List<CatColorDetailDto>>("/api/admin/catcolors", token);
+                var response = await HttpClient.GetAsync("/api/admin/catcolors", token);
+                return await FromResponse<List<CatColorDetailDto>>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось извлечь список CatColor с сервера!", nameof(CatColorApiClient), nameof(GetListAsync));
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<CatColorDetailDto?> AddAsync(CreateCatColorDto dto, CancellationToken token = default)
+        public async Task<ServiceResult<CatColorDetailDto>> AddAsync(CreateCatColorDto dto, CancellationToken token = default)
         {
             try
             {
                 var response = await HttpClient.PostAsJsonAsync("/api/admin/catcolors", dto, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<CatColorDetailDto>(token);
+                return await FromResponse<CatColorDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось добавить новую сущность CatColor!", nameof(CatColorApiClient), nameof(AddAsync));
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<CatColorDetailDto?> UpdateAsync(int id, UpdateCatColorDto dto, CancellationToken token = default)
+        public async Task<ServiceResult<CatColorDetailDto>> UpdateAsync(int id, UpdateCatColorDto dto, CancellationToken token = default)
         {
             try
             {
                 var response = await HttpClient.PutAsJsonAsync($"/api/admin/catcolors/{id}", dto, token);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadFromJsonAsync<CatColorDetailDto>(token);
+                return await FromResponse<CatColorDetailDto>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось обновить CatColor {id}!", nameof(CatColorApiClient), nameof(UpdateAsync), id);
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<PagedResult<CatColorListDto>?> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default)
+        public async Task<ServiceResult<PagedResult<CatColorListDto>>> GetByPageAsync(int pageIndex, int pageSize, CancellationToken token = default)
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<PagedResult<CatColorListDto>>($"/api/admin/catcolors?page={pageIndex}&pageSize={pageSize}", token);
+                var response = await HttpClient.GetAsync($"/api/admin/catcolors?page={pageIndex}&pageSize={pageSize}", token);
+                return await FromResponse<PagedResult<CatColorListDto>>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось получить страницу {p} списка CatColor!", nameof(CatColorApiClient), nameof(GetByPageAsync), pageIndex);
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
 
-        public async Task<CatColorTree?> GetCatColorTreeAsync(CancellationToken token)
+        public async Task<ServiceResult<CatColorTree>> GetCatColorTreeAsync(CancellationToken token)
         {
             try
             {
-                return await HttpClient.GetFromJsonAsync<CatColorTree>("/api/admin/catcolors/tree", token);
+                var response = await HttpClient.GetAsync("/api/admin/catcolors/tree", token);
+                return await FromResponse<CatColorTree>(response, token);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{service}.{method}(): Не удалось получить дерево CatColor!", nameof(CatColorApiClient), nameof(GetCatColorTreeAsync));
-                return null;
+                return new(500, "Неизвестная ошибка");
             }
         }
     }

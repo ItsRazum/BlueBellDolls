@@ -1,14 +1,13 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Settings;
-using BlueBellDolls.Bot.Types;
-using Microsoft.Extensions.Options;
-using BlueBellDolls.Common.Types;
-using BlueBellDolls.Common.Models;
-using BlueBellDolls.Common.Interfaces;
-using BlueBellDolls.Common.Dtos;
 using BlueBellDolls.Bot.Interfaces.Factories;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
+using BlueBellDolls.Bot.Settings;
+using BlueBellDolls.Bot.Types;
+using BlueBellDolls.Common.Interfaces;
+using BlueBellDolls.Common.Models;
+using BlueBellDolls.Common.Types;
+using Microsoft.Extensions.Options;
 
 namespace BlueBellDolls.Bot.Callbacks.Common
 {
@@ -43,9 +42,9 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             var args = c.CallbackData.Split(CallbackArgsSeparator, StringSplitOptions.RemoveEmptyEntries);
             var entityId = int.Parse(args.Last());
             var managementService = _managementServicesFactory.GetCatManagementService<TEntity>();
-            var entity = await managementService.GetEntityAsync(entityId, token);
+            var result = await managementService.GetEntityAsync(entityId, token);
 
-            if (entity == null)
+            if (result.StatusCode == StatusCodes.Status404NotFound)
             {
                 await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
                 return;
@@ -62,6 +61,8 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 return;
             }
 
+            var entity = result.Value!;
+
             if (args.Length < 3)
             {
                 await UpdateColorPicker(entity, string.Empty, [.. catColorTree.Keys], c, token);
@@ -71,9 +72,10 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             var buildedColor = args[1];
             if (buildedColor.Count(c => c == '_') == 2)
             {
-                var finalColor = buildedColor.Replace('_', ' ').Replace("/", "").Trim();
+                var finalColor = buildedColor.Replace("_", "").Replace("/", "").Trim();
                 entity = await UpdateEntityColor<TEntity>(entityId, finalColor, c, token);
-                await UpdateEntityForm(entity, c, token);
+                if (entity != null)
+                    await UpdateEntityForm(entity, c, token);
             }
             else
             {
@@ -94,19 +96,19 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 _messageParametersProvider.GetColorPickerParameters(entity, builtColor, colors), token);
         }
 
-        private async Task<TEntity> UpdateEntityColor<TEntity>(int entityId, string color, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
+        private async Task<TEntity?> UpdateEntityColor<TEntity>(int entityId, string color, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
         {
             var managementService = _managementServicesFactory.GetCatManagementService<TEntity>();
             var result = await managementService.UpdateColorAsync(entityId, color, token);
-            if (result.Success && result.Result != null)
+            if (result.Success)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(color), token: token);
-                return result.Result;
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateColorSetSuccessfullyMessage(result.Value!.Color!.DisplayName), token: token);
+                return result.Value!;
             }
             else
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
-                return await managementService.GetEntityAsync(entityId, token) ?? throw new NullReferenceException("Не удалось найти сущность!");
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.Message ?? _messagesProvider.CreateColorUpdateErrorMessage(), token: token);
+                return null;
             }
         }
 

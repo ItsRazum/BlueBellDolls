@@ -8,24 +8,24 @@ namespace BlueBellDolls.Bot.Services.Api
         IHttpClientFactory httpClientFactory,
         ILogger<BookingApiClient> logger) : ApiClientBase<BookingRequestDetailDto>(httpClientFactory, logger), IBookingApiClient
     {
-        public async Task<BookingRequestDetailDto?> ProcessBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
+        public async Task<ServiceResult<BookingRequestDetailDto>> ProcessBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
         {
             var response = await HttpClient.PostAsync(
                 $"api/admin/bookingrequests/{bookingId}/process?telegramUserId={telegramUserId}",
                 null,
                 cancellationToken: token);
 
-            return await response.Content.ReadFromJsonAsync<BookingRequestDetailDto>(token);
+            return await FromResponse<BookingRequestDetailDto>(response, token);
         }
 
-        public async Task<BookingRequestDetailDto?> CloseBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
+        public async Task<ServiceResult<BookingRequestDetailDto>> CloseBookingRequestAsync(int bookingId, long telegramUserId, CancellationToken token = default)
         {
             var response = await HttpClient.PostAsync(
                 $"api/admin/bookingrequests/{bookingId}/close?telegramUserId={telegramUserId}",
                 null,
                 cancellationToken: token);
 
-            return await response.Content.ReadFromJsonAsync<BookingRequestDetailDto>(token);
+            return await FromResponse<BookingRequestDetailDto>(response, token);
         }
     }
 }

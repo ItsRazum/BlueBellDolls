@@ -59,7 +59,7 @@ namespace BlueBellDolls.Bot.Services
                 {
                     var result = await apiClient.GetPhotosLimitsAsync();
                     if (result != null)
-                        _limits = result.Dictionaries;
+                        _limits = result.Value?.Dictionaries ?? [];
                 }
             }
             catch (Exception ex)

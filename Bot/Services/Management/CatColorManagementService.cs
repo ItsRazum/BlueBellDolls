@@ -1,8 +1,7 @@
 ﻿using BlueBellDolls.Bot.Extensions;
-using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Services.Api;
-using BlueBellDolls.Bot.Records;
+using BlueBellDolls.Bot.Interfaces.Services.Management;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Extensions;
 using BlueBellDolls.Common.Models;
@@ -20,6 +19,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catColorApiClient,
             messagesProvider,
             photosDownloaderService,
+            entityFormService,
             logger), ICatColorManagementService
     {
         private readonly ICatColorApiClient _catColorApiClient = catColorApiClient;
@@ -29,79 +29,34 @@ namespace BlueBellDolls.Bot.Services.Management
 
         protected override Func<CatColorDetailDto?, CatColor?> DtoToEntityFunc => (dto) => dto?.ToEFModel();
 
-        public async Task<CatColor?> GetEntityAsync(string colorIdentifier, CancellationToken token = default)
+        public async Task<ServiceResult<CatColor>> GetEntityAsync(string colorIdentifier, CancellationToken token = default)
         {
-            var dto = await _catColorApiClient.GetAsync(colorIdentifier.Replace(" ", ""), token);
-            return dto?.ToEFModel();
+            var result = await _catColorApiClient.GetAsync(colorIdentifier.Replace(" ", ""), token);
+            return new(result.StatusCode, result.Message, result.Value?.ToEFModel());
         }
 
-        public override async Task<ManagementOperationResult<CatColor>> AddNewEntityAsync(CancellationToken token = default)
+        public override async Task<ServiceResult<CatColor>> AddNewEntityAsync(CancellationToken token = default)
         {
             try
             {
                 var dto = new CreateCatColorDto(
-                    Identifier: "Новый окрас",
-                    Description: "Добавьте описание!");
+                    Identifier: string.Empty,
+                    Description: string.Empty);
 
                 var result = await _catColorApiClient.AddAsync(dto, token);
                 if (result != null)
-                    return new(true, null, result.ToEFModel());
+                    return new(result.StatusCode, result.Message, result.Value?.ToEFModel());
 
-                return new(false, _messagesProvider.CreateEntityAdditionErrorMessage());
+                return new(500, _messagesProvider.CreateEntityAdditionErrorMessage());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось добавить новый CatColor");
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
 
-        public override async Task<ManagementOperationResult<CatColor>> UpdateEntityAsync(CatColor entity, CancellationToken token = default)
-        {
-            try
-            {
-                var updateDto = entity.ToUpdateDto();
-                var result = await _catColorApiClient.UpdateAsync(entity.Id, updateDto, token);
-                if (result == null)
-                    return new(false, _messagesProvider.CreateApiUpdateEntityFailureMessage());
-
-                return new(true, null, result.ToEFModel());
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Не удалось обновить CatColor {id}!", entity.Id);
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
-        }
-
-        public override async Task<ManagementOperationResult<CatColor>> UpdateEntityByReplyAsync(
-            int modelId,
-            Dictionary<string, string> properties,
-            CancellationToken token = default)
-        {
-            try
-            {
-                var currentDto = await _catColorApiClient.GetAsync(modelId, token);
-                if (currentDto == null)
-                    return new(false, _messagesProvider.CreateApiGetEntityFailureMessage());
-
-                var tempEfModel = currentDto.ToEFModel();
-                foreach (var (propertyName, value) in properties)
-                {
-                    if (!_entityFormService.UpdateProperty(tempEfModel, propertyName, value))
-                        return new(false, _messagesProvider.CreatePropertyUpdateFailureMessage(propertyName));
-                }
-
-                return await UpdateEntityAsync(tempEfModel, token);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ошибка при обновлении CatColor {id} через Reply", modelId);
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
-            }
-        }
-
-        public override async Task<ManagementOperationResult<PagedResult<CatColor>>> GetByPageAsync(
+        public override async Task<ServiceResult<PagedResult<CatColor>>> GetByPageAsync(
             int pageIndex,
             int pageSize,
             CancellationToken token = default)
@@ -112,20 +67,21 @@ namespace BlueBellDolls.Bot.Services.Management
 
                 if (result != null)
                 {
-                    return new(true, null, new PagedResult<CatColor>(
-                        [.. result.Items.Select(dto => dto.ToEFModel())],
-                        result.PageNumber,
-                        result.PageSize,
-                        result.TotalItems,
-                        result.TotalPages));
+                    var page = result.Value!;
+                    return new(result.StatusCode, null, new PagedResult<CatColor>(
+                        [.. page.Items.Select(dto => dto.ToEFModel())],
+                        page.PageNumber,
+                        page.PageSize,
+                        page.TotalItems,
+                        page.TotalPages));
                 }
 
-                return new(false, _messagesProvider.CreateApiGetPageFailureMessage<CatColor>());
+                return new(500, _messagesProvider.CreateApiGetPageFailureMessage<CatColor>());
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу CatColor");
-                return new(false, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
             }
         }
     }

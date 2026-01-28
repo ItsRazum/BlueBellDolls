@@ -39,15 +39,15 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
 
             var managementService = _managementServicesFactory.GetEntityManagementService<ParentCat>();
-            var entity = await managementService.GetEntityAsync(int.Parse(args.Last()), token);
+            var result = await managementService.GetEntityAsync(int.Parse(args.Last()), token);
 
-            if (entity == null)
+            if (!result.Success)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
                 return;
             }
 
-            await _messagesHelperService.SendDeleteGeneticTestsConfirmationAsync(c, entity, token);
+            await _messagesHelperService.SendDeleteGeneticTestsConfirmationAsync(c, result.Value!, token);
         }
     }
 }

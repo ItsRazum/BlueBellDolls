@@ -44,50 +44,20 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
 
             if (result.Success)
             {
-                var parentCat = await _managementServicesFactory
-                    .GetEntityManagementService<ParentCat>()
-                    .GetEntityAsync(parentCatId, token);
+                var (isMale, litter) = result.Value!.Value;
+                await BotService.AnswerCallbackQueryAsync(
+                    c.CallbackId,
+                    _messagesProvider.CreateParentCatSetForLitter(isMale, litter),
+                    token: token
+                );
 
-                if (parentCat == null)
-                {
-                    await BotService.AnswerCallbackQueryAsync(
-                        c.CallbackId,
-                        _messagesProvider.CreateEntityNotFoundMessage(),
-                        token: token
-                    );
-                    return;
-                }
-
-                if (result.Success)
-                {
-                    var litter = await litterManagementService.GetEntityAsync(litterId, token);
-                    if (litter == null)
-                    {
-                        await BotService.AnswerCallbackQueryAsync(
-                            c.CallbackId,
-                            _messagesProvider.CreateApiGetEntityAfterUpdateFailureMessage(),
-                            token: token
-                        );
-                        return;
-                    }
-
-                    await BotService.AnswerCallbackQueryAsync(
-                        c.CallbackId,
-                        _messagesProvider.CreateParentCatSetForLitter(parentCat, litter),
-                        token: token
-                    );
-
-                    await BotService.EditMessageAsync(
-                        c.Chat,
-                        c.MessageId,
-                        _messageParametersProvider.GetEntityFormParameters(litter),
-                        token
-                    );
-                }
-
-
+                await BotService.EditMessageAsync(
+                    c.Chat,
+                    c.MessageId,
+                    _messageParametersProvider.GetEntityFormParameters(litter),
+                    token
+                );
             }
-
         }
     }
 }

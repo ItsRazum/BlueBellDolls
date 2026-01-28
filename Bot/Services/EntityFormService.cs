@@ -14,6 +14,7 @@ namespace BlueBellDolls.Bot.Services
     {
         private readonly EntityFormSettings _settings;
         private readonly IValueConverter _valueConverter;
+        private readonly Dictionary<Type, Dictionary<string, string>> _entityPropsMappings;
         private readonly ConcurrentDictionary<Type, Dictionary<string, Action<object, string>>> _entityProperties;
 
         public EntityFormService(
@@ -23,6 +24,7 @@ namespace BlueBellDolls.Bot.Services
             _settings = options.Value;
             _valueConverter = valueConverter;
             _entityProperties = new();
+            _entityPropsMappings = [];
 
             InitializePropertyMappings();
         }
@@ -38,6 +40,7 @@ namespace BlueBellDolls.Bot.Services
         private void AddEntityProperties<TEntity>(Dictionary<string, string> propertyMappings)
         {
             var entityType = typeof(TEntity);
+            _entityPropsMappings.Add(entityType, propertyMappings);
             var propertyActions = new Dictionary<string, Action<object, string>>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var (propertyName, displayName) in propertyMappings)
@@ -52,6 +55,16 @@ namespace BlueBellDolls.Bot.Services
             }
 
             _entityProperties[entityType] = propertyActions;
+        }
+
+        public string? GetPropertyName<TEntity>(string key) where TEntity : IEntity
+        {
+            ArgumentNullException.ThrowIfNull(key);
+            var entityType = typeof(TEntity);
+            if (_entityPropsMappings.TryGetValue(entityType, out var mappings))
+                return mappings.Where(kvp => kvp.Value == key).First().Key;
+
+            return null;
         }
 
         public bool UpdateProperty<TEntity>(TEntity entity, string displayName, string value) where TEntity : IEntity

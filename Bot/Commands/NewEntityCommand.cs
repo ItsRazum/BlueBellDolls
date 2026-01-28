@@ -4,6 +4,7 @@ using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Bot.Interfaces.Factories;
 using BlueBellDolls.Bot.Interfaces.Providers;
+using BlueBellDolls.Bot.Interfaces.Services;
 
 namespace BlueBellDolls.Bot.Commands
 {
@@ -11,15 +12,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IMessagesProvider _messagesProvider;
 
         public NewEntityCommand(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory)
+            IManagementServicesFactory managementServicesFactory,
+            IMessagesProvider messagesProvider)
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
             _managementServicesFactory = managementServicesFactory;
+            _messagesProvider = messagesProvider;
 
             AddCommandHandler("/newcat", HandleCommandAsync<ParentCat>);
             AddCommandHandler("/newlitter", HandleCommandAsync<Litter>);
@@ -30,10 +34,10 @@ namespace BlueBellDolls.Bot.Commands
             var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
             var result = await managementService.AddNewEntityAsync(token);
 
-            if (result.Result != null)
-                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
+            if (result.Success)
+                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Value!), token);
             else
-                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
+                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
         }
     }
 }

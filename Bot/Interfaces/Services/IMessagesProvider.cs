@@ -48,7 +48,7 @@ namespace BlueBellDolls.Bot.Interfaces.Services
 
         string CreateCouldNotExtractMessagesFromCallbackMessage(CallbackQueryAdapter callback);
 
-        string CreateParentCatSetForLitter(ParentCat parentCat, Litter litter);
+        string CreateParentCatSetForLitter(bool isMale, Litter litter);
 
         string CreateDefaultPhotoSetForEntityMessage(IDisplayableEntity entity, int photoId);
 

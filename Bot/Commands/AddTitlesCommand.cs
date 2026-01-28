@@ -48,10 +48,10 @@ namespace BlueBellDolls.Bot.Commands
             if (result.Success)
             {
                 await BotService.DeleteMessagesAsync(m.Chat, [.. m.Photos.Select(p => p.MessageId), m.ReplyToMessage!.MessageId], token);
-                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Result!), token);
+                await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Value!), token);
             }
             else
-                await BotService.SendMessageAsync(m.Chat, result.ErrorText!, token: token);
+                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
         }
     }
 }

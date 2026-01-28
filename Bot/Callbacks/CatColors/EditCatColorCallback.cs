@@ -1,8 +1,7 @@
 ﻿using BlueBellDolls.Bot.Adapters;
-using BlueBellDolls.Bot.Interfaces.Management;
 using BlueBellDolls.Bot.Interfaces.Providers;
 using BlueBellDolls.Bot.Interfaces.Services;
-using BlueBellDolls.Bot.Providers;
+using BlueBellDolls.Bot.Interfaces.Services.Management;
 using BlueBellDolls.Bot.Settings;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Interfaces;
@@ -37,17 +36,17 @@ namespace BlueBellDolls.Bot.Callbacks.CatColors
         private async Task HandleCommandAsync(CallbackQueryAdapter c, CancellationToken token)
         {
             var searchQuery = c.CallbackData.Split(CallbackArgsSeparator).Last();
-            var entity = int.TryParse(searchQuery, out var entityId)
+            var result = int.TryParse(searchQuery, out var entityId)
                 ? await _catColorManagementService.GetEntityAsync(entityId, token)
                 : await _catColorManagementService.GetEntityAsync(searchQuery, token);
 
-            if (entity == null)
+            if (!result.Success)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
                 return;
             }
 
-            await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(entity), token);
+            await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Value!), token);
         }
     }
 }

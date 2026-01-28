@@ -51,24 +51,16 @@ namespace BlueBellDolls.Bot.Callbacks.Media
 
             if (result.Success)
             {
-                var entity = await managementService.GetEntityAsync(entityId, token);
-
-                if (entity == null)
-                {
-                    await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateEntityNotFoundMessage(), token: token);
-                    return;
-                }
-
                 var key = c.MessageText.Split('\n').Last();
                 var (_, photoMessageIds) = _argumentParseHelperService.ParsePhotosArgs(key);
 
                 await BotService.DeleteMessagesAsync(c.Chat, [.. photoMessageIds, c.MessageId], token);
-                await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, entity, token);
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateDefaultPhotoSetForEntityMessage(entity, photoId), token: token);
+                await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, result.Value!, token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateDefaultPhotoSetForEntityMessage(result.Value!, photoId), token: token);
             }
             else
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.ErrorText!, token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.Message ?? _messagesProvider.CreateDefaultPhotoSetErrorMessage(), token: token);
             }
         }
     }

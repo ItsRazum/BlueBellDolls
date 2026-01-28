@@ -53,11 +53,11 @@ namespace BlueBellDolls.Bot.Callbacks.Media
                     _messagesProvider.CreatePhotosDeletionSuccessMessage(),
                     token: token);
 
-                if (result.Result!.Photos.Count > 0)
-                    await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, result.Result, token);
+                if (result.Value!.Photos.Count > 0)
+                    await _messagesHelperService.SendPhotoManagementMessageAsync(c.Chat, result.Value, token);
 
                 else
-                    await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Result), token);
+                    await BotService.EditOrSendNewMessageAsync(c.Chat, c.MessageId, _messageParametersProvider.GetEntityFormParameters(result.Value), token);
             }
             else
             {
