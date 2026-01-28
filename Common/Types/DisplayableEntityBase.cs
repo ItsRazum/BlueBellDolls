@@ -14,5 +14,6 @@ namespace BlueBellDolls.Common.Types
         [Column("is_enabled")]
         public virtual bool IsEnabled { get; set; }
 
+        public abstract bool ReadyToShow { get; }
     }
 }

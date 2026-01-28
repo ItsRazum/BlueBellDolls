@@ -1,11 +1,9 @@
 ﻿using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Extensions;
-using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
 using BlueBellDolls.Server.Interfaces;
-using BlueBellDolls.Server.Records;
 using BlueBellDolls.Server.Settings;
 using BlueBellDolls.Server.Types;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +14,10 @@ namespace BlueBellDolls.Server.Services
     public class KittenService(
         IApplicationDbContext applicationDbContext,
         IWebHostEnvironment env,
+        ICatColorService catColorService,
         ILogger<KittenService> logger,
         IOptions<FileStorageSettings> fileStorageSettings) 
-        : CatServiceBase<Kitten, KittenDetailDto>(env, applicationDbContext, fileStorageSettings, logger), IKittenService
+        : CatServiceBase<Kitten, KittenDetailDto>(env, applicationDbContext, fileStorageSettings, catColorService, logger), IKittenService
     {
 
         #region Fields
@@ -37,17 +36,20 @@ namespace BlueBellDolls.Server.Services
                     .AsNoTracking()
                     .Where(k => admin || k.IsEnabled);
 
+                var totalItems = await query.CountAsync(token);
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                if (totalPages < pageNumber)
+                    return new(StatusCodes.Status400BadRequest, "Запрошенная страница находится за пределами диапазона доступных!");
+
                 var items = await query
                     .Include(p => p.Photos)
                     .OrderBy(c => c.Name)
                     .Skip((pageNumber - 1) * pageSize)
                     .Take(pageSize)
                     .ToListAsync(token);
-
-                var totalItems = await query.CountAsync(token);
-                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
-                var result = new PagedResult<KittenListDto>([.. items.Select(k => k.ToListDto())], pageNumber, pageSize, totalItems, totalPages);
+                
+                var result = new PagedResult<KittenListDto>([.. items.Select(k => k.ToListDto(admin))], pageNumber, pageSize, totalItems, totalPages);
                 return new(StatusCodes.Status200OK, null, result);
             }
             catch (TaskCanceledException)
@@ -62,23 +64,24 @@ namespace BlueBellDolls.Server.Services
             }
         }
 
-        public async Task<ServiceResult<KittenListDto[]>> GetFreeKittensAsync(CancellationToken token = default)
+        public async Task<ServiceResult<KittenListDto[]>> GetAvailableKittensAsync(CancellationToken token = default)
         {
             try
             {
                 var items = await ApplicationDbContext.Kittens
                     .AsNoTracking()
+                    .Include(k => k.Color)
                     .Include(k => k.Litter)
                     .Include(p => p.Photos)
                     .Where(k => k.IsEnabled && k.Status == KittenStatus.Available)
                     .Take(25)
                     .ToListAsync(token);
 
-                return new(StatusCodes.Status200OK, null, [.. items.Select(k => k.ToListDto())]);
+                return new(StatusCodes.Status200OK, null, [.. items.Select(k => k.ToListDto(false))]);
             }
             catch (TaskCanceledException)
             {
-                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(GetFreeKittensAsync));
+                _logger.LogWarning("{service}.{method}(): Операция была отменена", nameof(KittenService), nameof(GetAvailableKittensAsync));
                 return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
@@ -97,12 +100,10 @@ namespace BlueBellDolls.Server.Services
                 if (result == null)
                     return new ServiceResult<KittenDetailDto>(StatusCodes.Status404NotFound, "Котёнок не найден");
 
-                if (!admin && result.IsEnabled)
+                if (!admin && !result.IsEnabled)
                     return new ServiceResult<KittenDetailDto>(StatusCodes.Status401Unauthorized, "Доступ к котёнку запрещён!");
 
-                result.Photos = SortPhotosByDefault(result.Photos);
-
-                return new ServiceResult<KittenDetailDto>(StatusCodes.Status200OK, null, result.ToDetailDto());
+                return new ServiceResult<KittenDetailDto>(StatusCodes.Status200OK, null, result.ToDetailDto(admin));
             }
             catch (TaskCanceledException)
             {
@@ -153,12 +154,16 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
+                if (kittenDto.Description != null && string.IsNullOrWhiteSpace(kittenDto.Description))
+                    return new(StatusCodes.Status400BadRequest, "Описание не может быть пустым!");
+
                 var entity = await GetDetailEntityAsync(id, token);
 
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "Котёнок не найден");
 
                 entity.ApplyUpdate(kittenDto);
+                entity.IsEnabled = false;
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }
@@ -246,11 +251,12 @@ namespace BlueBellDolls.Server.Services
         protected override async Task<Kitten?> GetDetailEntityAsync(int id, CancellationToken token = default)
         {
             var result = await ApplicationDbContext.Set<Kitten>()
-                    .Include(k => k.Litter)
-                    .Include(k => k.Photos)
-                    .ThenInclude(p => p.TelegramPhoto)
-                    .AsSplitQuery()
-                    .FirstOrDefaultAsync(k => k.Id == id, token);
+                .Include(k => k.Color)
+                .Include(k => k.Litter)
+                .Include(k => k.Photos)
+                .ThenInclude(p => p.TelegramPhoto)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(k => k.Id == id, token);
 
             if (result != null)
                 SortPhotosByDefault(result.Photos);

@@ -22,12 +22,11 @@
     );
 
     public record UpdateLitterDto(
-        char Letter,
-        DateOnly BirthDay,
-        bool IsEnabled,
-        string Description,
-        int? MotherCatId,
-        int? FatherCatId
+        char? Letter = null,
+        DateOnly? BirthDay = null,
+        string? Description = null,
+        int? MotherCatId = null,
+        int? FatherCatId = null
     );
 
     public record LitterDetailDto(
@@ -35,7 +34,7 @@
         char Letter,
         DateOnly BirthDay,
         bool IsEnabled,
-        string Description,
+        string? Description,
         List<PhotoDto> Photos,
         int? MotherCatId,
         ParentCatMinimalDto? MotherCat,
@@ -45,4 +44,6 @@
         int TotalKittens,
         int AvailableKittens
     );
+
+    public record SetParentCatForLitterResponse(bool IsMale, LitterDetailDto Litter);
 }

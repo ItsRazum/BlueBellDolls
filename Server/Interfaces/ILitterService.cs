@@ -1,6 +1,5 @@
 ﻿using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Records.Dtos;
-using BlueBellDolls.Server.Records;
 
 namespace BlueBellDolls.Server.Interfaces
 {
@@ -9,8 +8,7 @@ namespace BlueBellDolls.Server.Interfaces
         ServiceResult<PhotosLimitResponse> GetPhotosLimit(PhotosType photosType);
         Task<ServiceResult<LitterDetailDto>> AddAsync(CreateLitterDto litterDto, CancellationToken token = default);
         Task<ServiceResult<KittenDetailDto>> AddKittenToLitter(int litterId, CreateKittenDto kittenDto, CancellationToken token = default);
-        Task<ServiceResult<LitterDetailDto>> SetFatherCatAsync(int litterId, int parentCatId, CancellationToken token = default);
-        Task<ServiceResult<LitterDetailDto>> SetMotherCatAsync(int litterId, int parentCatId, CancellationToken token = default);
+        Task<ServiceResult<SetParentCatForLitterResponse>> SetParentCatAsync(int litterId, int parentCatId, CancellationToken token = default);
         Task<ServiceResult> DeleteAsync(int id, CancellationToken token = default);
         Task<ServiceResult<LitterDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default);
         Task<ServiceResult<PagedResult<LitterDetailDto>>> GetDetailListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default);

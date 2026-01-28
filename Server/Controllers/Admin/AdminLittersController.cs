@@ -121,20 +121,11 @@ namespace BlueBellDolls.Server.Controllers.Admin
             return FromResult(result);
         }
 
-        [HttpPut("{litterId}/mother/{parentCatId}")]
-        public async Task<ActionResult<LitterDetailDto>> SetMother(int litterId, int parentCatId, CancellationToken token = default)
+        [HttpPut("{litterId}/parent/{parentCatId}")]
+        public async Task<ActionResult<SetParentCatForLitterResponse>> SetParent(int litterId, int parentCatId, CancellationToken token = default)
         {
-            _logger.LogInformation("{controller}.{method}(): Идёт обработка запроса", nameof(AdminLittersController), nameof(SetMother));
-            var result = await _litterService.SetMotherCatAsync(litterId, parentCatId, token);
-
-            return FromResult(result);
-        }
-
-        [HttpPut("{litterId}/father/{parentCatId}")]
-        public async Task<ActionResult<LitterDetailDto>> SetFather(int litterId, int parentCatId, CancellationToken token = default)
-        {
-            _logger.LogInformation("{controller}.{method}(): Идёт обработка запроса", nameof(AdminLittersController), nameof(SetFather));
-            var result = await _litterService.SetFatherCatAsync(litterId, parentCatId, token);
+            _logger.LogInformation("{controller}.{method}(): Идёт обработка запроса", nameof(AdminLittersController), nameof(SetParent));
+            var result = await _litterService.SetParentCatAsync(litterId, parentCatId, token);
 
             return FromResult(result);
         }

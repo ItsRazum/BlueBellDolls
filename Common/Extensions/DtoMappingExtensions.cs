@@ -80,6 +80,23 @@ namespace BlueBellDolls.Common.Extensions
             );
         }
 
+        public static CatColorMinimalDto ToMinimalDto(this CatColor entity, bool admin = true)
+        {
+            return new CatColorMinimalDto(
+                Id: admin || entity.IsEnabled ? entity.Id : 0,
+                Identifier: entity.Identifier
+            );
+        }
+
+        public static CatColor ToEFModel(this CatColorMinimalDto dto)
+        {
+            return new CatColor
+            {
+                Id = dto.Id,
+                Identifier = dto.Identifier
+            };
+        }
+
         public static CatColor ToEFModel(this CatColorDetailDto dto)
         {
             return new CatColor
@@ -101,15 +118,6 @@ namespace BlueBellDolls.Common.Extensions
             };
         }
 
-        public static UpdateCatColorDto ToUpdateDto(this CatColor model)
-        {
-            return new UpdateCatColorDto(
-                Identifier: model.Identifier,
-                Description: model.Description,
-                Enabled: model.IsEnabled
-            );
-        }
-
         public static CatColor ToEFModel(this CatColorListDto dto)
         {
             return new CatColor
@@ -123,9 +131,8 @@ namespace BlueBellDolls.Common.Extensions
 
         public static void ApplyUpdate(this CatColor catColor, UpdateCatColorDto dto)
         {
-            catColor.Identifier = dto.Identifier;
-            catColor.Description = dto.Description;
-            catColor.IsEnabled = dto.Enabled;
+            if (dto.Description != null)
+                catColor.Description = dto.Description;
         }
 
         #endregion
@@ -141,28 +148,28 @@ namespace BlueBellDolls.Common.Extensions
             );
         }
 
-        public static ParentCatDetailDto ToDetailDto(this ParentCat entity)
+        public static ParentCatDetailDto ToDetailDto(this ParentCat entity, bool admin = true)
         {
             return new ParentCatDetailDto(
                 Id: entity.Id,
                 Name: entity.Name,
                 BirthDay: entity.BirthDay,
                 IsMale: entity.IsMale,
-                Color: entity.Color,
+                CatColor: entity.Color?.ToMinimalDto(admin),
                 Description: entity.Description,
                 IsEnabled: entity.IsEnabled,
                 Photos: [.. entity.Photos.Select(p => p.ToDto())]
             );
         }
 
-        public static ParentCatListDto ToListDto(this ParentCat entity)
+        public static ParentCatListDto ToListDto(this ParentCat entity, bool admin = true)
         {
             return new ParentCatListDto(
                 Id: entity.Id,
                 Name: entity.Name,
                 BirthDay: entity.BirthDay,
                 IsMale: entity.IsMale,
-                Color: entity.Color,
+                CatColor: entity.Color?.ToMinimalDto(admin),
                 Description: entity.Description,
                 IsEnabled: entity.IsEnabled,
                 MainPhotoUrl: entity.Photos?
@@ -192,7 +199,6 @@ namespace BlueBellDolls.Common.Extensions
                 BirthDay = dto.BirthDay,
                 IsMale = dto.IsMale,
                 Description = dto.Description,
-                Color = dto.Color,
                 IsEnabled = false
             };
         }
@@ -206,7 +212,6 @@ namespace BlueBellDolls.Common.Extensions
                 BirthDay = dto.BirthDay,
                 IsMale = dto.IsMale,
                 Description = dto.Description,
-                Color = dto.Color,
                 IsEnabled = dto.IsEnabled,
                 Photos = [.. dto.Photos.Select(p => p.ToEFModel())]
             };
@@ -214,24 +219,17 @@ namespace BlueBellDolls.Common.Extensions
 
         public static void ApplyUpdate(this ParentCat entity, UpdateParentCatDto dto)
         {
-            entity.Name = dto.Name;
-            entity.BirthDay = dto.BirthDay;
-            entity.IsMale = dto.IsMale;
-            entity.IsEnabled = dto.IsEnabled;
-            entity.Description = dto.Description;
-            entity.Color = dto.Color;
-        }
+            if (dto.Name != null)
+                entity.Name = dto.Name;
 
-        public static UpdateParentCatDto ToUpdateDto(this ParentCat model)
-        {
-            return new UpdateParentCatDto(
-                Name: model.Name,
-                BirthDay: model.BirthDay,
-                IsMale: model.IsMale,
-                IsEnabled: model.IsEnabled,
-                Description: model.Description,
-                Color: model.Color
-            );
+            if (dto.BirthDay != null)
+                entity.BirthDay = dto.BirthDay.Value;
+
+            if (dto.IsMale != null)
+                entity.IsMale = dto.IsMale.Value;
+
+            if (dto.Description != null)
+                entity.Description = dto.Description;
         }
 
         #endregion
@@ -247,7 +245,7 @@ namespace BlueBellDolls.Common.Extensions
             );
         }
 
-        public static KittenDetailDto ToDetailDto(this Kitten entity)
+        public static KittenDetailDto ToDetailDto(this Kitten entity, bool admin = true)
         {
             return new KittenDetailDto(
                 Id: entity.Id,
@@ -256,7 +254,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale: entity.IsMale,
                 IsEnabled: entity.IsEnabled,
                 Description: entity.Description,
-                Color: entity.Color,
+                CatColor: entity.Color?.ToMinimalDto(admin),
                 Class: entity.Class,
                 Status: entity.Status,
                 Photos: [.. entity.Photos.Select(p => p.ToDto())],
@@ -264,7 +262,7 @@ namespace BlueBellDolls.Common.Extensions
             );
         }
 
-        public static KittenListDto ToListDto(this Kitten entity)
+        public static KittenListDto ToListDto(this Kitten entity, bool admin = true)
         {
             return new KittenListDto(
                 Id: entity.Id,
@@ -277,8 +275,9 @@ namespace BlueBellDolls.Common.Extensions
                     .Select(p => p.Url)
                     .FirstOrDefault(),
                 Description: entity.Description,
+                Class: entity.Class,
                 Status: entity.Status,
-                Color: entity.Color,
+                CatColor: entity.Color?.ToMinimalDto(admin),
                 IsMale: entity.IsMale,
                 IsEnabled: entity.IsEnabled,
                 LitterLetter: entity.Litter?.Letter ?? '?',
@@ -294,7 +293,6 @@ namespace BlueBellDolls.Common.Extensions
                 Name = dto.Name,
                 IsMale = dto.IsMale,
                 Description = dto.Description,
-                Color = dto.Color,
                 Class = dto.Class,
                 Status = dto.Status,
                 BirthDay = litterBirthDay
@@ -303,7 +301,7 @@ namespace BlueBellDolls.Common.Extensions
 
         public static Kitten ToEFModel(this KittenDetailDto dto)
         {
-            return new Kitten
+            return new()
             {
                 Id = dto.Id,
                 LitterId = dto.Litter.Id,
@@ -312,7 +310,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale = dto.IsMale,
                 IsEnabled = dto.IsEnabled,
                 Description = dto.Description,
-                Color = dto.Color,
+                Color = dto.CatColor?.ToEFModel(),
                 Class = dto.Class,
                 Status = dto.Status,
                 Photos = [.. dto.Photos.Select(p => p.ToEFModel())]
@@ -321,16 +319,16 @@ namespace BlueBellDolls.Common.Extensions
 
         public static Kitten ToEFModel(this KittenListDto dto)
         {
-            return new Kitten
+            return new()
             {
                 Id = dto.Id,
                 Name = dto.Name,
                 BirthDay = dto.BirthDay,
                 IsMale = dto.IsMale,
-                Color = dto.Color,
                 Status = dto.Status,
                 LitterId = dto.LitterId,
                 IsEnabled = dto.IsEnabled,
+                Color = dto.CatColor?.ToEFModel(),
                 Description = dto.Description
             };
         }
@@ -347,25 +345,14 @@ namespace BlueBellDolls.Common.Extensions
 
         public static void ApplyUpdate(this Kitten entity, UpdateKittenDto dto)
         {
-            entity.Name = dto.Name;
-            entity.Description = dto.Description;
-            entity.IsMale = dto.IsMale;
-            entity.Color = dto.Color;
-            entity.Class = dto.Class;
-            entity.Status = dto.Status;
-        }
+            if (dto.Name != null)
+                entity.Name = dto.Name;
 
-        public static UpdateKittenDto ToUpdateDto(this Kitten model)
-        {
-            return new UpdateKittenDto(
-                Name: model.Name,
-                Description: model.Description,
-                IsMale: model.IsMale,
-                Color: model.Color,
-                Class: model.Class,
-                Status: model.Status,
-                IsEnabled: model.IsEnabled
-            );
+            if (dto.Description != null)
+                entity.Description = dto.Description;
+
+            if (dto.IsMale != null)
+                entity.IsMale = dto.IsMale.Value;
         }
 
         #endregion
@@ -392,7 +379,7 @@ namespace BlueBellDolls.Common.Extensions
             );
         }
 
-        public static LitterDetailDto ToDetailDto(this Litter entity)
+        public static LitterDetailDto ToDetailDto(this Litter entity, bool admin = true)
         {
             return new LitterDetailDto(
                 Id: entity.Id,
@@ -405,7 +392,7 @@ namespace BlueBellDolls.Common.Extensions
                 MotherCat: entity.MotherCat?.ToMinimalDto(),
                 FatherCatId: entity.FatherCatId,
                 FatherCat: entity.FatherCat?.ToMinimalDto(),
-                Kittens: [.. entity.Kittens.Select(k => k.ToListDto())],
+                Kittens: [.. entity.Kittens.Select(k => k.ToListDto(admin))],
                 TotalKittens: entity.Kittens.Count,
                 AvailableKittens: entity.Kittens.Count(k => k.Status == KittenStatus.Available)
             );
@@ -464,36 +451,32 @@ namespace BlueBellDolls.Common.Extensions
 
         public static void ApplyUpdate(this Litter entity, UpdateLitterDto dto)
         {
-            entity.Letter = dto.Letter;
-            entity.BirthDay = dto.BirthDay;
-            entity.IsEnabled = dto.IsEnabled;
-            entity.Description = dto.Description;
-            entity.MotherCatId = dto.MotherCatId;
-            entity.FatherCatId = dto.FatherCatId;
-        }
+            if (dto.Letter != null)
+                entity.Letter = dto.Letter.Value;
 
-        public static UpdateLitterDto ToUpdateDto(this Litter model)
-        {
-            return new UpdateLitterDto(
-                Letter: model.Letter,
-                BirthDay: model.BirthDay,
-                IsEnabled: model.IsEnabled,
-                Description: model.Description,
-                MotherCatId: model.MotherCatId,
-                FatherCatId: model.FatherCatId
-            );
+            if (dto.BirthDay != null)
+                entity.BirthDay = dto.BirthDay.Value;
+            
+            if (dto.Description != null)
+                entity.Description = dto.Description;
+
+            if (dto.MotherCatId != null)
+                entity.MotherCatId = dto.MotherCatId;
+
+            if (dto.FatherCatId != null)
+                entity.FatherCatId = dto.FatherCatId;
         }
 
         #endregion
 
-        #region BookingRequests
+        #region BookingRequest
 
         public static BookingRequestDetailDto ToDetailDto(this BookingRequest model)
         {
             return new BookingRequestDetailDto(
                 Id: model.Id,
-                CustomerName: model.CustomerName,
-                CustomerPhone: model.CustomerPhone,
+                Name: model.CustomerName,
+                PhoneNumber: model.CustomerPhone,
                 IsProcessed: model.IsProcessed,
                 CuratorId: model.CuratorTelegramId,
                 KittenId: model.KittenId);
@@ -503,8 +486,8 @@ namespace BlueBellDolls.Common.Extensions
         {
             return new BookingRequest
             {
-                CustomerName = dto.CustomerName,
-                CustomerPhone = dto.CustomerPhone,
+                CustomerName = dto.Name,
+                CustomerPhone = dto.PhoneNumber,
                 KittenId = dto.KittenId
             };
         }
@@ -514,10 +497,34 @@ namespace BlueBellDolls.Common.Extensions
             return new BookingRequest
             {
                 Id = dto.Id,
-                CustomerName = dto.CustomerName,
-                CustomerPhone = dto.CustomerPhone,
+                CustomerName = dto.Name,
+                CustomerPhone = dto.PhoneNumber,
                 KittenId = dto.KittenId,
                 CuratorTelegramId = dto.CuratorId,
+                IsProcessed = dto.IsProcessed,
+            };
+        }
+
+        #endregion
+
+        #region FeedBackRequest
+
+        public static FeedbackRequestDetailDto ToDetailDto(this FeedbackRequest model)
+        {
+            return new FeedbackRequestDetailDto(
+                Id: model.Id,
+                Name: model.Name,
+                Phone: model.Phone,
+                IsProcessed: model.IsProcessed);
+        }
+
+        public static FeedbackRequest ToEFModel(this FeedbackRequestDetailDto dto)
+        {
+            return new FeedbackRequest
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                Phone = dto.Phone,
                 IsProcessed = dto.IsProcessed,
             };
         }

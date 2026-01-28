@@ -6,5 +6,7 @@ namespace BlueBellDolls.Common.Interfaces
     {
         string CreateBookingRequestTemplateMessage(BookingRequest bookingRequest, bool hidePhoneNumber = false);
         string CreateNewBookingRequestMessage(BookingRequest bookingRequest);
+
+        string CreateNewFeedbackRequestMessage(FeedbackRequest feedbackRequest, FeedbackRequest? previousRequestFromThatUser = null);
     }
 }

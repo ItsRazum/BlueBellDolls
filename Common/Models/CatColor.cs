@@ -12,10 +12,25 @@ namespace BlueBellDolls.Common.Models
         public string Identifier { get; set; }
 
         [Column("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
+
+        #region IDisplayableEntity
 
         public override string DisplayName => Identifier.Humanize(LetterCasing.Title);
 
+        #endregion
+
+        #region ICanBeFoundWithName
+
         public string QueryName => Identifier;
+
+        #endregion
+
+        public override bool ReadyToShow => this is 
+        {
+            Identifier.Length: > 0,
+            Description.Length: > 0,
+            Photos.Count: > 0
+        };
     }
 }

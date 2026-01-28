@@ -7,7 +7,7 @@
     public record CatColorDetailDto(
         int Id,
         string Identifier,
-        string Description,
+        string? Description,
         bool IsEnabled,
         PhotoDto[] Photos);
 
@@ -16,14 +16,12 @@
         string Description);
 
     public record UpdateCatColorDto(
-        string Identifier,
-        string Description,
-        bool Enabled);
+        string? Description = null);
 
     public record CatColorListDto(
         int Id,
         string Identifier,
-        string Description,
+        string? Description,
         bool IsEnabled,
         string? MainPhotoUrl);
 }

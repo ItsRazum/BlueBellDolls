@@ -3,6 +3,7 @@ using System;
 using BlueBellDolls.Data.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BlueBellDolls.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260120172847_CatColor-foreign-keys-added")]
+    partial class CatColorforeignkeysadded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,13 +81,13 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
                     b.Property<string>("Identifier")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
+                        .HasColumnType("text")
                         .HasColumnName("identifier");
 
                     b.Property<bool>("IsEnabled")
@@ -92,9 +95,6 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("is_enabled");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Identifier")
-                        .IsUnique();
 
                     b.ToTable("cat_colors");
                 });
@@ -153,38 +153,6 @@ namespace BlueBellDolls.Data.Migrations
                     b.ToTable("photos");
                 });
 
-            modelBuilder.Entity("BlueBellDolls.Common.Models.FeedbackRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at");
-
-                    b.Property<bool>("IsProcessed")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_processed");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("name");
-
-                    b.Property<string>("Phone")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("phone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("feedback_requests");
-                });
-
             modelBuilder.Entity("BlueBellDolls.Common.Models.Kitten", b =>
                 {
                     b.Property<int>("Id")
@@ -212,6 +180,7 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -228,6 +197,7 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("litter_id");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
@@ -263,6 +233,7 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -313,6 +284,7 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("created_at");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
@@ -325,6 +297,7 @@ namespace BlueBellDolls.Data.Migrations
                         .HasColumnName("is_male");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 

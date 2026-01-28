@@ -17,5 +17,12 @@ namespace BlueBellDolls.Common.Providers
                 _messagesProvider.CreateNewBookingRequestMessage(bookingRequest),
                 _keyboardsProvider.CreateProcessBookingKeyboard(bookingRequest.Id));
         }
+
+        public MessageParameters GetNewFeedbackRequestParameters(FeedbackRequest feedbackRequest, FeedbackRequest? previousRequestFromThatUser = null)
+        {
+            return new MessageParameters(
+                _messagesProvider.CreateNewFeedbackRequestMessage(feedbackRequest),
+                _keyboardsProvider.CreateCloseFeebackRequestKeyboard(feedbackRequest.Id));
+        }
     }
 }

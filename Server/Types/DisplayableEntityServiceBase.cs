@@ -3,7 +3,6 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
-using BlueBellDolls.Server.Records;
 using BlueBellDolls.Server.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -81,7 +80,7 @@ namespace BlueBellDolls.Server.Types
             }
             catch (TaskCanceledException)
             {
-                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<TEntity, TDto>), nameof(ToggleVisibilityAsync));
+                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<,>), nameof(ToggleVisibilityAsync));
                 return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
@@ -206,7 +205,7 @@ namespace BlueBellDolls.Server.Types
                     }
                     catch (TaskCanceledException)
                     {
-                        _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<TEntity, TDto>), nameof(UploadFilesAsync));
+                        _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<,>), nameof(UploadFilesAsync));
                         await transaction.RollbackAsync(token);
                         return new(StatusCodes.Status403Forbidden, "Операция отменена", new(ModelToDtoFunc(entity),
                             [.. addedPhotosResult.Select(p => new FileUploadResult(p.photoIndex, false))]));
@@ -225,7 +224,7 @@ namespace BlueBellDolls.Server.Types
             }
             catch (TaskCanceledException)
             {
-                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<TEntity, TDto>), nameof(UploadFilesAsync));
+                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<,>), nameof(UploadFilesAsync));
                 return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
@@ -258,7 +257,7 @@ namespace BlueBellDolls.Server.Types
             }
             catch (TaskCanceledException)
             {
-                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<TEntity, TDto>), nameof(SetDefaultPhotoAsync));
+                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<,>), nameof(SetDefaultPhotoAsync));
                 return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)
@@ -290,7 +289,7 @@ namespace BlueBellDolls.Server.Types
             }
             catch (TaskCanceledException)
             {
-                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<TEntity, TDto>), nameof(DeleteFilesAsync));
+                _logger.LogWarning("{class}.{method}(): Операция была отменена", nameof(DisplayableEntityServiceBase<,>), nameof(DeleteFilesAsync));
                 return new(StatusCodes.Status403Forbidden, "Операция отменена");
             }
             catch (Exception ex)

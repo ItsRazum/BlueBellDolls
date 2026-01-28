@@ -4,7 +4,7 @@ namespace BlueBellDolls.Common.Records.Dtos
 {
     public record KittenMinimalDto(
         int Id,
-        string Name,
+        string? Name,
         bool IsEnabled);
 
     public record CreateKittenDto(
@@ -12,29 +12,25 @@ namespace BlueBellDolls.Common.Records.Dtos
         string Name,
         bool IsMale,
         string Description,
-        string Color,
         KittenClass Class,
         KittenStatus Status
     );
 
     public record UpdateKittenDto(
-        string Name,
-        string Description,
-        bool IsMale,
-        string Color,
-        bool IsEnabled,
-        KittenClass Class,
-        KittenStatus Status
+        string? Name = null,
+        string? Description = null,
+        bool? IsMale = null
     );
 
     public record KittenListDto(
         int Id,
-        string Name,
+        string? Name,
         DateOnly BirthDay,
         string? MainPhotoUrl,
+        KittenClass Class,
         KittenStatus Status,
-        string Description,
-        string Color,
+        string? Description,
+        CatColorMinimalDto? CatColor,
         bool IsMale,
         char LitterLetter,
         int LitterId,
@@ -43,17 +39,19 @@ namespace BlueBellDolls.Common.Records.Dtos
 
     public record KittenDetailDto(
         int Id,
-        string Name,
+        string? Name,
         DateOnly BirthDay,
         bool IsMale,
         bool IsEnabled,
-        string Description,
-        string Color,
+        string? Description,
+        CatColorMinimalDto? CatColor,
         KittenClass Class,
         KittenStatus Status,
         List<PhotoDto> Photos,
         LitterMinimalDto Litter
     );
+
+    public record UpdateKittenColorRequest(string Color);
 
     public record UpdateKittenClassRequest(KittenClass Class);
 

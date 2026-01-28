@@ -11,7 +11,24 @@ namespace BlueBellDolls.Common.Models
         #region IDisplayableEntity
 
         [NotMapped]
-        public override string DisplayName => Name;
+        public override string DisplayName => Name ?? string.Empty;
+
+        public override bool ReadyToShow 
+        { 
+            get
+            {
+                var photos = Photos.Where(p => p.Type == Enums.PhotosType.Photos);
+                var titles = Photos.Where(p => p.Type == Enums.PhotosType.Titles);
+                var genTests = Photos.Where(p => p.Type == Enums.PhotosType.GenTests);
+
+                return this is
+                {
+                    Name.Length: > 0,
+                    Description.Length: > 0,
+                    CatColorId: not null
+                } && photos.Any() && titles.Any() && genTests.Any();
+            } 
+        }
 
         #endregion
 

@@ -4,7 +4,6 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
 using BlueBellDolls.Server.Interfaces;
-using BlueBellDolls.Server.Records;
 using BlueBellDolls.Server.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -44,8 +43,8 @@ namespace BlueBellDolls.Server.Services
                         "Номер телефона: {phoneNumber}\n" +
                         "KittenId: {kittenId}", 
                         validationMessage,
-                        dto.CustomerName,
-                        dto.CustomerPhone,
+                        dto.Name,
+                        dto.PhoneNumber,
                         dto.KittenId);
                     return new(statusCode, validationMessage, null);
                 }
@@ -139,34 +138,34 @@ namespace BlueBellDolls.Server.Services
 
         private async Task<(bool valid, int statusCode, string message)> ValidateBookingRequestAsync(CreateBookingRequestDto dto, CancellationToken token = default)
         {
-            if (dto.CustomerName is
+            if (dto.Name is
                 {
                     Length: < 3 or > 30
                 })
                 return (false, StatusCodes.Status400BadRequest, "Имя введено некорректно.");
 
-            if (dto.CustomerPhone is
+            if (dto.PhoneNumber is
                 {
-                    Length: < 3 or > 30
+                    Length: < 3 or > 20
                 })
                 return (false, StatusCodes.Status400BadRequest, "Телефон введён некорректно.");
 
             if (dto.KittenId <= 0)
                 return (false, StatusCodes.Status400BadRequest, "Некорректный идентификатор котенка.");
 
-            var spamCheckTime = DateTime.UtcNow.AddDays(-1);
+            var spamCheckTime = DateTime.UtcNow.AddDays(1);
             var hasRecentBooking = await _applicationDbContext.BookingRequests
-                .CountAsync(br => br.CustomerPhone == dto.CustomerPhone && br.KittenId == dto.KittenId && br.CreatedAt > spamCheckTime, token) != 0;
+                .CountAsync(br => br.CustomerPhone == dto.PhoneNumber && br.KittenId == dto.KittenId && br.CreatedAt < spamCheckTime, token) != 0;
 
             if (hasRecentBooking)
-                return (false, StatusCodes.Status429TooManyRequests, "Бронь с таким телефоном уже существует для данного котенка");
+                return (false, StatusCodes.Status429TooManyRequests, "Заявка на бронь с таким телефоном уже существует для данного котенка. Пожалуйста, подождите немного.");
 
             var kitten = await _applicationDbContext.Kittens.FindAsync([dto.KittenId], token);
             if (kitten == null)
-                return (false, StatusCodes.Status404NotFound, "Котенок не найден.");
+                return (false, StatusCodes.Status404NotFound, "К сожалению, этот котёнок не найден в базе.");
 
             if (kitten.Status != KittenStatus.Available || !kitten.IsEnabled)
-                return (false, StatusCodes.Status403Forbidden, "Этот котенок недоступен для бронирования.");
+                return (false, StatusCodes.Status403Forbidden, "К сожалению, сейчас этот котёнок недоступен для бронирования.");
 
             return (true, StatusCodes.Status200OK, string.Empty);
         }

@@ -1,5 +1,4 @@
 ﻿using BlueBellDolls.Common.Enums;
-using BlueBellDolls.Common.Interfaces.Markers;
 using BlueBellDolls.Common.Types;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -26,13 +25,15 @@ namespace BlueBellDolls.Common.Models
 
         #region IDisplayableEntity
 
-        public override string DisplayName => Name;
+        public override string DisplayName => Name ?? string.Empty;
 
-        #endregion
-
-        #region IOwnedEntity
-
-        public int OwnerId => LitterId;
+        public override bool ReadyToShow => this is 
+        {
+            Name.Length: > 0,
+            Description.Length: > 0,
+            Photos.Count: > 0,
+            CatColorId: not null
+        };
 
         #endregion
 

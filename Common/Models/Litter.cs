@@ -29,7 +29,7 @@ namespace BlueBellDolls.Common.Models
         public List<Kitten> Kittens { get; set; }
 
         [Column("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         #endregion
 
@@ -37,6 +37,15 @@ namespace BlueBellDolls.Common.Models
 
         [NotMapped]
         public override string DisplayName => "Помёт " + Letter;
+
+        public override bool ReadyToShow => this is 
+        {
+            Letter: not '\0',
+            Description.Length: > 0,
+            Kittens.Count: > 0,
+            FatherCatId: not null,
+            MotherCatId: not null
+        };
 
         #endregion
 

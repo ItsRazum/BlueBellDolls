@@ -2,8 +2,8 @@
 {
     public enum KittenClass
     {
-        Pet,
-        Breed,
-        Show
+        Pet = 0,
+        Breed = 1,
+        Show = 2
     }
 }

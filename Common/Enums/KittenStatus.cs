@@ -2,9 +2,9 @@
 {
     public enum KittenStatus
     {
-        Available,
-        Reserved,
-        UnderObservation,
-        Sold
+        Available = 0,
+        Reserved = 1,
+        UnderObservation = 2,
+        Sold = 3
     }
 }

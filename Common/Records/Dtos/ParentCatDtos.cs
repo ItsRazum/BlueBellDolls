@@ -2,45 +2,42 @@
 {
     public record ParentCatMinimalDto(
         int Id,
-        string Name,
+        string? Name,
         bool IsEnabled
     );
 
     public record CreateParentCatDto(
-        string Name,
+        string? Name,
         DateOnly BirthDay,
         bool IsMale,
-        string Description,
-        string Color
+        string? Description
     );
 
     public record UpdateParentCatDto(
-        string Name,
-        DateOnly BirthDay,
-        bool IsMale,
-        bool IsEnabled,
-        string Description,
-        string Color
+        string? Name = null,
+        DateOnly? BirthDay = null,
+        bool? IsMale = null,
+        string? Description = null
     );
 
     public record ParentCatListDto(
         int Id,
-        string Name,
+        string? Name,
         DateOnly BirthDay,
         bool IsMale,
-        string Color,
-        string Description,
+        CatColorMinimalDto? CatColor,
+        string? Description,
         string? MainPhotoUrl,
         bool IsEnabled
     );
 
     public record ParentCatDetailDto(
         int Id,
-        string Name,
+        string? Name,
         DateOnly BirthDay,
         bool IsMale,
-        string Color,
-        string Description,
+        CatColorMinimalDto? CatColor,
+        string? Description,
         bool IsEnabled,
         List<PhotoDto> Photos
     );

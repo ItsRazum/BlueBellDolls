@@ -79,6 +79,7 @@ namespace BlueBellDolls.Server.Controllers.Admin
             return FromResult(result);
         }
 
+        [HttpPut("{id}")]
         public async Task<ActionResult<CatColorDetailDto>> UpdateCatColor(
             int id,
             [FromBody] UpdateCatColorDto dto,

@@ -16,7 +16,7 @@ namespace BlueBellDolls.Server.Controllers
         public async Task<ActionResult<KittenListDto[]>> GetKittens(CancellationToken token = default)
         {
             _logger.LogInformation("{controller}.{method}(): Идёт обработка запроса", nameof(KittensController), nameof(GetKittens));
-            var result = await _kittenService.GetFreeKittensAsync(token);
+            var result = await _kittenService.GetAvailableKittensAsync(token);
 
             return FromResult(result);
         }

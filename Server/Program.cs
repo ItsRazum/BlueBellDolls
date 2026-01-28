@@ -3,14 +3,15 @@ using BlueBellDolls.Common.Providers;
 using BlueBellDolls.Common.Services;
 using BlueBellDolls.Data.Contexts;
 using BlueBellDolls.Data.Interfaces;
-using BlueBellDolls.Server.Factory;
 using BlueBellDolls.Server.Interfaces;
 using BlueBellDolls.Server.Services;
 using BlueBellDolls.Server.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Globalization;
 using Telegram.Bot;
 
 internal class Program
@@ -53,6 +54,14 @@ internal class Program
                 options.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
             });
 
+            options.AddFixedWindowLimiter("FeedbackRequestPolicy", options =>
+            {
+                options.PermitLimit = 3;
+                options.Window = TimeSpan.FromMinutes(30);
+                options.QueueLimit = 0;
+                options.QueueProcessingOrder = System.Threading.RateLimiting.QueueProcessingOrder.OldestFirst;
+            });
+
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
@@ -74,10 +83,6 @@ internal class Program
                 .AllowAnyMethod();
             });
         });
-
-        // Фабрики
-        builder.Services
-            .AddSingleton<IEntityFactory, EntityFactory>();
 
         builder.Services.AddAuthentication(options =>
         {
@@ -114,6 +119,7 @@ internal class Program
             .AddSingleton<ICommonKeyboardsProvider, CommonKeyboardsProvider>()
             .AddSingleton<IBotService, BotService>()
             .AddScoped<IBookingService, BookingService>()
+            .AddScoped<IFeedbackProcessingService, FeedbackProcessingService>()
             .AddScoped<ILitterService, LitterService>()
             .AddScoped<IParentCatService, ParentCatService>()
             .AddScoped<IKittenService, KittenService>()
@@ -132,6 +138,16 @@ internal class Program
 
     private static void ConfigureServer(WebApplication app)
     {
+        var defaultCulture = new CultureInfo("ru-RU");
+
+        var localizationOptions = new RequestLocalizationOptions
+        {
+            DefaultRequestCulture = new RequestCulture(defaultCulture),
+            SupportedCultures = [defaultCulture],
+            SupportedUICultures = [defaultCulture]
+        };
+
+        app.UseRequestLocalization(localizationOptions);
         app.UseDefaultFiles();
         app.UseStaticFiles();
         app.MapStaticAssets();

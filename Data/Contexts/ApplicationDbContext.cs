@@ -17,6 +17,7 @@ namespace BlueBellDolls.Data.Contexts
         public DbSet<TelegramPhoto> TelegramPhotos => Set<TelegramPhoto>();
         public DbSet<CatColor> CatColors => Set<CatColor>();
         public DbSet<BookingRequest> BookingRequests => Set<BookingRequest>();
+        public DbSet<FeedbackRequest> FeedbackRequests => Set<FeedbackRequest>();
 
         #endregion
 
@@ -25,29 +26,6 @@ namespace BlueBellDolls.Data.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        }
-
-        public override int SaveChanges()
-        {
-            var entities = ChangeTracker.Entries< DisplayableEntityBase> ()
-                .Where(e => e.State == EntityState.Modified)
-                .ToList();
-
-            foreach (var entry in entities)
-            {
-                var hasNonIsEnabledChanges = entry.Properties
-                    .Any(p => p.Metadata.Name != nameof(DisplayableEntityBase.IsEnabled) && p.IsModified);
-
-                if (hasNonIsEnabledChanges)
-                {
-                    if (!entry.Property(x => x.IsEnabled).IsModified)
-                    {
-                        entry.Entity.IsEnabled = false;
-                    }
-                }
-            }
-
-            return base.SaveChanges();
         }
 
         #endregion

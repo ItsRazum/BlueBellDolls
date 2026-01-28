@@ -4,7 +4,6 @@ using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
 using BlueBellDolls.Server.Interfaces;
-using BlueBellDolls.Server.Records;
 using BlueBellDolls.Server.Settings;
 using BlueBellDolls.Server.Types;
 using Microsoft.EntityFrameworkCore;
@@ -15,16 +14,15 @@ namespace BlueBellDolls.Server.Services
     public class ParentCatService(
         IApplicationDbContext applicationDbContext,
         IWebHostEnvironment env,
-        IEntityFactory entityFactory,
+        ICatColorService catColorService,
         ILogger<ParentCatService> logger,
         IOptions<FileStorageSettings> fileStorageSettings) 
-        : CatServiceBase<ParentCat, ParentCatDetailDto>(env, applicationDbContext, fileStorageSettings, logger), IParentCatService
+        : CatServiceBase<ParentCat, ParentCatDetailDto>(env, applicationDbContext, fileStorageSettings, catColorService, logger), IParentCatService
     {
 
         #region Fields
 
         private readonly ILogger<ParentCatService> _logger = logger;
-        private readonly IEntityFactory _entityFactory = entityFactory;
 
         #endregion
 
@@ -41,6 +39,12 @@ namespace BlueBellDolls.Server.Services
                 if (isMale.HasValue)
                     query = query.Where(c => c.IsMale == isMale.Value);
 
+                var totalItems = await query.CountAsync(token);
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+                if (totalPages < pageNumber)
+                    return new(StatusCodes.Status400BadRequest, "Запрошенная страница находится за пределами диапазона доступных!");
+                
                 var items = await query
                     .Include(c => c.Photos)
                     .ThenInclude(p => p.TelegramPhoto)
@@ -49,10 +53,7 @@ namespace BlueBellDolls.Server.Services
                     .Take(pageSize)
                     .ToListAsync(token);
 
-                var totalItems = await query.CountAsync(token);
-                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
-
-                var paged = new PagedResult<ParentCatListDto>([.. items.Select(p => p.ToListDto())], pageNumber, pageSize, totalItems, totalPages);
+                var paged = new PagedResult<ParentCatListDto>([.. items.Select(p => p.ToListDto(admin))], pageNumber, pageSize, totalItems, totalPages);
                 return new ServiceResult<PagedResult<ParentCatListDto>>(StatusCodes.Status200OK, null, paged);
             }
             catch (TaskCanceledException)
@@ -78,10 +79,10 @@ namespace BlueBellDolls.Server.Services
                     _logger.LogWarning("ParentCat {id} не найден.", id);
                     return new ServiceResult<ParentCatDetailDto>(StatusCodes.Status404NotFound, "Производитель не найден");
                 }
-                if (!admin && result.IsEnabled)
+                if (!admin && !result.IsEnabled)
                     return new(StatusCodes.Status403Forbidden, "Доступ к коту запрещён");
 
-                return new(StatusCodes.Status200OK, null, result.ToDetailDto());
+                return new(StatusCodes.Status200OK, null, result.ToDetailDto(admin));
             }
             catch (TaskCanceledException)
             {
@@ -139,11 +140,13 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var entity = _entityFactory.CreateNewParentCat(
-                    parentCatDto.Name,
-                    parentCatDto.IsMale,
-                    parentCatDto.Description,
-                    parentCatDto.Color);
+                var entity = new ParentCat()
+                {
+                    Name = parentCatDto.Name,
+                    BirthDay = parentCatDto.BirthDay,
+                    Description = parentCatDto.Description,
+                    IsMale = parentCatDto.IsMale
+                };
                 await ApplicationDbContext.Cats.AddAsync(entity, token);
                 await ApplicationDbContext.SaveChangesAsync(token);
 
@@ -165,7 +168,10 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var entity = await ApplicationDbContext.Cats.FindAsync([id], token);
+                if (parentCatDto.Description != null && string.IsNullOrWhiteSpace(parentCatDto.Description))
+                    return new(StatusCodes.Status400BadRequest, "Описание не может быть пустым!");
+
+                var entity = await GetDetailEntityAsync(id, token);
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "Производитель не найден");
 
@@ -173,18 +179,21 @@ namespace BlueBellDolls.Server.Services
                 {
                     var littersToUpdate = await ApplicationDbContext.Litters
                     .Where(
-                        l => (l.MotherCatId == id && parentCatDto.IsMale) ||
-                        (l.FatherCatId == id && !parentCatDto.IsMale))
+                        l => (l.MotherCatId == id && parentCatDto.IsMale == false) ||
+                        (l.FatherCatId == id && !parentCatDto.IsMale == true))
                     .ToListAsync(token);
 
                     foreach (var litter in littersToUpdate)
                     {
-                        if (parentCatDto.IsMale) litter.MotherCatId = null;
-                        else litter.FatherCatId = null;
+                        if (parentCatDto.IsMale == true) 
+                            litter.MotherCatId = null;
+                        else 
+                            litter.FatherCatId = null;
                     }
                 }
 
                 entity.ApplyUpdate(parentCatDto);
+                entity.IsEnabled = false;
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, Value: entity.ToDetailDto());
             }

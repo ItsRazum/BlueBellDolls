@@ -4,7 +4,6 @@ using BlueBellDolls.Common.Extensions;
 using BlueBellDolls.Common.Records.Dtos;
 using BlueBellDolls.Data.Interfaces;
 using BlueBellDolls.Server.Interfaces;
-using BlueBellDolls.Server.Records;
 using BlueBellDolls.Server.Settings;
 using BlueBellDolls.Server.Types;
 using Microsoft.EntityFrameworkCore;
@@ -18,21 +17,22 @@ namespace BlueBellDolls.Server.Services
 
         #region Fields
 
-        private readonly IEntityFactory _entityFactory;
         private readonly ILogger<CatColorService> _logger;
         private readonly CatColorTree _catColorTree;
         private readonly string[] _catColorTreeMap;
 
+        #endregion
+
+        #region Constructor
+
         public CatColorService(
             IApplicationDbContext applicationDbContext,
             IWebHostEnvironment env,
-            IEntityFactory entityFactory,
             ILogger<CatColorService> logger,
             IOptions<FileStorageSettings> fileStorageSettings,
             IOptions<EntitiesSettings> entitiesSettings) : base(env, applicationDbContext, fileStorageSettings, logger)
         {
             _logger = logger;
-            _entityFactory = entityFactory;
             _catColorTree = entitiesSettings.Value.CatColors;
             _catColorTreeMap = _catColorTree.ToTreeMap();
         }
@@ -71,9 +71,29 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
+                var totalItems = _catColorTreeMap.Length;
+                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                if (totalPages < pageNumber)
+                    return new(StatusCodes.Status400BadRequest, "Запрошенная страница находится за пределами диапазона доступных!");
+
                 var query = ApplicationDbContext.CatColors
                     .AsNoTracking()
-                    .Where(c => admin || c.IsEnabled);
+                    .Where(c => admin || c.IsEnabled)
+                    .Include(c => c.Photos)
+                    .ThenInclude(p => p.TelegramPhoto)
+                    .OrderBy(s => s);
+
+                if (!admin)
+                {
+                    var publicItems = await query.ToListAsync(token);
+                    totalItems = await query.CountAsync(token);
+                    totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+                    return new(
+                        StatusCodes.Status200OK, 
+                        null,
+                        new([.. publicItems.Select(c => c.ToListDto())], pageNumber, pageSize, totalItems, totalPages)
+                    );
+                }
 
                 var treeMapItems = _catColorTreeMap
                     .OrderBy(s => s)
@@ -81,21 +101,19 @@ namespace BlueBellDolls.Server.Services
                     .Take(pageSize);
 
                 var items = await query
-                    .Include(c => c.Photos)
-                    .ThenInclude(p => p.TelegramPhoto)
                     .Where(c => treeMapItems.Contains(c.Identifier))
                     .ToListAsync(token);
 
                 var zippedItems = treeMapItems.Select(identifier =>
                 {
-                    var entity = items.FirstOrDefault(c => c.Identifier == identifier);
-                    entity ??= _entityFactory.CreateNewCatColor(identifier);
+                    var entity = items.FirstOrDefault(c => c.Identifier == identifier) 
+                    ?? new() 
+                    { 
+                        Identifier = identifier
+                    };
 
                     return entity.ToListDto();
                 }).ToList();
-
-                var totalItems = await query.CountAsync(token);
-                var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
                 var result = new PagedResult<CatColorListDto>(zippedItems, pageNumber, pageSize, totalItems, totalPages);
                 return new(StatusCodes.Status200OK, null, result);
@@ -121,7 +139,7 @@ namespace BlueBellDolls.Server.Services
                 if (result == null)
                     return new(StatusCodes.Status404NotFound, "CatColor не найден!");
 
-                if (!result.IsEnabled && !admin)
+                if (!admin && !result.IsEnabled)
                     return new(StatusCodes.Status403Forbidden, "Доступ к CatColor запрещен!");
 
                 result.Photos = SortPhotosByDefault(result.Photos);
@@ -155,7 +173,11 @@ namespace BlueBellDolls.Server.Services
                     if (!_catColorTreeMap.Contains(identifier))
                         return new(StatusCodes.Status400BadRequest, "Недопустимый идентификатор CatColor!");
 
-                    result = _entityFactory.CreateNewCatColor(identifier);
+                    result = new() 
+                    {
+                        Identifier = identifier,
+                        Photos = []
+                    };
 
                     await ApplicationDbContext.CatColors.AddAsync(result, token);
                     await ApplicationDbContext.SaveChangesAsync(token);
@@ -163,8 +185,6 @@ namespace BlueBellDolls.Server.Services
 
                 if (result.IsEnabled && !admin)
                     return new(StatusCodes.Status403Forbidden, "Доступ к CatColor запрещен!");
-
-                result.Photos = SortPhotosByDefault(result.Photos);
 
                 return new(StatusCodes.Status200OK, null, result.ToDetailDto());
             }
@@ -213,11 +233,15 @@ namespace BlueBellDolls.Server.Services
         {
             try
             {
-                var entity = await ApplicationDbContext.CatColors.FindAsync([id], token);
+                if (catColorDto.Description != null && string.IsNullOrWhiteSpace(catColorDto.Description))
+                    return new(StatusCodes.Status400BadRequest, "Описание не может быть пустым!");
+
+                var entity = await GetDetailEntityAsync(id, token);
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "CatColor не найден!");
 
                 entity.ApplyUpdate(catColorDto);
+                entity.IsEnabled = false;
                 await ApplicationDbContext.SaveChangesAsync(token);
                 return new(StatusCodes.Status200OK, null, entity.ToDetailDto());
             }

@@ -9,5 +9,7 @@ namespace BlueBellDolls.Common.Interfaces
         List<EntityPhoto> Photos { get; set; }
 
         bool IsEnabled { get; set; }
+
+        bool ReadyToShow { get; }
     }
 }

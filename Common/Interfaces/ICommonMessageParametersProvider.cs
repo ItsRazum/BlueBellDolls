@@ -6,5 +6,7 @@ namespace BlueBellDolls.Common.Interfaces
     public interface ICommonMessageParametersProvider
     {
         MessageParameters GetNewBookingRequestParameters(BookingRequest bookingRequest);
+
+        MessageParameters GetNewFeedbackRequestParameters(FeedbackRequest feedbackRequest, FeedbackRequest? previousRequestFromThatUser = null);
     }
 }

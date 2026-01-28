@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using BlueBellDolls.Common.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BlueBellDolls.Common.Types
 {
@@ -8,7 +9,7 @@ namespace BlueBellDolls.Common.Types
         #region Properties
 
         [Column("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [Column("birthday")]
         public DateOnly BirthDay { get; set; } = DateOnly.FromDateTime(DateTime.Now);
@@ -17,10 +18,11 @@ namespace BlueBellDolls.Common.Types
         public bool IsMale { get; set; }
 
         [Column("description")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        [Column("color")]
-        public string Color { get; set; }
+        [Column("cat_color_id")]
+        public int? CatColorId { get; set; }
+        public CatColor? Color { get; set; }
 
         #endregion
 

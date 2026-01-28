@@ -1,6 +1,5 @@
 ﻿using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Records.Dtos;
-using BlueBellDolls.Server.Records;
 
 namespace BlueBellDolls.Server.Interfaces
 {
@@ -10,7 +9,7 @@ namespace BlueBellDolls.Server.Interfaces
         Task<ServiceResult> DeleteAsync(int id, CancellationToken token = default);
         Task<ServiceResult<KittenDetailDto>> GetAsync(bool admin, int id, CancellationToken token = default);
         Task<ServiceResult<PagedResult<KittenListDto>>> GetListAsync(bool admin, int pageNumber, int pageSize, CancellationToken token = default);
-        Task<ServiceResult<KittenListDto[]>> GetFreeKittensAsync(CancellationToken token = default);
+        Task<ServiceResult<KittenListDto[]>> GetAvailableKittensAsync(CancellationToken token = default);
         Task<ServiceResult<KittenDetailDto>> UpdateAsync(int id, UpdateKittenDto kittenDto, CancellationToken token = default);
         Task<ServiceResult<KittenDetailDto>> UpdateColorAsync(int id, string color, CancellationToken token = default);
         Task<ServiceResult<KittenDetailDto>> UpdateKittenClassAsync(int id, UpdateKittenClassRequest request, CancellationToken token = default);
