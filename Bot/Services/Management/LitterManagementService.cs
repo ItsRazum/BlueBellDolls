@@ -53,7 +53,7 @@ namespace BlueBellDolls.Bot.Services.Management
             }
             catch (Exception ex)
             {
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось добавить помет: {ex.Message}");
             }
         }
 
@@ -76,8 +76,8 @@ namespace BlueBellDolls.Bot.Services.Management
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Не удалось обновить получить страницу Litter!");
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Не удалось получить страницу Litter!");
+                return new(500, $"Не удалось получить страницу: {ex.Message}");
             }
         }
 
@@ -98,7 +98,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{Service}.{Method}(): Произошла необработанная ошибка", nameof(LitterManagementService), nameof(AddNewKittenToLitterAsync));
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось добавить котенка: {ex.Message}");
             }
         }
 
@@ -115,7 +115,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "{Service}.{Method}(): Произошла необработанная ошибка", nameof(LitterManagementService), nameof(SetParentCatForLitterAsync));
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось установить родителя: {ex.Message}");
             }
         }
     }

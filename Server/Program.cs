@@ -138,6 +138,9 @@ internal class Program
 
     private static void ConfigureServer(WebApplication app)
     {
+        if (!Directory.Exists("wwwroot"))
+            Directory.CreateDirectory("wwwroot");
+
         var defaultCulture = new CultureInfo("ru-RU");
 
         var localizationOptions = new RequestLocalizationOptions

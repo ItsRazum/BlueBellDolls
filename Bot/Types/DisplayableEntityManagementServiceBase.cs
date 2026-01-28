@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Types
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить лимит фотографий {type}!", photosType);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось получить лимит фотографий: {ex.Message}");
             }
         }
 
@@ -56,7 +56,7 @@ namespace BlueBellDolls.Bot.Types
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось удалить {type} {id}", typeof(TEntity).Name, entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось удалить {typeof(TEntity).Name}: {ex.Message}");
             }
         }
 
@@ -73,7 +73,7 @@ namespace BlueBellDolls.Bot.Types
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при установке заглавного фото для {type} {id}!", typeof(TEntity).Name, entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось установить заглавное фото для {typeof(TEntity).Name}: {ex.Message}");
             }
         }
 
@@ -127,7 +127,7 @@ namespace BlueBellDolls.Bot.Types
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при загрузке фотографий для {type} {id}!", typeof(TEntity).Name, entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось загрузить фотографии для {typeof(TEntity).Name}: {ex.Message}");
             }
             finally
             {
@@ -153,7 +153,7 @@ namespace BlueBellDolls.Bot.Types
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка удаления фотографий для {type} {id}!", typeof(TEntity).Name, entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось удалить фотографии для {typeof(TEntity).Name}: {ex.Message}");
             }
         }
 
@@ -170,7 +170,7 @@ namespace BlueBellDolls.Bot.Types
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при установке заглавного фото для {type} {id}!", typeof(TEntity).Name, entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось установить заглавное фото для {typeof(TEntity).Name}: {ex.Message}");
             }
         }
 
@@ -187,7 +187,7 @@ namespace BlueBellDolls.Bot.Types
             }
             catch (Exception ex)
             {
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось изменить видимость {typeof(TEntity).Name}: {ex.Message}");
             }
         }
 
@@ -211,8 +211,8 @@ namespace BlueBellDolls.Bot.Types
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ошибка при обновлении CatColor {id} через Reply", modelId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Ошибка при обновлении {type} {id} через Reply", typeof(TEntity).Name, modelId);
+                return new(500, $"Не удалось обновить {typeof(TEntity).Name}: {ex.Message}");
             }
         }
     }

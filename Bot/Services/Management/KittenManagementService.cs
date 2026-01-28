@@ -56,7 +56,8 @@ namespace BlueBellDolls.Bot.Services.Management
             }
             catch (Exception ex)
             {
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Не удалось получить страницу котят!");
+                return new(500, $"Не удалось получить страницу котят: {ex.Message}");
             }
         }
 
@@ -72,7 +73,8 @@ namespace BlueBellDolls.Bot.Services.Management
             }
             catch (Exception ex)
             {
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Не удалось обновить цвет котёнка!");
+                return new(500, $"Не удалось обновить цвет: {ex.Message}");
             }
         }
 
@@ -88,7 +90,8 @@ namespace BlueBellDolls.Bot.Services.Management
             }
             catch (Exception ex)
             {
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Не удалось обновить статус котёнка!");
+                return new(500, $"Не удалось обновить статус: {ex.Message}");
             }
         }
 
@@ -104,7 +107,8 @@ namespace BlueBellDolls.Bot.Services.Management
             }
             catch (Exception ex)
             {
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                _logger.LogError(ex, "Не удалось обновить класс котёнка!");
+                return new(500, $"Не удалось обновить класс: {ex.Message}");
             }
         }
     }

@@ -48,7 +48,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось добавить ParentCat!");
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось добавить ParentCat: {ex.Message}");
             }
         }
 
@@ -73,7 +73,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу ParentCat!");
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось получить страницу ParentCat: {ex.Message}");
             }
         }
 
@@ -98,7 +98,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу ParentCat!");
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось получить страницу ParentCat: {ex.Message}");
             }
         }
 
@@ -112,7 +112,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось обновить цвет для ParentCat {id}!", entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось обновить цвет для ParentCat: {ex.Message}");
             }
         }
 
@@ -167,7 +167,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Ошибка при загрузке файлов для ParentCat {id}!", entityId);
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Ошибка при загрузке файлов для ParentCat: {ex.Message}");
             }
             finally
             {

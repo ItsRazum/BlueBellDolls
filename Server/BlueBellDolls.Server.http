@@ -1,66 +1,9 @@
-﻿# --- ПЕРЕМЕННЫЕ ---
-# (Я исправил 'lue...' на '@', это стандартный синтаксис)
-@BlueBellDolls_Server_HostAddress = http://localhost:5297
-@Id_для_теста = 1
-
-GET {{BlueBellDolls_Server_HostAddress}}/api/parentcats?pageNumber=1&pageSize=5
-Accept: application/json
-
-###
-
-GET {{BlueBellDolls_Server_HostAddress}}/api/parentcats?pageNumber=1&pageSize=5&isMale=true
-Accept: application/json
-
-###
-
-POST {{BlueBellDolls_Server_HostAddress}}/api/parentcats
+﻿@BlueBellDolls_Server_HostAddress = http://localhost:5297
+POST {{BlueBellDolls_Server_HostAddress}}/api/BookingRequests
 Content-Type: application/json
 
 {
-  "name": "Тестовый Кот (из .http)",
-  "birthDay": "2023-10-01",
-  "isMale": true,
-  "description": "Описание, созданное через .http файл",
-  "color": "Seal Bicolor",
-  "oldDescription": null
+  "kittenId": 2,
+  "customerName": "Иван Иванов (Тест)",
+  "customerPhone": "+7 (900) 123-45-75"
 }
-
-###
-
-GET {{BlueBellDolls_Server_HostAddress}}/api/parentcats/{{Id_для_теста}}
-Accept: application/json
-
-###
-
-# (PUT /api/parentcats/1)
-PUT {{BlueBellDolls_Server_HostAddress}}/api/parentcats/{{Id_для_теста}}
-Content-Type: application/json
-
-{
-  "name": "Имя (Обновлено)",
-  "birthDay": "2023-10-01",
-  "isMale": false, // <-- Поменяли пол (Сервер должен отвязать его от 'FatherCatId' в Пометах)
-  "description": "Описание (Обновлено)",
-  "color": "Blue Point",
-  "oldDescription": "Старое описание"
-}
-
-###
-
-DELETE {{BlueBellDolls_Server_HostAddress}}/api/parentcats/{{Id_для_теста}}
-
-###
-
-POST {{BlueBellDolls_Server_HostAddress}}/api/parentcats/{{Id_для_теста}}/photos
-Content-Type: multipart/form-data; boundary=boundary-test
-
---boundary-test
-# "files" - это имя (name="files"), которое ждет твой контроллер
-Content-Disposition: form-data; name="files"; filename="test-image.jpg"
-Content-Type: image/jpeg
-
-# "<" - синтаксис для вставки файла
-< ./test-image.jpg
---boundary-test--
-
-###

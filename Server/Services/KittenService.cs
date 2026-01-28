@@ -39,7 +39,7 @@ namespace BlueBellDolls.Server.Services
                 var totalItems = await query.CountAsync(token);
                 var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
 
-                if (totalPages < pageNumber)
+                if (totalPages > 0 && totalPages < pageNumber)
                     return new(StatusCodes.Status400BadRequest, "Запрошенная страница находится за пределами диапазона доступных!");
 
                 var items = await query

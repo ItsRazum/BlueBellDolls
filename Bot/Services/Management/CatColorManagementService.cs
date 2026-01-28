@@ -52,7 +52,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось добавить новый CatColor");
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось добавить новый CatColor: {ex.Message}");
             }
         }
 
@@ -81,7 +81,7 @@ namespace BlueBellDolls.Bot.Services.Management
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Не удалось получить страницу CatColor");
-                return new(500, _messagesProvider.CreateUnknownErrorMessage(ex.Message));
+                return new(500, $"Не удалось получить страницу CatColor: {ex.Message}");
             }
         }
     }

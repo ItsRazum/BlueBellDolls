@@ -6,9 +6,15 @@ definePageMeta({
   buttonUrl: "/litters",
 });
 
+const config = useRuntimeConfig();
+
+console.log(`API Base: ` + config.public.apiBase);
+
 const kittenApi = useKittenApi();
 
-const { data: kittens, pending } = await kittenApi.getAvailableKittens();
+const { data: kittensResponse, pending } = await kittenApi.getAvailableKittens();
+
+const kittens = computed(() => kittensResponse.value || []);
 </script>
 
 <template>
@@ -43,7 +49,7 @@ const { data: kittens, pending } = await kittenApi.getAvailableKittens();
       <KittenListItemSkeleton variant="compact" />
     </div>
   </div>
-  <div v-else-if="kittens.length === 0" class="kittens-container">
+  <div v-else-if="kittens && kittens.length && kittens.length === 0" class="kittens-container">
     <div class="no-kittens-container">
       <span class="font-bold text-3xl text-white">{{ $t("pages.main.kittensWillBeSoon") }}</span>
       <span class="text-2xl text-white text-center">{{
@@ -51,7 +57,7 @@ const { data: kittens, pending } = await kittenApi.getAvailableKittens();
       }}</span>
     </div>
   </div>
-  <div v-else-if="kittens.length < 4" class="kittens-container">
+  <div v-else-if="kittens && kittens.length && kittens.length < 3" class="kittens-container">
     <h2 class="text-3xl">{{ $t("pages.main.kittensForSale") }}</h2>
     <div class="carousel-wrapper">
       <KittenListItem
