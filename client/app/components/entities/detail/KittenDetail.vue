@@ -93,4 +93,11 @@ const { data: kitten, pending } = await kittenApi.getById(props.kittenId);
   display: flex;
   gap: var(--padding-large);
 }
+
+@media (max-width: 880px) {
+  .content-container {
+    flex-direction: column;
+  }
+}
+
 </style>

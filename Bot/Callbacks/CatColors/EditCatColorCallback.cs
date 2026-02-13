@@ -42,7 +42,7 @@ namespace BlueBellDolls.Bot.Callbacks.CatColors
 
             if (!result.Success)
             {
-                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
+                await BotService.AnswerCallbackQueryAsync(c.CallbackId, _messagesProvider.CreateServerErrorMessage(result.Message), token: token);
                 return;
             }
 

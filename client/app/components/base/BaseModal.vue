@@ -1,5 +1,4 @@
 ﻿<script setup lang="ts">
-import { watch, ref } from "vue";
 
 const props = defineProps<{
   isOpen: boolean;
@@ -89,7 +88,9 @@ const close = () => {
               <span class="tooltip">{{ $t("components.modals.close") }}</span>
             </div>
           </div>
-          <slot />
+          <div class="modal-content">
+            <slot />
+          </div>
           <span class="copyright">©{{ year }} BlueBellDolls Cattery.</span>
         </CardWrapper>
       </div>
@@ -118,6 +119,30 @@ const close = () => {
   justify-content: center;
   padding: var(--padding-large);
   gap: var(--padding-large);
+
+  max-height: 95vh;
+  box-sizing: border-box;
+}
+
+.modal-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding: 10px;
+  margin: -10px;
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: var(--color-scrollbar);
+  border-radius: 3px;
 }
 
 .modal-toolbar {
@@ -128,6 +153,8 @@ const close = () => {
 }
 
 .close-btn {
+  width: 20px !important;
+  height: 20px !important;
   all: unset;
   background: transparent;
   border: none;

@@ -51,7 +51,7 @@ namespace BlueBellDolls.Bot.Commands
                 await BotService.SendMessageAsync(m.Chat, _messageParametersProvider.GetEntityFormParameters(result.Value!), token);
             }
             else
-                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateUnknownErrorMessage(result.Message), token: token);
+                await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreateServerErrorMessage(result.Message), token: token);
         }
     }
 }

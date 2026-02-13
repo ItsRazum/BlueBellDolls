@@ -92,6 +92,8 @@ const nextButton = ref(null);
 }
 
 .main-swiper {
+  width: 100%;
+  height: 100%;
   display: block;
   border-radius: var(--border-radius-main);
 }
@@ -103,16 +105,18 @@ const nextButton = ref(null);
 }
 
 .image-4x3 {
-  width: 37.5rem;
-  height: 28.125rem;
+  max-width: 37.5rem;
+  max-height: 28.125rem;
+  aspect-ratio: 4 / 3;
   border-radius: var(--border-radius-main);
   object-fit: cover;
   box-shadow: var(--shadow-base);
 }
 
 .image-1x1 {
-  width: 25rem;
-  height: 25rem;
+  max-width: 25rem;
+  max-height: 25rem;
+  aspect-ratio: 1 / 1;
   border-radius: var(--border-radius-main);
   object-fit: cover;
   box-shadow: var(--shadow-base);
@@ -217,5 +221,45 @@ const nextButton = ref(null);
   background-color: var(--color-text-base);
   opacity: 0.7;
   transform: scale(1.1);
+}
+
+@media (max-width: 604px) {
+  .gallery-wrapper {
+    width: 100%;
+    max-width: 80vw;
+    padding: 0;
+    gap: 0;
+    margin: 0 auto;
+  }
+
+  .main-swiper {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto;
+  }
+
+  .image-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex;
+    justify-content: center;
+  }
+
+  .image-4x3,
+  .image-1x1 {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 100% !important;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+  }
+
+  .image-1x1 {
+    aspect-ratio: 1 / 1;
+  }
+
+  .mode-outside .nav-btn {
+    display: none;
+  }
 }
 </style>

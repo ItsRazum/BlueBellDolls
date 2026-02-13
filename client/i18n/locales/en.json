@@ -8,6 +8,7 @@
   },
   "common": {
     "contacts": {
+      "name": "Elena",
       "phoneLabel": "Phone Number:",
       "emailLabel": "Email:",
       "telegramLabel": "Telegram:"

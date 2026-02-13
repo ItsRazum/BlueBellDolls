@@ -7,7 +7,6 @@ using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Models;
 using BlueBellDolls.Common.Types;
 using Microsoft.Extensions.Options;
-using System.Drawing;
 using System.Globalization;
 using System.Text;
 using Telegram.Bot.Types;
@@ -302,8 +301,8 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateColorUpdateErrorMessage()
             => "❌ Не удалось обновить цвет: сервер не ответил или отклонил запрос";
 
-        public string CreateUnknownErrorMessage(string? message = null)
-            => "❌ Произошла неизвестная ошибка" + (message != null ? $": {message}" : "");
+        public string CreateServerErrorMessage(string? message = null)
+            => "❌ Произошла ошибка на сервере" + (message != null ? $": {message}" : "");
 
         public string CreateEntityDeletionError()
             => "❌ Не удалось удалить сущность: сервер не ответил или отклонил запрос";

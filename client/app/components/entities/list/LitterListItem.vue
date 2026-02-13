@@ -1,5 +1,5 @@
 ﻿<script setup lang="ts">
-import { KittenClass, KittenStatus } from "~~/enums/enums";
+import { KittenStatus } from "~~/enums/enums";
 
 const props = defineProps<{
   litter: LitterDetailDto;
@@ -24,24 +24,15 @@ const fatherModal = useModal();
 <template>
   <CardWrapper class="litter-card">
     <div class="card-expanded">
-      <div class="card-photo-container">
-        <img
-          class="card-expanded-photo"
-          :src="apiBaseUrl + litter.photos[0].url"
-          :alt="`${$t('components.common.litters.title')} «${litter.letter}»`"
-        />
-        <button class="link-btn" @click="litterModal.open">
-          {{ $t("components.common.morePhotos") }}
-        </button>
-      </div>
+      <Avatar :expanded="true" :photoUrl="litter.photos[0].url" :alt="litter.name" :read-only="false" @click="litterModal.open" />
       <CardWrapper :enable-blur="true" :show-border="false" class="card-info-container">
         <div class="card-header">
-          <h2 class="text-4xl">
+          <h2 class="text-2xl md:text-4xl font-bold">
             {{ $t("components.common.litters.title", { letter: litter.letter }) }}
           </h2>
-          <span class="font-medium text-2xl text-(--color-text-caption)">{{
-            litter.birthDay
-          }}</span>
+          <span class="font-medium text-lg md:text-2xl text-(--color-text-caption)">{{
+              litter.birthDay
+            }}</span>
         </div>
         <CardWrapper :show-border="false" class="card-info-body">
           <div class="card-info-props">
@@ -60,8 +51,8 @@ const fatherModal = useModal();
 
             <div class="card-property">
               <span style="color: var(--color-context-blue)">{{
-                litter.kittens.length + ` `
-              }}</span>
+                  litter.kittens.length + ` `
+                }}</span>
               <span>{{ $t("components.common.litters.totalKittens", litter.kittens.length) }}</span>
             </div>
 
@@ -69,7 +60,7 @@ const fatherModal = useModal();
               <span style="color: var(--color-context-blue)">{{ freeKittensCount + ` ` }}</span>
               <span>{{ $t("components.common.litters.availableKittens", freeKittensCount) }}</span>
             </div>
-            <span v-if="locale == 'ru'" style="margin-top: var(--padding-small)">
+            <span v-if="locale == 'ru'" class="description-text">
               {{ litter.description }}</span
             >
           </div>
@@ -81,26 +72,32 @@ const fatherModal = useModal();
       <KittenListItem v-for="kitten in litter.kittens" :key="kitten.id" :kitten="kitten" />
     </div>
   </CardWrapper>
+
   <LitterModal
-    :is-open="litterModal.isOpen.value"
-    :litterId="props.litter.id"
-    @close="litterModal.close"
+      :is-open="litterModal.isOpen.value"
+      :litterId="props.litter.id"
+      @close="litterModal.close"
   />
   <ParentCatModal
-    :is-open="motherModal.isOpen.value"
-    :parent-cat-id="litter.motherCatId"
-    @close="motherModal.close"
+      :is-open="motherModal.isOpen.value"
+      :parent-cat-id="litter.motherCatId"
+      @close="motherModal.close"
   />
   <ParentCatModal
-    :is-open="fatherModal.isOpen.value"
-    :parent-cat-id="litter.fatherCatId"
-    @close="fatherModal.close"
+      :is-open="fatherModal.isOpen.value"
+      :parent-cat-id="litter.fatherCatId"
+      @close="fatherModal.close"
   />
 </template>
 
 <style scoped>
 span {
   font-size: 1.125rem;
+}
+
+.description-text {
+  margin-top: var(--padding-small);
+  display: block;
 }
 
 .litter-card {
@@ -123,13 +120,9 @@ span {
 }
 
 .card-property span,
+.card-property button,
 .card-property a {
   font-size: 1.25rem;
-}
-
-.card-expanded-photo {
-  height: 18.5rem;
-  width: 18.5rem;
 }
 
 .kittens-grid {
@@ -138,5 +131,31 @@ span {
   gap: var(--padding-extra-large);
   margin-top: 20px;
   width: 100%;
+}
+
+@media (max-width: 720px) {
+  .litter-card {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  span {
+    font-size: 0.95rem;
+  }
+
+  .card-property span,
+  .card-property button,
+  .card-property a {
+    font-size: 1rem;
+  }
+
+  .card-info-body {
+    padding: 1rem;
+  }
+
+  .kittens-grid {
+    gap: 1.5rem;
+    margin-top: 10px;
+  }
 }
 </style>

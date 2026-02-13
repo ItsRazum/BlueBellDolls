@@ -16,4 +16,8 @@ useHead({
   }
 })
 
+onMounted(() => {
+  document.body.classList.remove('preload');
+})
+
 </script>

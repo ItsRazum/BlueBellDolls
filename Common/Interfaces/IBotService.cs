@@ -21,7 +21,7 @@ namespace BlueBellDolls.Common.Interfaces
         /// </summary>
         /// <param name="inputFiles"></param>
         /// <returns></returns>
-        Task<Message[]> SendMessageAsync(ChatId chat, string messageText, IReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default);
+        Task<Message[]> SendMessageAsync(ChatId chat, string messageText, ReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default);
 
         /// <summary>
         /// Формирует и отправляет сообщение из <paramref name="messageParameters"/>.

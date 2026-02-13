@@ -17,7 +17,7 @@ namespace BlueBellDolls.Bot.Providers
         private readonly IKeyboardsProvider _keyboardsProvider = keyboardsProvider;
 
         public MessageParameters GetStartParameters()
-            => new MessageParameters(
+            => new(
                 _messagesProvider.CreateStartMessage(),
                 _keyboardsProvider.CreateStartKeyboard());
 

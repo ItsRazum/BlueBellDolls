@@ -92,7 +92,7 @@ const submitFeedback = async () => {
         </p>
       </div>
 
-      <div class="separator vertical h-[15rem] m-[2rem]" />
+      <div class="separator separator-style" />
 
       <div class="form-container">
         <span class="mb-[0.875rem] text-2xl font-medium">{{ $t("footer.orContact") }}</span>
@@ -128,7 +128,7 @@ const submitFeedback = async () => {
           <NuxtLinkLocale to="/about" class="link primary">{{ $t("footer.about.aboutUs") }}</NuxtLinkLocale>
           <NuxtLinkLocale to="/history" class="link secondary">{{ $t("footer.about.ourStory") }}</NuxtLinkLocale>
           <NuxtLinkLocale to="/achievements" class="link secondary">{{ $t("footer.about.achievements") }}</NuxtLinkLocale>
-          <NuxtLinkLocale to="/route" class="link secondary">{{ $t("footer.about.howToGetToUs") }}</NuxtLinkLocale>
+          <NuxtLinkLocale to="/location" class="link secondary">{{ $t("footer.about.howToGetToUs") }}</NuxtLinkLocale>
         </div>
         <div class="block-container">
           <NuxtLinkLocale to="/about-ragdoll" class="link primary">{{ $t("footer.aboutRagdoll.ragdollBreed") }}</NuxtLinkLocale>
@@ -209,6 +209,8 @@ a:hover {
 
 .links-container {
   display: flex;
+  flex-wrap: wrap;
+  gap: var(--padding-extra-large);
   width: 100%;
   justify-content: space-between;
 }
@@ -217,6 +219,12 @@ a:hover {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.separator-style {
+  height: auto;
+  margin: 2rem;
+  width: 1px;
 }
 
 .link {
@@ -247,4 +255,19 @@ a:hover {
 .dev-link {
   color: #899dd5;
 }
+
+@media (max-width: 910px) {
+
+  .contacts-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .separator-style {
+    width: 100%;
+    max-width: 700px;
+    height: 1px;
+  }
+}
+
 </style>

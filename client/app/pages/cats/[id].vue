@@ -35,17 +35,8 @@ useSeoMeta({
     :button-url="`/cats/${parentCat.isMale ? `males` : `females`}`"
   />
   <main>
-    <div class="content-container">
+    <div class="page-block secondary">
       <ParentCatDetail :target-id="parentCatId" />
     </div>
   </main>
 </template>
-
-<style scoped>
-.content-container {
-  display: flex;
-  justify-content: center;
-  padding: var(--padding-large);
-  background-color: var(--color-pages-secondary-background);
-}
-</style>

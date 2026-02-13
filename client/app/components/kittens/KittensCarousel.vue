@@ -38,7 +38,7 @@ const carousel = ref(null);
             itemsToShow: 1,
             snapAlign: 'start',
           },
-          700: {
+          820: {
             itemsToShow: 2,
             snapAlign: 'start',
           },
@@ -77,10 +77,10 @@ const carousel = ref(null);
 .carousel-wrapper {
   display: flex;
   align-items: center;
+  margin: 10px;
   gap: var(--padding-extra-large);
   width: 100%;
   max-width: 1150px;
-  margin: 0 auto;
 }
 
 .nav-btn {

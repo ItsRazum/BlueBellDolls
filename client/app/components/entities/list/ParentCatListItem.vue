@@ -53,16 +53,7 @@ const catColorModal = useModal();
   </CardWrapper>
 
   <div v-else class="card-expanded">
-    <div class="card-photo-container">
-      <img
-        class="card-expanded-photo"
-        :src="apiBaseUrl + parentCat.mainPhotoUrl"
-        :alt="parentCat.name"
-      />
-      <button class="link-btn" @click="parentCatModal.open">
-        {{ $t("components.common.morePhotos") }}
-      </button>
-    </div>
+    <Avatar :photoUrl="parentCat.mainPhotoUrl" :alt="parentCat.name" :read-only="false" @click="parentCatModal.open" />
     <CardWrapper :enable-blur="true" :show-border="false" class="card-info-container w-full">
       <div class="card-header">
         <h2 class="m-0">{{ parentCat.name }}</h2>

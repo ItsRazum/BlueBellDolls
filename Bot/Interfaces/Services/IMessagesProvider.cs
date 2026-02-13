@@ -92,7 +92,7 @@ namespace BlueBellDolls.Bot.Interfaces.Services
 
         string CreateColorUpdateErrorMessage();
 
-        string CreateUnknownErrorMessage(string? message = null);
+        string CreateServerErrorMessage(string? message = null);
 
         string CreateEntityDeletionError();
 

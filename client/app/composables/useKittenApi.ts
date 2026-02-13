@@ -1,6 +1,6 @@
 ﻿export const useKittenApi = () => {
   const config = useRuntimeConfig();
-  const apiBase = config.public.apiBase;
+  const apiBase = import.meta.env.DEV ? config.public.apiBase : '';
   const route = useRoute();
   const nuxtApp = useNuxtApp();
 

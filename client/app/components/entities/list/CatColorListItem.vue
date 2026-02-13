@@ -13,16 +13,7 @@ const catColorModal = useModal();
 
 <template>
   <div class="card-expanded">
-    <div class="card-photo-container">
-      <img
-        class="card-expanded-photo"
-        :src="apiBaseUrl + catColor.mainPhotoUrl"
-        :alt="catColor.identifier"
-      />
-      <button @click="catColorModal.open" class="link-btn">
-        {{ $t("components.common.morePhotos") }}
-      </button>
-    </div>
+    <Avatar :photoUrl="catColor.mainPhotoUrl" :alt="catColor.identifier" :read-only="false" @click="catColorModal.open" />
     <CardWrapper
       :enable-blur="true"
       :show-border="false"

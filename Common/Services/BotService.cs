@@ -30,7 +30,7 @@ namespace BlueBellDolls.Common.Services
             _botClient.StartReceiving(updateHandler, receiverOptions, cancellationToken: token);
         }
 
-        public async Task<Message[]> SendMessageAsync(ChatId chat, string messageText, IReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default)
+        public async Task<Message[]> SendMessageAsync(ChatId chat, string messageText, ReplyMarkup? replyMarkup = null, InputMediaPhoto[]? inputFiles = null, CancellationToken token = default)
         {
             if (inputFiles?.Length > 0)
             {

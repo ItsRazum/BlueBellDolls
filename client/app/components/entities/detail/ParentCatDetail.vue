@@ -189,4 +189,10 @@ const genderText = computed(() => t(`components.common.cats.${genderPrefix.value
   color: var(--color-context-blue);
   background-color: var(--color-background-blue);
 }
+
+@media (max-width: 880px) {
+  .content-container {
+    flex-direction: column;
+  }
+}
 </style>

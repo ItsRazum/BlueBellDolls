@@ -13,7 +13,7 @@ const props = defineProps({
 
 <template>
   <div
-    :class="['card-wrapper', { 'card-wrapper--blurred': enableBlur }]"
+    :class="['card-wrapper', { 'blurred': enableBlur }]"
     :style="`borderWidth: ${showBorder ? 1 : 0}px;`"
   >
     <slot></slot>
@@ -28,7 +28,7 @@ const props = defineProps({
   box-shadow: var(--shadow-base);
 }
 
-.card-wrapper--blurred {
+.card-wrapper.blurred {
   backdrop-filter: blur(var(--blur-base));
   -webkit-backdrop-filter: blur(var(--blur-base));
 }

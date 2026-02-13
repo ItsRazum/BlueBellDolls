@@ -100,7 +100,6 @@ namespace BlueBellDolls.Bot.Types
             try
             {
                 var response = await HttpClient.PostAsJsonAsync($"/api/admin/{typeof(TEntity).Name.ToLower()}s/{id}/photos/delete-batch", ids, token);
-                response.EnsureSuccessStatusCode();
                 return await FromResponse<TDto>(response, token);
             }
             catch (Exception ex)

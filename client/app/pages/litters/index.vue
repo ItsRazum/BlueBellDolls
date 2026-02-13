@@ -17,10 +17,10 @@ const { data: littersPage, pending } = await litterApi.getByPage();
 </script>
 
 <template>
-  <div class="first-message-container">
+  <div class="page-block primary">
     <message-box image-url="/photo.png" :text="$t('pages.litters.welcomeMessage')" />
   </div>
-  <div class="articles-container">
+  <div class="page-block secondary flex-row">
     <Article
       :title="$t('pages.litters.articles.kittenBookingRules.title')"
       photo-url="photo.png"
@@ -40,7 +40,7 @@ const { data: littersPage, pending } = await litterApi.getByPage();
       redirect-url="/faq"
     />
   </div>
-  <div class="litters-container" v-if="!pending">
+  <div class="page-block primary" v-if="!pending">
     <LitterListItem v-for="lit in littersPage.items" :key="lit.id" :litter="lit" />
     <PageSelector
       v-if="littersPage.totalPages > 1"
@@ -49,40 +49,19 @@ const { data: littersPage, pending } = await litterApi.getByPage();
       :total="littersPage.totalPages"
     />
   </div>
-  <div class="litters-container" v-else>
+  <div class="page-block primary" v-else>
     <LitterListItemSkeleton />
     <LitterListItemSkeleton />
   </div>
-  <div class="last-message-container">
+  <div class="last-message-container page-block secondary">
     <MessageBox image-url="photo.png" :text="$t('pages.litters.visitInvitationMessage')" />
   </div>
 </template>
 
 <style scoped>
-.litters-container {
-  display: flex;
-  flex-direction: column;
-  gap: 3.75rem;
-  background-color: var(--color-pages-primary-background);
-  padding: var(--padding-large) 6.25rem;
-  align-items: center;
-}
-
-.first-message-container {
-  background-color: var(--color-pages-primary-background);
-  padding: var(--padding-large);
-}
-
-.articles-container {
-  display: flex;
-  justify-content: center;
-  background-color: var(--color-pages-secondary-background);
-  gap: var(--padding-extra-large);
-  padding: var(--padding-pages);
-}
 
 .last-message-container {
-  background-color: var(--color-pages-secondary-background);
   padding: var(--padding-large) 10rem;
 }
+
 </style>

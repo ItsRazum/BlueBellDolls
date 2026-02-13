@@ -6,19 +6,14 @@ definePageMeta({
   buttonUrl: "/litters",
 });
 
-const config = useRuntimeConfig();
-
-console.log(`API Base: ` + config.public.apiBase);
-
 const kittenApi = useKittenApi();
-
 const { data: kittensResponse, pending } = await kittenApi.getAvailableKittens();
 
 const kittens = computed(() => kittensResponse.value || []);
 </script>
 
 <template>
-  <div class="articles-container">
+  <div class="page-block primary flex-row articles-container">
     <Article
       :title="$t('pages.main.articles.aboutRagdoll.title')"
       photo-url="photo.png"
@@ -38,10 +33,10 @@ const kittens = computed(() => kittensResponse.value || []);
       redirect-url="/about"
     />
   </div>
-  <div class="first-message-container">
+  <div class="page-block secondary">
     <MessageBox imageUrl="/photo.png" :text="$t('pages.main.welcomeMessage')" />
   </div>
-  <div v-if="pending" class="kittens-container">
+  <div v-if="pending" class="kittens-container page-block primary">
     <h2 class="text-3xl">{{ $t("pages.main.kittensForSale") }}</h2>
     <div class="carousel-wrapper">
       <KittenListItemSkeleton variant="compact" />
@@ -49,7 +44,7 @@ const kittens = computed(() => kittensResponse.value || []);
       <KittenListItemSkeleton variant="compact" />
     </div>
   </div>
-  <div v-else-if="kittens && kittens.length && kittens.length === 0" class="kittens-container">
+  <div v-else-if="kittens && kittens.length && kittens.length === 0" class="kittens-container page-block primary">
     <div class="no-kittens-container">
       <span class="font-bold text-3xl text-white">{{ $t("pages.main.kittensWillBeSoon") }}</span>
       <span class="text-2xl text-white text-center">{{
@@ -71,27 +66,27 @@ const kittens = computed(() => kittensResponse.value || []);
       $t("pages.main.showMoreKittens")
     }}</NuxtLinkLocale>
   </div>
-  <div v-else class="kittens-container">
-    <h2 class="text-3xl">{{ $t("pages.main.kittensForSale") }}</h2>
+  <div v-else class="kittens-container page-block primary">
+    <h2 class="kittens-title">{{ $t("pages.main.kittensForSale") }}</h2>
     <KittensCarousel :kittens="kittens" />
     <NuxtLinkLocale to="litters" class="text-[1.25rem]">{{
       $t("pages.main.showMoreKittens")
     }}</NuxtLinkLocale>
   </div>
-  <div class="cats-container">
+  <div class="page-block secondary">
     <span class="kittens-title">{{ $t("pages.main.ourCatsDescription") }}</span>
     <div class="cats-articles-container">
       <Article
         :title="$t('pages.main.articles.ourFemaleCats.title')"
         photo-url="photo.png"
         :description="$t('pages.main.articles.ourFemaleCats.description')"
-        redirect-url="/femalecats"
+        redirect-url="/cats/females"
       />
       <Article
         :title="$t('pages.main.articles.ourMaleCats.title')"
         photo-url="photo.png"
         :description="$t('pages.main.articles.ourMaleCats.description')"
-        redirect-url="/malecats"
+        redirect-url="/cats/males"
       />
     </div>
   </div>
@@ -99,26 +94,11 @@ const kittens = computed(() => kittensResponse.value || []);
 
 <style scoped>
 .articles-container {
-  display: flex;
-  justify-content: center;
-  background-color: var(--color-pages-primary-background);
-  gap: var(--padding-extra-large);
   padding: var(--padding-pages);
 }
 
-.first-message-container {
-  display: flex;
-  background-color: var(--color-pages-secondary-background);
-  padding: var(--padding-large) 5.375rem;
-}
-
 .kittens-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--color-pages-primary-background);
   padding: var(--padding-large) var(--padding-extra-large);
-  gap: var(--padding-extra-large);
 }
 
 .no-kittens-container {
@@ -144,18 +124,10 @@ const kittens = computed(() => kittensResponse.value || []);
   margin: 0 auto;
 }
 
-.cats-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--color-pages-secondary-background);
-  gap: var(--padding-extra-large);
-  padding: var(--padding-large);
-}
-
 .cats-articles-container {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   gap: var(--padding-large);
 }
 
@@ -165,4 +137,12 @@ const kittens = computed(() => kittensResponse.value || []);
   max-width: 55rem;
   text-align: center;
 }
+
+@media (max-width: 720px) {
+  .kittens-title {
+    font-size: 1.5rem;
+  }
+}
+
+
 </style>

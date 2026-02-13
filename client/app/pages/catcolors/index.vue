@@ -17,7 +17,7 @@ const { data: colorsPage, pending } = await catColorApi.getByPage();
 </script>
 
 <template>
-  <div v-if="!pending" class="cats-container">
+  <div v-if="!pending" class="page-block secondary">
     <CatColorListItem
       v-for="catColor in colorsPage.items"
       :key="catColor.id"
@@ -30,20 +30,9 @@ const { data: colorsPage, pending } = await catColorApi.getByPage();
       url="/femalecats"
     />
   </div>
-  <div v-else class="cats-container">
+  <div v-else class="page-block secondary">
     <CatColorListItemSkeleton />
     <CatColorListItemSkeleton />
     <CatColorListItemSkeleton />
   </div>
 </template>
-
-<style scoped>
-.cats-container {
-  background-color: var(--color-pages-secondary-background);
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-  padding: var(--padding-large) 6.875rem;
-}
-</style>

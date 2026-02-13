@@ -1,6 +1,6 @@
 ﻿export const useParentCatApi = () => {
   const config = useRuntimeConfig();
-  const apiBase = config.public.apiBase;
+  const apiBase = import.meta.env.DEV ? config.public.apiBase : '';
   const route = useRoute();
   const nuxtApp = useNuxtApp();
 
@@ -16,11 +16,9 @@
     return useAsyncData(
       () => key.value,
       async () => {
-        // 1. Пропсы
         const initialData = toValue(initialDataSource);
         if (initialData) return initialData;
 
-        // 2. Сеть
         const id = toValue(idSource);
         if (id) {
           return await $fetch<ParentCatDetailDto>(`/api/parentcats/${id}`, {

@@ -15,7 +15,7 @@ const { data: parentCatsPage, pending } = await parentCatApi.getByPage(true);
 </script>
 
 <template>
-  <div v-if="!pending" class="cats-container">
+  <div v-if="!pending" class="page-block secondary">
     <ParentCatListItem
       v-for="parentCat in parentCatsPage.items"
       :key="parentCat.id"
@@ -28,20 +28,9 @@ const { data: parentCatsPage, pending } = await parentCatApi.getByPage(true);
       url="/malecats"
     />
   </div>
-  <div v-else class="cats-container">
+  <div v-else class="page-block secondary">
     <ParentCatListItemSkeleton />
     <ParentCatListItemSkeleton />
     <ParentCatListItemSkeleton />
   </div>
 </template>
-
-<style scoped>
-.cats-container {
-  background-color: var(--color-pages-secondary-background);
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  width: 100%;
-  padding: var(--padding-large) 6.875rem;
-}
-</style>

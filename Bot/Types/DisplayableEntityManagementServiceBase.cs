@@ -34,7 +34,7 @@ namespace BlueBellDolls.Bot.Types
                 var result = await _apiClient.GetPhotosLimitAsync(photosType, token);
                 return result != null
                     ? new(result.StatusCode, result.Message, result.Value)
-                    : new(500, _messagesProvider.CreateUnknownErrorMessage());
+                    : new(500, _messagesProvider.CreateServerErrorMessage());
             }
             catch (Exception ex)
             {
@@ -183,7 +183,7 @@ namespace BlueBellDolls.Bot.Types
                 if (result != null)
                     return new(result.StatusCode, result.Message, DtoToEntityFunc(result.Value));
 
-                return new(500, _messagesProvider.CreateUnknownErrorMessage());
+                return new(500, _messagesProvider.CreateServerErrorMessage());
             }
             catch (Exception ex)
             {

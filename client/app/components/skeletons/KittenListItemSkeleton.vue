@@ -30,10 +30,10 @@ const props = withDefaults(
   <div v-else class="card-expanded">
     <div class="card-photo-container">
       <Skeleton
-        class="card-expanded-photo"
-        style="width: 16rem; height: 16rem; margin-bottom: 0; border-radius: 1rem"
+        class="card-expanded-photo skeleton"
+        style="border-radius: 1rem"
       />
-      <Skeleton width="9rem" />
+      <Skeleton width="9rem" class="desktop-only" />
     </div>
 
     <CardWrapper
@@ -72,6 +72,7 @@ const props = withDefaults(
 <style scoped>
 .buttons {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   gap: var(--padding-small);
 }

@@ -73,6 +73,9 @@ namespace BlueBellDolls.Server.Types
                 if (entity == null)
                     return new(StatusCodes.Status404NotFound, "Сущность не найдена");
 
+                if (!entity.IsEnabled && !entity.ReadyToShow)
+                    return new(StatusCodes.Status400BadRequest, "Сущность не заполнена до конца, и не может быть отображена на сайте.");
+
                 entity.IsEnabled = !entity.IsEnabled;
                 await ApplicationDbContext.SaveChangesAsync(token);
 

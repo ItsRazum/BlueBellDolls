@@ -38,10 +38,12 @@
     "thankYou": "Спасибо!",
     "error": "Ошибка:",
     "contacts": {
+      "title": "Контакты",
       "name": "Елена",
       "phoneLabel": "Номер телефона:",
       "emailLabel": "Эл. почта:",
-      "telegramLabel": "Telegram:"
+      "telegramLabel": "Telegram:",
+      "address": "г. Москва"
     },
     "form": {
       "namePlaceholder": "Имя",

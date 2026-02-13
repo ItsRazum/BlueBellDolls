@@ -26,7 +26,7 @@ const fatherModal = useModal();
     <PhotoGallery :photos="litter.photos" aspectRatio="1:1" controls-position="inside" />
     <CardWrapper class="card-info-container">
       <div class="card-header">
-        <h2>{{ $t("components.common.litters.title") }} «{{ litter.letter }}»</h2>
+        <h2>{{ $t("components.common.litters.title", { letter: litter.letter }) }}</h2>
         <span>{{ litter.birthDay }}</span>
       </div>
       <CardWrapper class="card-info-body">
@@ -125,4 +125,11 @@ const fatherModal = useModal();
 .card-property a {
   font-size: 1.25rem;
 }
+
+@media (max-width: 880px) {
+  .content-container {
+    flex-direction: column;
+  }
+}
+
 </style>

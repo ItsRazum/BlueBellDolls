@@ -4,15 +4,15 @@
       <div class="card-expanded">
         <div class="card-photo-container">
           <Skeleton
-            class="card-expanded-photo"
-            style="width: 18.5rem; height: 18.5rem; margin-bottom: 0; border-radius: 1rem"
+            class="card-expanded-photo skeleton large"
+            style="margin-bottom: 0; border-radius: 1rem"
           />
-          <Skeleton width="9rem" />
+          <Skeleton width="9rem" class="desktop-only" />
         </div>
 
         <CardWrapper :enable-blur="true" :show-border="false" class="card-info-container">
           <div class="card-header">
-            <Skeleton width="40%" height="2rem" radius="8px" />
+            <Skeleton width="50%" height="2rem" radius="8px" />
             <Skeleton width="20%" height="1.5rem" />
           </div>
 

@@ -4,6 +4,7 @@
     phoneLink: "+79166468510",
     email: "ragdoll-bluebelldolls@mail.ru",
     telegram: "https://t.me/elena_ragdoll_BlueBellDolls",
+    whatsapp: "https://wa.me/79166468510",
     address: "Москва, ...",
   },
   socials: {

@@ -1,6 +1,6 @@
 ﻿export const useFeedbackRequestApi = () => {
   const config = useRuntimeConfig();
-  const apiBase = config.public.apiBase;
+  const apiBase = import.meta.env.DEV ? config.public.apiBase : '';
 
   const sendRequest = async (customer: CreateFeedbackRequestDto) => {
     return await $fetch(`/api/feedbackrequests/`, {

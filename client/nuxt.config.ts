@@ -1,13 +1,25 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
+  app: {
+      head: {
+          bodyAttrs: {
+              class: 'preload'
+          }
+      }
+  },
   compatibilityDate: "2025-07-15",
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],
   modules: ["nuxt-svgo", "@nuxtjs/i18n", "@nuxtjs/color-mode"],
   svgo: {
     autoImportPath: "./assets/",
+      global: false,
+      defaultImport: 'component',
+      component: {
+        rendersSvg: true,
+        wrapper: false,
+      }
   },
   vite: {
     plugins: [tailwindcss()],
@@ -44,6 +56,8 @@ export default defineNuxtConfig({
   colorMode: {
     classSuffix: '',
     preference: 'system',
-    fallback: 'light'
+    fallback: 'light',
+
+    dataValue: 'theme'
   }
 });

@@ -48,7 +48,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 c.CallbackId, 
                 result.Success 
                 ? _messagesProvider.CreateEntityDeletionSuccess() 
-                : _messagesProvider.CreateUnknownErrorMessage(result.Message),
+                : _messagesProvider.CreateServerErrorMessage(result.Message),
                 token: token);
 
             var pageResult = await managementService.GetByPageAsync(1, _inlineKeyboardSettings.PageSize, token);

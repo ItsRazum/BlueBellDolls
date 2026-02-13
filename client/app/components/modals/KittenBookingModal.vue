@@ -40,7 +40,7 @@ const submitBooking = async () => {
 
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
-    //await kittenApi.bookKitten(payload);
+    await kittenApi.bookKitten(payload);
     isSuccess.value = true;
     statusMessage.value = `${t("common.form.success")}\n${t("components.modals.kittenBooking.youCanCloseThisWindow")}`;
 
@@ -182,6 +182,12 @@ const reset = () => {
 .overlay-content h3 {
   margin: 0;
   font-size: 1.25rem;
+}
+
+@media (max-width: 720px) {
+  .booking-cards {
+    flex-direction: column;
+  }
 }
 
 </style>

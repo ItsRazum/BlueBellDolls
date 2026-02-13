@@ -26,15 +26,15 @@ const genderColor = computed(() => `var(--color-gender-${genderPrefix.value})`);
 const genderText = computed(() => t(`components.common.cats.${genderPrefix.value}Default`));
 
 const status = computed(() =>
-  t(`components.common.kittens.statuses.${genderPrefix.value}${KittenStatus[props.kitten.status]}`),
+    t(`components.common.kittens.statuses.${genderPrefix.value}${KittenStatus[props.kitten.status]}`),
 );
 
 const classDescription = computed(() =>
-  t(`components.common.kittens.tips.classes.${KittenClass[props.kitten.class]}`),
+    t(`components.common.kittens.tips.classes.${KittenClass[props.kitten.class]}`),
 );
 
 const statusDescription = computed(() =>
-  t(`components.common.kittens.tips.statuses.${KittenStatus[props.kitten.status]}`),
+    t(`components.common.kittens.tips.statuses.${KittenStatus[props.kitten.status]}`),
 );
 
 const colorDisplayName = computed(() => humanizeString(props.kitten.catColor.identifier));
@@ -52,10 +52,10 @@ const colorModal = useModal();
       <span>{{ $t("components.common.cats.color") }}: </span>
       <span v-if="kitten.catColor?.id === 0" class="link-btn">{{ colorDisplayName }}</span>
       <button
-        v-else
-        class="link-btn"
-        :class="{ underline: kitten.catColor?.id != 0 }"
-        @click="colorModal.open"
+          v-else
+          class="link-btn"
+          :class="{ underline: kitten.catColor?.id != 0 }"
+          @click="colorModal.open"
       >
         {{ colorDisplayName }}
       </button>
@@ -73,20 +73,19 @@ const colorModal = useModal();
   </div>
 
   <CatColorModal
-    v-if="kitten.catColor"
-    :is-open="colorModal.isOpen.value"
-    @close="colorModal.close"
-    :cat-color-id="kitten.catColor.id"
+      v-if="kitten.catColor"
+      :is-open="colorModal.isOpen.value"
+      @close="colorModal.close"
+      :cat-color-id="kitten.catColor.id"
   />
 </template>
 
 <style scoped>
+
 .link-btn {
   all: unset;
-
   color: var(--color-link);
   font-weight: 525;
-
   font-family: var(--font-family-base);
   font-size: 1.125rem;
   transition: color 0.2s;
@@ -99,5 +98,19 @@ const colorModal = useModal();
 
 .link-btn.underline:hover {
   color: var(--color-link-hover);
+}
+
+.card-property span {
+  font-size: 1.125rem;
+}
+
+@media (max-width: 720px) {
+  .link-btn {
+    font-size: 1rem;
+  }
+
+  .card-property span {
+    font-size: 1rem;
+  }
 }
 </style>

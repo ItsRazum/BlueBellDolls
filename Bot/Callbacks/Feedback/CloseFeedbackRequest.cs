@@ -44,7 +44,7 @@ namespace BlueBellDolls.Bot.Callbacks.Feedback
             {
                 await BotService.AnswerCallbackQueryAsync(
                     c.CallbackId,
-                    _messagesProvider.CreateUnknownErrorMessage(result.Message),
+                    _messagesProvider.CreateServerErrorMessage(result.Message),
                     token: token);
             }
         }

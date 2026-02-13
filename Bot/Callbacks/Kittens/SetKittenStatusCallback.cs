@@ -61,7 +61,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
                 {
                     await BotService.AnswerCallbackQueryAsync(
                         c.CallbackId,
-                        _messagesProvider.CreateUnknownErrorMessage(result.Message),
+                        _messagesProvider.CreateServerErrorMessage(result.Message),
                         token: token);
                 }
             }
@@ -69,7 +69,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             {
                 await BotService.AnswerCallbackQueryAsync(
                     c.CallbackId,
-                    _messagesProvider.CreateUnknownErrorMessage(),
+                    _messagesProvider.CreateServerErrorMessage(),
                     token: token);
             }
         }
