@@ -14,7 +14,7 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
             ListUnitActionMode actionMode = ListUnitActionMode.Edit,
             int chunkSize = 1,
             (int page, int totalPagesCount)? pageParameters = null, 
-            int? litterOwnerId = null) 
+            int litterOwnerId = 0) 
             where TEntity : class, IDisplayableEntity;
 
         InlineKeyboardMarkup CreateEntityOptionsKeyboard(IDisplayableEntity entity);

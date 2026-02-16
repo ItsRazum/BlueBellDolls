@@ -130,10 +130,10 @@ namespace BlueBellDolls.Bot.Providers
         public string CreateDeleteEntityCallback(IDisplayableEntity entity, int fromLitterId = 0)
             => $"{_settings.DeleteEntity}{entity.GetType().Name}{(fromLitterId != 0 ? $"{Separator}fromLitter{Separator}{fromLitterId}" : string.Empty)}{Separator}{entity.Id}";
 
-        public string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, int? litterOwnerId = null)
+        public string CreateEntityReferenceCallback(IDisplayableEntity entity, ListUnitActionMode actionMode, int litterOwnerId = 0)
         {
             var entityType = entity.GetType().Name;
-            if (litterOwnerId == null)
+            if (litterOwnerId == 0)
             {
                 var searchQuery = $"{entity.Id}";
                 if (entity is ICanBeFoundWithName canBeFoundWithName && entity.Id == 0)

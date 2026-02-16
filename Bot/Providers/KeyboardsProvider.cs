@@ -54,18 +54,18 @@ namespace BlueBellDolls.Bot.Providers
             ListUnitActionMode actionMode = ListUnitActionMode.Edit,
             int rowLength = 1,
             (int page, int totalPagesCount)? pageParameters = null,
-            int? litterOwnerId = null)
+            int litterOwnerId = 0)
             where TEntity : class, IDisplayableEntity
         {
             var result = new InlineKeyboardMarkup();
-            if (litterOwnerId != null)
-                result.AddNewRow(CreateBackToLitterButton(litterOwnerId.Value));
+            if (litterOwnerId != 0)
+                result.AddNewRow(CreateBackToLitterButton(litterOwnerId));
 
             foreach (var chunk in entities.OrderBy(e => e.DisplayName).Chunk(rowLength))
                 result.AddNewRow([.. chunk.Select(e => CreateListEntityReferenceButton(e, actionMode, litterOwnerId))]);
 
             if (pageParameters != null)
-                result.AddNewRow(CreatePageControlsButtons<TEntity>(pageParameters.Value));
+                result.AddNewRow(CreatePageControlsButtons<TEntity>(pageParameters.Value, actionMode, litterOwnerId));
 
             if (typeof(IHandCreatableEntity).IsAssignableFrom(typeof(TEntity)) && actionMode != ListUnitActionMode.Select)
                 result.AddNewRow(CreateAddButton<TEntity>());
@@ -320,20 +320,32 @@ namespace BlueBellDolls.Bot.Providers
             return result;
         }
 
-        //TODO: Исправить смену страниц при выборе ParentCat в помёт
-        private InlineKeyboardButton[] CreatePageControlsButtons<TEntity>((int page, int totalPagesCount) pageParameters, int litterOwnerId = 0)
+        private InlineKeyboardButton[] CreatePageControlsButtons<TEntity>((int page, int totalPagesCount) pageParameters, ListUnitActionMode actionMode, int? litterOwnerId = null)
         {
             var entityTypeName = typeof(TEntity).Name;
             var pageCounterString = pageParameters.totalPagesCount == 0
                 ? "Список пуст!"
                 : $"{pageParameters.page}/{pageParameters.totalPagesCount}";
 
+            (string previousPageCallback, string nextPageCallback) = actionMode switch
+            {
+                ListUnitActionMode.Edit => (
+                    _callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page - 1),
+                    _callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page + 1)
+                ),
+                ListUnitActionMode.Select => (
+                    _callbackDataProvider.CreateSelectParentCatCallback(false, pageParameters.page - 1, litterOwnerId ?? 0),
+                    _callbackDataProvider.CreateSelectParentCatCallback(false, pageParameters.page + 1, litterOwnerId ?? 0)
+                ),
+                _ => (string.Empty, string.Empty)
+            };
+
             var buttons = new List<InlineKeyboardButton?>
             {
                 pageParameters.page > 1
                 ? new InlineKeyboardButtonBuilder()
                     .WithText("«")
-                    .WithCallbackData(_callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page - 1))
+                    .WithCallbackData(previousPageCallback)
                     .Build()
                 : null,
 
@@ -345,7 +357,7 @@ namespace BlueBellDolls.Bot.Providers
                 pageParameters.page < pageParameters.totalPagesCount
                 ? new InlineKeyboardButtonBuilder()
                     .WithText("»")
-                    .WithCallbackData(_callbackDataProvider.CreateListEntityCallback(entityTypeName, pageParameters.page + 1))
+                    .WithCallbackData(nextPageCallback)
                     .Build()
                 : null
             };
@@ -394,7 +406,7 @@ namespace BlueBellDolls.Bot.Providers
                 .WithStyle(KeyboardButtonStyle.Primary)
                 .Build();
 
-        private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, int? litterOwnerId = null)
+        private InlineKeyboardButton CreateListEntityReferenceButton(IDisplayableEntity entity, ListUnitActionMode actionMode, int litterOwnerId = 0)
             => new InlineKeyboardButtonBuilder()
                 .WithText($"{(entity.IsEnabled ? "" : "(Скрыто) ")}" + entity.DisplayName + $" (Id {entity.Id})")
                 .WithCallbackData(_callbackDataProvider.CreateEntityReferenceCallback(entity, actionMode, litterOwnerId))
@@ -473,7 +485,7 @@ namespace BlueBellDolls.Bot.Providers
 
         private InlineKeyboardButton CreateColorPartReferenceButton(Cat entity, string buildedColor, string colorPart)
         {
-            string buttonText = colorPart;
+            var buttonText = colorPart;
             if (colorPart == "/")
                 buttonText = "Сохранить";
 

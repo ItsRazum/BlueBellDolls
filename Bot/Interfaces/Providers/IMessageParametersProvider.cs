@@ -33,7 +33,7 @@ namespace BlueBellDolls.Bot.Interfaces.Providers
             IEnumerable<TEntity> entities, 
             ListUnitActionMode actionMode, 
             (int page, int totalPagesCount, int totalEntitiesCount) pageParameters,
-            int? litterOwnderId = null)
+            int litterOwnderId = 0)
             where TEntity : class, IDisplayableEntity;
 
         MessageParameters GetEntityFromLitterParameters(IDisplayableEntity entity, int litterId);

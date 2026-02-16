@@ -67,7 +67,7 @@ namespace BlueBellDolls.Bot.Providers
             IEnumerable<TEntity> entities, 
             ListUnitActionMode actionMode, 
             (int page, int totalPagesCount, int totalEntitiesCount) pageParameters,
-            int? litterOwnerId = null) 
+            int litterOwnerId = 0) 
             where TEntity : class, IDisplayableEntity
         {
             return new MessageParameters(

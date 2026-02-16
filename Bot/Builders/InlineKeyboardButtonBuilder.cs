@@ -8,18 +8,6 @@ namespace BlueBellDolls.Bot.Builders
         private string _callbackData;
         private KeyboardButtonStyle? _style;
 
-        public InlineKeyboardButtonBuilder()
-        {
-
-        }
-
-        public InlineKeyboardButtonBuilder(string text, string callbackData, KeyboardButtonStyle? style = null)
-        {
-            _text = text;
-            _callbackData = callbackData;
-            _style = style;
-        }
-
         public InlineKeyboardButtonBuilder WithText(string text)
         {
             _text = text;
@@ -56,7 +44,6 @@ namespace BlueBellDolls.Bot.Builders
 
                 return result;
             }
-            
         }
     }
 }

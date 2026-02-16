@@ -47,8 +47,8 @@ namespace BlueBellDolls.Bot.Callbacks.Common
 
                 // Проверяем, есть ли информация о владельце (например, список котят *для* помёта 5)
                 // Если длина 5, значит есть владелец (индекс 4)
-                int? ownerId = listArgs.Length == 5
-                    ? int.Parse(listArgs[4]) : null; // ID владельца или 0, если нет
+                var ownerId = listArgs.Length == 5
+                    ? int.Parse(listArgs[4]) : 0; // ID владельца или 0, если нет
                 //Могут быть проблемы, если владельцем в будущем сможет быть не только Litter
 
                 var pageIndex = int.Parse(args.Last());
