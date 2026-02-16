@@ -9,15 +9,15 @@ namespace BlueBellDolls.Bot.Commands
     public class SaveCommand : CommandHandler
     {
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public SaveCommand(
             IBotService botService,
             IMessagesProvider messagesProvider, 
-            IManagementServicesFactory managementServicesFactory)
+            IManagementServicesProvider managementServicesProvider)
             : base(botService)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messagesProvider = messagesProvider;
 
             AddCommandHandler("/save", HandleCommandAsync);
@@ -25,7 +25,7 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleCommandAsync(MessageAdapter m, CancellationToken token)
         {
-            //var managementService = _managementServicesFactory.GetEntityManagementService();
+            //var managementService = _managementServicesProvider.GetEntityManagementService();
             //var result = await _entityManagementService.ActivateEntitiesAsync(token);
 
             //if (result.Success)

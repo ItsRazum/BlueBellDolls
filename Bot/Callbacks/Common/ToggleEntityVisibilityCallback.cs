@@ -15,20 +15,20 @@ namespace BlueBellDolls.Bot.Callbacks.Common
     {
         private readonly IMessagesProvider _messagesProvider;
         private readonly IKeyboardsProvider _keyboardsProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public ToggleEntityVisibilityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IKeyboardsProvider keyboardsProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
             _keyboardsProvider = keyboardsProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetToggleEntityVisibilityCallback<ParentCat>(), HandleCallbackAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetToggleEntityVisibilityCallback<Litter>(), HandleCallbackAsync<Litter>);
@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
         private async Task HandleCallbackAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
-            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetDisplayableEntityManagementService<TEntity>();
             var result = await managementService.ToggleEntityVisibilityAsync(entityId, token);
 
             if (!result.Success)

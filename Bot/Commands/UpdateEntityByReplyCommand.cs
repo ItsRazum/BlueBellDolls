@@ -12,18 +12,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public UpdateEntityByReplyCommand(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesProvider messagesProvider)
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler("update_entity_by_reply_parentcat", HandleCommandAsync<ParentCat>);
             AddCommandHandler("update_entity_by_reply_litter", HandleCommandAsync<Litter>);
@@ -47,7 +47,7 @@ namespace BlueBellDolls.Bot.Commands
                     if (properties == null || properties.Count == 0)
                         return;
 
-                    var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+                    var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
                     var result = await managementService.UpdateEntityAsync(modelId, properties, token);
 
                     if (result.Success)

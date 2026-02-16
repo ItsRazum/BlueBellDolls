@@ -14,7 +14,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
 {
     public class TogglePhotoSelectionCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessagesProvider _messagesProvider;
@@ -23,13 +23,13 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
@@ -45,7 +45,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1] PhotoIndex, [2]bool Select, [3] PhotosManagementMode, [4]EntityId
             var entityId = int.Parse(args.Last());
 
-            var result = await _managementServicesFactory
+            var result = await _managementServicesProvider
                 .GetEntityManagementService<TEntity>()
                 .GetEntityAsync(entityId, token);
 

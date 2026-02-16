@@ -16,7 +16,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
         private readonly ICatColorTreeService _catColorTreeService;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public FindColorCallback(
             IBotService botService, 
@@ -25,13 +25,13 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             ICatColorTreeService catColorTreeService,
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory) 
+            IManagementServicesProvider managementServicesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _catColorTreeService = catColorTreeService;
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler("findColorParentCat", HandleCallbackAsync<ParentCat>);
             AddCommandHandler("findColorKitten", HandleCallbackAsync<Kitten>);
@@ -41,7 +41,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
         {
             var args = c.CallbackData.Split(CallbackArgsSeparator, StringSplitOptions.RemoveEmptyEntries);
             var entityId = int.Parse(args.Last());
-            var managementService = _managementServicesFactory.GetCatManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetCatManagementService<TEntity>();
             var result = await managementService.GetEntityAsync(entityId, token);
 
             if (result.StatusCode == StatusCodes.Status404NotFound)
@@ -98,7 +98,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
 
         private async Task<TEntity?> UpdateEntityColor<TEntity>(int entityId, string color, CallbackQueryAdapter c, CancellationToken token) where TEntity : Cat
         {
-            var managementService = _managementServicesFactory.GetCatManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetCatManagementService<TEntity>();
             var result = await managementService.UpdateColorAsync(entityId, color, token);
             if (result.Success)
             {

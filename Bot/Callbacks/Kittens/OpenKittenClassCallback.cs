@@ -15,20 +15,20 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
 
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public OpenKittenClassCallback(
             IBotService botService, 
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetOpenKittenClassCallback(), HandleCallbackAsync);
         }
@@ -38,7 +38,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var kittenId = int.Parse(args.Last());
             
-            var kittenManagementService = _managementServicesFactory.GetEntityManagementService<Kitten>();
+            var kittenManagementService = _managementServicesProvider.GetEntityManagementService<Kitten>();
             var result = await kittenManagementService.GetEntityAsync(kittenId, token);
 
             if (!result.Success)

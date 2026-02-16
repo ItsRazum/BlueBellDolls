@@ -6,7 +6,7 @@ using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Factories
 {
-    public class ManagementServicesFactory(IServiceProvider serviceProvider) : IManagementServicesFactory
+    public class ManagementServicesProvider(IServiceProvider serviceProvider) : IManagementServicesProvider
     {
 
         private readonly IServiceProvider _serviceProvider = serviceProvider;

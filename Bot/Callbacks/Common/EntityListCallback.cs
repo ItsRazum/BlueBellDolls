@@ -14,18 +14,18 @@ namespace BlueBellDolls.Bot.Callbacks.Common
     public class EntityListCallback : CallbackHandler
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly InlineKeyboardsSettings _inlineKeyboardsSettings;
 
         public EntityListCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _inlineKeyboardsSettings = botSettings.Value.InlineKeyboardsSettings;
 
@@ -52,7 +52,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
                 //Могут быть проблемы, если владельцем в будущем сможет быть не только Litter
 
                 var pageIndex = int.Parse(args.Last());
-                var result = await _managementServicesFactory
+                var result = await _managementServicesProvider
                     .GetEntityManagementService<TEntity>()
                     .GetByPageAsync(pageIndex, _inlineKeyboardsSettings.PageSize, token);
 

@@ -16,7 +16,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
     {
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public ConfirmDeletePhotosCallback(
             IBotService botService,
@@ -24,12 +24,12 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             ICallbackDataProvider callbackDataProvider,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory) 
+            IManagementServicesProvider managementServicesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<ParentCat>(PhotosType.Photos), HandleCallbackAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetConfirmDeletePhotoCallback<Litter>(PhotosType.Photos), HandleCallbackAsync<Litter>);
@@ -42,7 +42,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var (photoKeys, _) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText.Split('\n').Last());
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetDisplayableEntityManagementService<TEntity>();
             var result = await managementService.DeleteEntityPhotosAsync(entityId, [.. photoKeys], token);
 
             await BotService.AnswerCallbackQueryAsync(c.CallbackId, result.Success

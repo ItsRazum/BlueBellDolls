@@ -14,7 +14,7 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public SelectToLitterCallback(
             IBotService botService,
@@ -22,12 +22,12 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
             ICallbackDataProvider callbackDataProvider,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory)
+            IManagementServicesProvider managementServicesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetSelectToLitterCallback(), HandleCommandAsync);
         }
@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
             var litterId = int.Parse(args[1]);
             var parentCatId = int.Parse(args[3]);
 
-            var litterManagementService = _managementServicesFactory.GetLitterManagementService();
+            var litterManagementService = _managementServicesProvider.GetLitterManagementService();
             var result = await litterManagementService.SetParentCatForLitterAsync(litterId, parentCatId, token);
 
             if (result.Success)

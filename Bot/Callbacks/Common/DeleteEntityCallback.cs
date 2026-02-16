@@ -12,20 +12,20 @@ namespace BlueBellDolls.Bot.Callbacks.Common
 {
     public class DeleteEntityCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServiceFactory;
+        private readonly IManagementServicesProvider _managementServiceFactory;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
 
         public DeleteEntityCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServiceFactory = managementServicesFactory;
+            _managementServiceFactory = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 

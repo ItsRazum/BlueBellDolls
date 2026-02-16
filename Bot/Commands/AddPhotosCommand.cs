@@ -13,18 +13,18 @@ namespace BlueBellDolls.Bot.Commands
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public AddPhotosCommand(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesProvider messagesProvider)
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler("фото", HandleCommandAsync);
         }
@@ -68,7 +68,7 @@ namespace BlueBellDolls.Bot.Commands
             if (repliedMessageText == null) return;
 
             var loadingMessage = await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLoadingMessage(), token: token);
-            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetDisplayableEntityManagementService<TEntity>();
 
             var result = await managementService.AddPhotosToEntityAsync(entityId, m.Photos!, PhotosType.Photos, token);
             await BotService.DeleteMessageAsync(m.Chat, loadingMessage.Single().MessageId, token);

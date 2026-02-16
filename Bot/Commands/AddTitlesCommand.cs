@@ -11,18 +11,18 @@ namespace BlueBellDolls.Bot.Commands
     public class AddTitlesCommand : CommandHandler
     {
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
 
         public AddTitlesCommand(
             IBotService botService,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider)
             : base(botService)
         {
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
 
             AddCommandHandler("титулы", HandleCommandAsync);
@@ -40,7 +40,7 @@ namespace BlueBellDolls.Bot.Commands
 
             var loadingMessage = await BotService.SendMessageAsync(m.Chat, _messagesProvider.CreatePhotosLoadingMessage(), token: token);
 
-            var managementService = _managementServicesFactory.GetParentCatManagementService();
+            var managementService = _managementServicesProvider.GetParentCatManagementService();
             var result = await managementService.AddPhotosToEntityAsync(entityId, m.Photos, PhotosType.Titles, token);
 
             await BotService.DeleteMessageAsync(m.Chat, loadingMessage.Single().MessageId, token);

@@ -15,7 +15,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
     {
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
@@ -25,14 +25,14 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             ICallbackDataProvider callbackDataProvider,
             IArgumentParseHelperService argumentParseHelperService,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             IMessagesHelperService messagesHelperService)
             : base(botService, botSettings, callbackDataProvider)
         {
             _argumentParseHelperService = argumentParseHelperService;
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _messagesHelperService = messagesHelperService;
 
@@ -44,7 +44,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var (photoKeys, _) = _argumentParseHelperService.ParsePhotosArgs(c.MessageText.Split('\n').Last());
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<ParentCat>();
+            var managementService = _managementServicesProvider.GetDisplayableEntityManagementService<ParentCat>();
             var result = await managementService.DeleteEntityPhotosAsync(entityId, [.. photoKeys], token);
 
             if (result.Success)

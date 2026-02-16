@@ -15,7 +15,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
 
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public SetKittenClassCallback(
             IBotService botService, 
@@ -23,12 +23,12 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory) 
+            IManagementServicesProvider managementServicesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetSetKittenClassCallback(), HandleCallbackAsync);
         }
@@ -38,7 +38,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var kittenId = int.Parse(args.Last());
 
-            var kittenManagementService = _managementServicesFactory.GetKittenManagementService();
+            var kittenManagementService = _managementServicesProvider.GetKittenManagementService();
 
             if (Enum.TryParse<KittenClass>(args[1], out var kittenClass))
             {

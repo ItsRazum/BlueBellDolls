@@ -13,7 +13,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
 {
     public class EditEntityCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
 
@@ -21,12 +21,12 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
         private async Task HandleCommandAsync<TEntity>(CallbackQueryAdapter c, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
-            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
             var result = await managementService.GetEntityAsync(entityId, token);
 
             if (!result.Success)

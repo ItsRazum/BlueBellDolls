@@ -14,7 +14,7 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public OpenEntityInLitterCallback(
             IBotService botService,
@@ -22,12 +22,12 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
             ICallbackDataProvider callbackDataProvider,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory) 
+            IManagementServicesProvider managementServicesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetOpenEntityCallback<ParentCat>(), HandleCommandAsync<ParentCat>);
             AddCommandHandler(CallbackDataProvider.GetOpenEntityCallback<Kitten>(), HandleCommandAsync<Kitten>);
@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Callbacks.Litters
             var entityId = int.Parse(args.Last());
             var litterId = int.Parse(args[1]);
 
-            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
             var result = await managementService.GetEntityAsync(entityId, token);
 
             if (!result.Success)

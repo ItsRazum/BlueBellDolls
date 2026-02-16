@@ -17,7 +17,7 @@ namespace BlueBellDolls.Bot.Callbacks.Booking
         private readonly ICallbackDataProvider _callbackDataProvider;
         private readonly IBookingManagementService _bookingManagementService;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public SetBookingKittenStatusCallback(
             IBotService botService,
@@ -26,14 +26,14 @@ namespace BlueBellDolls.Bot.Callbacks.Booking
             IBookingManagementService bookingManagementService,
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory)
+            IManagementServicesProvider managementServicesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _callbackDataProvider = callbackDataProvider;
             _bookingManagementService = bookingManagementService;
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(_callbackDataProvider.GetSetBookingKittenStatusCallback(), HandleCallbackAsync);
         }
@@ -43,7 +43,7 @@ namespace BlueBellDolls.Bot.Callbacks.Booking
             var args = c.CallbackData.Split(CallbackArgsSeparator);
             var kittenStatus = Enum.Parse<KittenStatus>(args[1]);
             var kittenId = int.Parse(args.Last());
-            var kittenManagementService = _managementServicesFactory.GetKittenManagementService();
+            var kittenManagementService = _managementServicesProvider.GetKittenManagementService();
             var result = await kittenManagementService.UpdateStatusAsync(kittenId, kittenStatus, token);
             if (result.Success && result.Value != null)
             {

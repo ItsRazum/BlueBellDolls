@@ -11,18 +11,18 @@ namespace BlueBellDolls.Bot.Commands
     public class NewEntityCommand : CommandHandler
     {
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessagesProvider _messagesProvider;
 
         public NewEntityCommand(
             IBotService botService,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesProvider messagesProvider)
             : base(botService)
         {
             _messageParametersProvider = messageParametersProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messagesProvider = messagesProvider;
 
             AddCommandHandler("/newcat", HandleCommandAsync<ParentCat>);
@@ -31,7 +31,7 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
             var result = await managementService.AddNewEntityAsync(token);
 
             if (result.Success)

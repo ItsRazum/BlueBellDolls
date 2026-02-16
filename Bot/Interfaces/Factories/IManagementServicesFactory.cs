@@ -5,7 +5,7 @@ using BlueBellDolls.Common.Types;
 
 namespace BlueBellDolls.Bot.Interfaces.Factories
 {
-    public interface IManagementServicesFactory
+    public interface IManagementServicesProvider
     {
         IEntityManagementService<TEntity> GetEntityManagementService<TEntity>() where TEntity : class, IEntity;
         IDisplayableEntityManagementService<TEntity> GetDisplayableEntityManagementService<TEntity>() where TEntity : class, IDisplayableEntity;

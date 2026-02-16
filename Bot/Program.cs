@@ -87,7 +87,7 @@ internal class Program
             .AddSingleton<ICommonMessagesProvider, CommonMessagesProvider>()
             .AddSingleton<IPhotosLimitsService, PhotosLimitsService>()
 
-            .AddScoped<IManagementServicesFactory, ManagementServicesFactory>()
+            .AddScoped<IManagementServicesProvider, ManagementServicesProvider>()
 
             .AddScoped<ICatColorTreeService, CatColorTreeService>()
             .AddScoped<IKittenApiClient, KittenApiClient>()

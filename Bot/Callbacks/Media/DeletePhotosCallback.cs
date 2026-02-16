@@ -14,7 +14,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
 {
     public class DeletePhotosCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
@@ -22,12 +22,12 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesProvider messagesProvider,
             IMessagesHelperService messagesHelperService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messagesProvider = messagesProvider;
             _messagesHelperService = messagesHelperService;
 
@@ -43,7 +43,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
 
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]Entity Id
 
-            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
             var result = await managementService.GetEntityAsync(int.Parse(args.Last()), token);
 
             if (!result.Success)

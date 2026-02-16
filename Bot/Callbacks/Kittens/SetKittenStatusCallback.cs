@@ -15,7 +15,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
 
         private readonly IMessagesProvider _messagesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public SetKittenStatusCallback(
             IBotService botService,
@@ -23,12 +23,12 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
             IMessageParametersProvider messageParametersProvider,
-            IManagementServicesFactory managementServicesFactory)
+            IManagementServicesProvider managementServicesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
             _messageParametersProvider = messageParametersProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetSetKittenStatusCallback(), HandleCallbackAsync);
         }
@@ -40,7 +40,7 @@ namespace BlueBellDolls.Bot.Callbacks.Kittens
 
             if (Enum.TryParse<KittenStatus>(args[1], out var kittenStatus))
             {
-                var result = await _managementServicesFactory
+                var result = await _managementServicesProvider
                     .GetKittenManagementService()
                     .UpdateStatusAsync(kittenId, kittenStatus, token);
 

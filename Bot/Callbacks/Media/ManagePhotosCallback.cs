@@ -14,18 +14,18 @@ namespace BlueBellDolls.Bot.Callbacks.Media
 {
     public class ManagePhotosCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
         public ManagePhotosCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesHelperService messagesHelperService)
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messagesHelperService = messagesHelperService;
 
             AddCommandHandler(CallbackDataProvider.GetManagePhotosCallback<ParentCat>(PhotosType.Photos), HandleCommandAsync<ParentCat>);
@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]EntityId
             var entityId = int.Parse(args.Last());
 
-            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
             var result = await managementService.GetEntityAsync(entityId, token);
 
             if (!result.Success || result.Value?.Photos.Count is null or 0) return;

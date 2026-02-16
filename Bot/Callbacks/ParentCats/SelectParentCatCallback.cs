@@ -12,7 +12,7 @@ namespace BlueBellDolls.Bot.Callbacks.ParentCats
 {
     public class SelectParentCatCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
         private readonly InlineKeyboardsSettings _inlineKeyboardsSettings;
@@ -21,13 +21,13 @@ namespace BlueBellDolls.Bot.Callbacks.ParentCats
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider) 
             : base(botService, botSettings, callbackDataProvider)
         {
             _inlineKeyboardsSettings = botSettings.Value.InlineKeyboardsSettings;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
 
@@ -42,7 +42,7 @@ namespace BlueBellDolls.Bot.Callbacks.ParentCats
             var pageIndex = int.Parse(args[2]);
             var litterId = int.Parse(args.Last());
 
-            var result = await _managementServicesFactory
+            var result = await _managementServicesProvider
                 .GetParentCatManagementService()
                 .GetByPageAsync(isMale, pageIndex, _inlineKeyboardsSettings.PageSize, token);
 

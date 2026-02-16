@@ -17,7 +17,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
         private readonly IMessagesHelperService _messagesHelperService;
         private readonly IArgumentParseHelperService _argumentParseHelperService;
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
 
         public SetDefaultPhotoCallback(
             IBotService botService,
@@ -25,13 +25,13 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             ICallbackDataProvider callbackDataProvider,
             IMessagesHelperService messagesHelperService,
             IArgumentParseHelperService argumentParseHelperService,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesProvider messagesProvider)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesHelperService = messagesHelperService;
             _argumentParseHelperService = argumentParseHelperService;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messagesProvider = messagesProvider;
 
             AddCommandHandler(CallbackDataProvider.GetSetDefaultPhotoCallback<ParentCat>(PhotosType.Photos), HandleCallbackAsync<ParentCat>);
@@ -46,7 +46,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); //[0]Command, [1]PhotoId, [2]Entity Id
             var entityId = int.Parse(args.Last());
             var photoId = int.Parse(args[1]);
-            var managementService = _managementServicesFactory.GetDisplayableEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetDisplayableEntityManagementService<TEntity>();
             var result = await managementService.SetDefaultPhotoToEntityAsync(entityId, photoId, token);
 
             if (result.Success)

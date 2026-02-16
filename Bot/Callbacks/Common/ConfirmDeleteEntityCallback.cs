@@ -13,7 +13,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
     public class ConfirmDeleteEntityCallback : CallbackHandler
     {
         private readonly IMessagesProvider _messagesProvider;
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly InlineKeyboardsSettings _inlineKeyboardSettings;
 
@@ -22,13 +22,13 @@ namespace BlueBellDolls.Bot.Callbacks.Common
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
             IMessagesProvider messagesProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             IOptions<InlineKeyboardsSettings> inlineKeyboardSettings)
             : base(botService, botSettings, callbackDataProvider)
         {
             _messagesProvider = messagesProvider;
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _inlineKeyboardSettings = inlineKeyboardSettings.Value;
 
@@ -41,7 +41,7 @@ namespace BlueBellDolls.Bot.Callbacks.Common
         {
             var entityId = int.Parse(c.CallbackData.Split(CallbackArgsSeparator).Last());
 
-            var managementService = _managementServicesFactory.GetEntityManagementService<TEntity>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<TEntity>();
             var result = await managementService.DeleteEntityAsync(entityId, token);
 
             await BotService.AnswerCallbackQueryAsync(

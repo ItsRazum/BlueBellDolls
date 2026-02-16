@@ -13,20 +13,20 @@ namespace BlueBellDolls.Bot.Commands
 {
     public class EntityListCommand : CommandHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessageParametersProvider _messageParametersProvider;
         private readonly IMessagesProvider _messagesProvider;
         private readonly InlineKeyboardsSettings _inlineKeyboardsSettings;
 
         public EntityListCommand(
             IBotService botService,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessageParametersProvider messageParametersProvider,
             IMessagesProvider messagesProvider,
             IOptions<BotSettings> botSettings)
             : base(botService)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messageParametersProvider = messageParametersProvider;
             _messagesProvider = messagesProvider;
             _inlineKeyboardsSettings = botSettings.Value.InlineKeyboardsSettings;
@@ -39,7 +39,7 @@ namespace BlueBellDolls.Bot.Commands
 
         private async Task HandleCommandAsync<TEntity>(MessageAdapter m, CancellationToken token) where TEntity : class, IDisplayableEntity
         {
-            var result = await _managementServicesFactory
+            var result = await _managementServicesProvider
                 .GetEntityManagementService<TEntity>()
                 .GetByPageAsync(1, _inlineKeyboardsSettings.PageSize, token);
 

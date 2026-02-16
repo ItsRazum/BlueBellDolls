@@ -13,18 +13,18 @@ namespace BlueBellDolls.Bot.Callbacks.Media
 {
     public class ManageGeneticTestsCallback : CallbackHandler
     {
-        private readonly IManagementServicesFactory _managementServicesFactory;
+        private readonly IManagementServicesProvider _managementServicesProvider;
         private readonly IMessagesHelperService _messagesHelperService;
 
         public ManageGeneticTestsCallback(
             IBotService botService,
             IOptions<BotSettings> botSettings,
             ICallbackDataProvider callbackDataProvider,
-            IManagementServicesFactory managementServicesFactory,
+            IManagementServicesProvider managementServicesProvider,
             IMessagesHelperService messagesHelperService) 
             : base(botService, botSettings, callbackDataProvider)
         {
-            _managementServicesFactory = managementServicesFactory;
+            _managementServicesProvider = managementServicesProvider;
             _messagesHelperService = messagesHelperService;
 
             AddCommandHandler(CallbackDataProvider.GetManagePhotosCallback<ParentCat>(PhotosType.GenTests), HandleCallbackAsync);
@@ -35,7 +35,7 @@ namespace BlueBellDolls.Bot.Callbacks.Media
             var args = c.CallbackData.Split(CallbackArgsSeparator); // [0]Command, [1]EntityId
             var entityId = int.Parse(args.Last());
 
-            var managementService = _managementServicesFactory.GetEntityManagementService<ParentCat>();
+            var managementService = _managementServicesProvider.GetEntityManagementService<ParentCat>();
             var result = await managementService.GetEntityAsync(entityId, token);
 
             if (!result.Success || result.Value?.Photos.Any(p => p.Type == PhotosType.GenTests) is null or false) return;
