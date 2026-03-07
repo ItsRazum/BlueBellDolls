@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Services.Api.Base;
 using BlueBellDolls.Bot.Interfaces.Services.Management.Base;
+using BlueBellDolls.Bot.Interfaces.ValueConverters;
 using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Interfaces;
 using BlueBellDolls.Common.Records.Dtos;
@@ -13,13 +14,15 @@ namespace BlueBellDolls.Bot.Types
         IMessagesProvider messagesProvider,
         IPhotosDownloaderService photosDownloaderService,
         IEntityFormService entityFormService,
-        ILogger logger) : IDisplayableEntityManagementService<TEntity> where TEntity : class, IDisplayableEntity where TDto : class
+        ILogger logger, 
+        IValueConverter valueConverter) : IDisplayableEntityManagementService<TEntity> where TEntity : class, IDisplayableEntity where TDto : class
     {
         private readonly IDisplayableEntityApiClient<TDto> _apiClient = apiClient;
         private readonly IMessagesProvider _messagesProvider = messagesProvider;
         private readonly IPhotosDownloaderService _photosDownloaderService = photosDownloaderService;
         private readonly IEntityFormService _entityFormService = entityFormService;
         private readonly ILogger _logger = logger;
+        private readonly IValueConverter _valueConverter = valueConverter;
 
         protected abstract Func<TDto?, TEntity?> DtoToEntityFunc { get; }
 
@@ -198,12 +201,12 @@ namespace BlueBellDolls.Bot.Types
         {
             try
             {
-                var dto = new Dictionary<string, string>();
+                var dto = new Dictionary<string, object>();
                 foreach (var (propertyName, value) in properties)
                 {
                     var property = _entityFormService.GetPropertyName<TEntity>(propertyName);
                     if (property != null)
-                        dto.Add(property, value);
+                        dto.Add(property, _valueConverter.Convert(value, typeof(bool)));
                 }
 
                 var result = await _apiClient.UpdateAsync(modelId, dto, token);

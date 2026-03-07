@@ -145,7 +145,8 @@ namespace BlueBellDolls.Server.Services
                     Name = parentCatDto.Name,
                     BirthDay = parentCatDto.BirthDay,
                     Description = parentCatDto.Description,
-                    IsMale = parentCatDto.IsMale
+                    IsMale = parentCatDto.IsMale,
+                    Photos = []
                 };
                 await ApplicationDbContext.Cats.AddAsync(entity, token);
                 await ApplicationDbContext.SaveChangesAsync(token);

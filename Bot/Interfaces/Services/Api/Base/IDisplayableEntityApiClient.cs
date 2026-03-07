@@ -12,6 +12,6 @@ namespace BlueBellDolls.Bot.Interfaces.Services.Api.Base
         Task<ServiceResult<EntityFilesUploadResult<TDto>>> UploadPhotosAsync(int id, IEnumerable<(Stream fileStream, string fileName, string fileId)> photos, CancellationToken token = default);
         Task<ServiceResult<TDto>> SetDefaultPhotoAsync(int id, int photoId, CancellationToken token = default);
         Task<ServiceResult<TDto>> DeletePhotosAsync(int id, int[] ids, CancellationToken token = default);
-        Task<ServiceResult<TDto>> UpdateAsync(int id, Dictionary<string, string> dto, CancellationToken token = default);
+        Task<ServiceResult<TDto>> UpdateAsync(int id, Dictionary<string, object> dto, CancellationToken token = default);
     }
 }

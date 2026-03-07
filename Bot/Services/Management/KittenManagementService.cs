@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Services.Api;
 using BlueBellDolls.Bot.Interfaces.Services.Management;
+using BlueBellDolls.Bot.Interfaces.ValueConverters;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Enums;
 using BlueBellDolls.Common.Extensions;
@@ -15,13 +16,15 @@ namespace BlueBellDolls.Bot.Services.Management
         IEntityFormService entityFormService,
         IPhotosDownloaderService photosDownloaderService,
         IMessagesProvider messagesProvider,
-        ILogger<KittenManagementService> logger)
+        ILogger<KittenManagementService> logger,
+        IValueConverter valueConverter)
         : DisplayableEntityManagementServiceBase<Kitten, KittenDetailDto>(
             kittenApiClient,
             messagesProvider,
             photosDownloaderService,
             entityFormService,
-            logger), IKittenManagementService
+            logger,
+            valueConverter), IKittenManagementService
     {
         private readonly IKittenApiClient _kittenApiClient = kittenApiClient;
         private readonly IEntityFormService _entityFormService = entityFormService;

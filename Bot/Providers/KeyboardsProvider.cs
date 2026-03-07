@@ -295,6 +295,8 @@ namespace BlueBellDolls.Bot.Providers
             if (photosManagementRow.Count > 0)
                 result.AddNewRow([.. photosManagementRow]);
 
+            result.AddNewRow(CreateSelectColorButton(parentCat));
+
             return result;
         }
 

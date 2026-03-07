@@ -213,7 +213,7 @@ namespace BlueBellDolls.Common.Extensions
                 IsMale = dto.IsMale,
                 Description = dto.Description,
                 IsEnabled = dto.IsEnabled,
-                Photos = [.. dto.Photos.Select(p => p.ToEFModel())]
+                Photos = [.. dto.Photos?.Select(p => p.ToEFModel()) ?? []]
             };
         }
 

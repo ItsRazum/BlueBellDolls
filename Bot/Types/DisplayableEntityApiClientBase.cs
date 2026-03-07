@@ -109,7 +109,7 @@ namespace BlueBellDolls.Bot.Types
             }
         }
 
-        public virtual async Task<ServiceResult<TDto>> UpdateAsync(int id, Dictionary<string, string> body, CancellationToken token = default)
+        public virtual async Task<ServiceResult<TDto>> UpdateAsync(int id, Dictionary<string, object> body, CancellationToken token = default)
         {
             try
             {

@@ -2,6 +2,7 @@
 using BlueBellDolls.Bot.Interfaces.Services;
 using BlueBellDolls.Bot.Interfaces.Services.Api;
 using BlueBellDolls.Bot.Interfaces.Services.Management;
+using BlueBellDolls.Bot.Interfaces.ValueConverters;
 using BlueBellDolls.Bot.Types;
 using BlueBellDolls.Common.Extensions;
 using BlueBellDolls.Common.Models;
@@ -14,13 +15,15 @@ namespace BlueBellDolls.Bot.Services.Management
         IEntityFormService entityFormService,
         IPhotosDownloaderService photosDownloaderService,
         IMessagesProvider messagesProvider,
-        ILogger<CatColorManagementService> logger)
+        ILogger<CatColorManagementService> logger,
+        IValueConverter valueConverter)
         : DisplayableEntityManagementServiceBase<CatColor, CatColorDetailDto>(
             catColorApiClient,
             messagesProvider,
             photosDownloaderService,
             entityFormService,
-            logger), ICatColorManagementService
+            logger,
+            valueConverter), ICatColorManagementService
     {
         private readonly ICatColorApiClient _catColorApiClient = catColorApiClient;
         private readonly IEntityFormService _entityFormService = entityFormService;
