@@ -370,7 +370,7 @@ namespace BlueBellDolls.Bot.Providers
         private InlineKeyboardButton[] CreateEntityControlsButtons(IDisplayableEntity entity)
         {
             var result = new List<InlineKeyboardButton>();
-            if (entity is IHandCreatableEntity)
+            if (entity is IDeletableEntity)
                 result.Add(CreateDeleteButton(entity));
 
             result.AddRange([CreateBackToEntityListButton(entity), CreateUpdateEntityFormButtton(entity)]);

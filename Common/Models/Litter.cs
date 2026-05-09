@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BlueBellDolls.Common.Models
 {
     [Table("litters")]
-    public class Litter : DisplayableEntityBase, IHandCreatableEntity
+    public class Litter : DisplayableEntityBase, IHandCreatableEntity, IDeletableEntity
     {
 
         #region Properties

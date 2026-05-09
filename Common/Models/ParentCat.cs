@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BlueBellDolls.Common.Models
 {
     [Table("cats")]
-    public class ParentCat : Cat, IHandCreatableEntity
+    public class ParentCat : Cat, IHandCreatableEntity, IDeletableEntity
     {
 
         #region IDisplayableEntity
