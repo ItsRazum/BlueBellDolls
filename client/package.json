@@ -8,24 +8,29 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
-    "lint": "oxlint",
-    "lint:fix": "oxlint --fix"
+    "lint": "vp lint",
+    "lint:fix": "vp lint --fix",
+    "fmt": "vp fmt"
   },
   "dependencies": {
     "@nuxtjs/color-mode": "^4.0.0",
-    "@nuxtjs/i18n": "^10.2.1",
-    "@tailwindcss/vite": "^4.1.18",
+    "@nuxtjs/i18n": "^10.2.3",
+    "@tailwindcss/vite": "^4.2.1",
     "maska": "^3.2.0",
-    "nuxt": "^4.2.1",
-    "swiper": "^12.0.3",
-    "tailwindcss": "^4.1.18",
-    "vue": "^3.5.24",
-    "vue-router": "^4.6.3",
+    "nuxt": "^4.4.2",
+    "swiper": "^12.1.2",
+    "tailwindcss": "^4.2.1",
+    "vue": "^3.5.30",
+    "vue-router": "^5.0.3",
     "vue3-carousel": "^0.17.0"
   },
   "devDependencies": {
     "nuxt-svgo": "^4.2.6",
-    "oxfmt": "^0.26.0",
-    "oxlint": "^1.42.0"
+    "vite-plus": "latest"
+  },
+  "packageManager": "npm@11.11.1",
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
   }
 }
