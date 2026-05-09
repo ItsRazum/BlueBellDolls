@@ -205,8 +205,9 @@ namespace BlueBellDolls.Bot.Types
                 foreach (var (propertyName, value) in properties)
                 {
                     var property = _entityFormService.GetPropertyName<TEntity>(propertyName);
-                    if (property != null)
-                        dto.Add(property, _valueConverter.Convert(value, typeof(bool)));
+                    var propertyType = _entityFormService.GetPropertyType<TEntity>(propertyName);
+                    if (property != null && propertyType != null)
+                        dto.Add(property, _valueConverter.Convert(value, propertyType));
                 }
 
                 var result = await _apiClient.UpdateAsync(modelId, dto, token);

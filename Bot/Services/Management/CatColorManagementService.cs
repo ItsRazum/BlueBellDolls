@@ -26,7 +26,6 @@ namespace BlueBellDolls.Bot.Services.Management
             valueConverter), ICatColorManagementService
     {
         private readonly ICatColorApiClient _catColorApiClient = catColorApiClient;
-        private readonly IEntityFormService _entityFormService = entityFormService;
         private readonly IMessagesProvider _messagesProvider = messagesProvider;
         private readonly ILogger<CatColorManagementService> _logger = logger;
 
